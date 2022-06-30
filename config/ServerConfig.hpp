@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <map>
 
 struct LocationConfig
 {
@@ -12,7 +13,7 @@ struct LocationConfig
 	std::vector< std::string > allowed_methods_;
 
 	// Set a default file to answer if the request is a directory.
-	std::vector< std::string > index_;
+	std::vector< std::string > indexes_;
 
 	// Turn on or off directory listing.
 	bool autoindex_;
@@ -20,8 +21,6 @@ struct LocationConfig
 	// Execute CGI based on certain file extension (for example .php).
 	std::string cgi_path_;
 
-	// Limit client body size.
-	size_t client_body_size_limit_;
 };
 
 struct ServerConfig
@@ -34,10 +33,13 @@ struct ServerConfig
 	std::vector<std::string> names_; 
 
 	// Setup default error pages.
-	std::vector<std::string> error_pages_;
+	std::map<int, std::string> error_pages_;
 
 	// Setup routes with one or multiple of the following rules/configuration (routes wont be using regexp)
 	std::string root_;
+
+	// Limit client body size.
+	size_t client_body_size_limit_;
 
 	std::vector< LocationConfig > locations_;
 };
