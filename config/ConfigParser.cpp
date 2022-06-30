@@ -19,7 +19,7 @@ ConfigParser::ConfigParser(std::string file)
 	//std::vector<std::string> file_content = read_file(file);
 	std::string file_content = readFile(file);
 	std::vector<std::string> tokens = isspaceSplit(file_content);
-	print_vector(tokens);
+	//print_vector(tokens);
 
 	parseTokens(tokens);
 
@@ -41,7 +41,7 @@ void ConfigParser::parseTokens(std::vector<std::string> tokens)
 		if (*it == "server" && *(++it) == "{") {
 			ServerConfig  server;
 			parseServer(server, ++it);
-			std::cout << "OK" << std::endl;
+			//std::cout << "OK: parseServer" << std::endl;
 			serverconfigs_.push_back(server);
 		} else {
 			throw -1;
@@ -94,26 +94,84 @@ void ConfigParser::parseRoot(ServerConfig &server, std::vector<std::string>::ite
 
 void ConfigParser::parseErrorPages(ServerConfig &server, std::vector<std::string>::iterator &it)
 {
+	server.error_pages_.insert(std::pair<int, std::string>(stoi(*it), (*(++it)).substr(0, posSemicolon(*it))));
+}
+
+void ConfigParser::parseClientBodySizeLimit(ServerConfig &server, std::vector<std::string>::iterator &it)
+{
+	server.client_body_size_limit_ = stoi(*it);
+}
+
+void ConfigParser::parseLocationRoot(LocationConfig &location, std::vector<std::string>::iterator &it)
+{
+	location.root_ = it->substr(0, posSemicolon(*it));
+}
+
+void ConfigParser::parseLocationAllowedMethods(LocationConfig &location, std::vector<std::string>::iterator &it)
+{
+	//std::cout << *it << std::endl;
 	int num = countContents(it);
 	for (int i = 0; i < num; ++i, ++it) {
-		//std::cout << *it << std::endl;
 		if (posSemicolon(*it) != -1) {
-			server.error_pages_.push_back(it->substr(0, posSemicolon(*it)));
+			location.allowed_methods_.push_back(it->substr(0, posSemicolon(*it)));
 		} else {
-			server.error_pages_.push_back(*it);
+			location.allowed_methods_.push_back(*it);
 		}
 	}
 	it--;
 }
 
+void ConfigParser::parseLocationIndexes(LocationConfig &location, std::vector<std::string>::iterator &it)
+{
+	//std::cout << *it << std::endl;
+	int num = countContents(it);
+	for (int i = 0; i < num; ++i, ++it) {
+		if (posSemicolon(*it) != -1) {
+			location.indexes_.push_back(it->substr(0, posSemicolon(*it)));
+		} else {
+			location.indexes_.push_back(*it);
+		}
+	}
+	it--;
+}
+
+
+void ConfigParser::parseLocationAutoindexes(LocationConfig &location, std::vector<std::string>::iterator &it)
+{
+	if (it->substr(0, posSemicolon(*it)) == "on") {
+		location.autoindex_ = true;
+	} else if (it->substr(0, posSemicolon(*it)) == "off") {
+		location.autoindex_ = false;
+	} else {
+		throw -1;
+	}
+}
+
+
+void ConfigParser::parseLocationCGIPath(LocationConfig &location, std::vector<std::string>::iterator &it)
+{
+	location.cgi_path_ = it->substr(0, posSemicolon(*it));
+}
+
 void ConfigParser::parseLocation(LocationConfig &location, std::vector<std::string>::iterator &it)
 {
-
-
-	(void)location;
 	location.uri_ = *it;
-	//std::cout << *it << std::endl;
-
+	if (*(++it) == "{") {
+		for (; *it != "}"; ++it)
+		{
+			if (*it == "root") {
+				parseLocationRoot(location, ++it);
+			} else if (*it == "allowed_method") {
+				parseLocationAllowedMethods(location, ++it);
+			} else if (*it == "index") {
+				parseLocationIndexes(location, ++it);
+			} else if (*it == "autoindex") {
+				parseLocationAutoindexes(location, ++it);
+			} else if (*it == "cgi_path") {
+				parseLocationCGIPath(location, ++it);
+			}
+		}
+	}
 }
 
 void ConfigParser::parseServer(ServerConfig &server, std::vector<std::string>::iterator &it)
@@ -125,17 +183,18 @@ void ConfigParser::parseServer(ServerConfig &server, std::vector<std::string>::i
 			parseServerName(server, ++it); 
 		} else if (*it == "root") {
 			parseRoot(server, ++it); 
-		/* } else if (*it == "error_pages_") { */
-		/* 	parseErrorPages(server, ++it); */
-		/* } */
+		} else if (*it == "error_page") {
+			parseErrorPages(server, ++it);
+		} else if (*it == "client_body_size_limit") {
+			parseClientBodySizeLimit(server, ++it);
 		} else if (*it == "location") {
-				LocationConfig  location;
-				parseLocation(location, ++it);
-				server.locations_.push_back(location);
+			LocationConfig  location;
+			parseLocation(location, ++it);
+			server.locations_.push_back(location);
 		} else {
 			throw -1;
 		}
-}
+	}
 }
 
 std::string ConfigParser::readFile(std::string file) {
