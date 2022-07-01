@@ -15,5 +15,8 @@ jobs:
     - uses: actions/checkout@v3
     - name: test
       run: |
-        cd config
-        make test
+        pwd
+        ls
+    - name: label change test2
+      run: |
+        echo test, and deploy your project.
