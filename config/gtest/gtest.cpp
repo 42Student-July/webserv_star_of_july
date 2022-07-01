@@ -1,5 +1,5 @@
-#include "./gtest/gtest.h"
-#include "ConfigParser.hpp"
+#include <gtest/gtest.h>
+#include "../ConfigParser.hpp"
 
 TEST(ConfigParserServersTests, CanParsePort){
 	ConfigParser configparser("./TestConfigs/listen.conf");
