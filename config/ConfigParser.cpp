@@ -16,7 +16,6 @@ ConfigParser::ConfigParser()
 
 ConfigParser::ConfigParser(std::string file)
 {
-	//std::vector<std::string> file_content = read_file(file);
 	std::string file_content = readFile(file);
 	std::vector<std::string> tokens = isspaceSplit(file_content);
 	//print_vector(tokens);
@@ -41,7 +40,6 @@ void ConfigParser::parseTokens(std::vector<std::string> tokens)
 		if (*it == "server" && *(++it) == "{") {
 			ServerConfig  server;
 			parseServer(server, ++it);
-			//std::cout << "OK: parseServer" << std::endl;
 			serverconfigs_.push_back(server);
 		} else {
 			throw -1;
@@ -49,20 +47,9 @@ void ConfigParser::parseTokens(std::vector<std::string> tokens)
 	}
 }
 
-int posSemicolon(std::string str)
-{
-	int pos = 0;
-	while (str[pos]) {
-		if (str[pos] == ';')
-			return pos;
-		pos++;
-	}
-	return -1;
-}
-
 int countContents(std::vector<std::string>::iterator it) {
 	int num = 1;
-	for (; posSemicolon(*it) == -1; ++it) {
+	for (; it->find(";") == std::string::npos; ++it) {
 		num++;
 	}
 	return num;
@@ -70,16 +57,21 @@ int countContents(std::vector<std::string>::iterator it) {
 
 void ConfigParser::parseListen(ServerConfig &server, std::vector<std::string>::iterator &it)
 {
-	server.port_ = stoi(it->substr(0, posSemicolon(*it)));
+	if (it->find(":") != std::string::npos) {
+		server.host_ = it->substr(0, it->find(":"));
+		server.port_ = stoi(it->substr(it->find(":") + 1, it->find(";")));
+	} else {
+		server.host_ = it->substr(0, it->find(":"));
+		server.port_ = stoi(it->substr(it->find(":") + 1, it->find(";")));
+	}
 }
 
 void ConfigParser::parseServerName(ServerConfig &server, std::vector<std::string>::iterator &it)
 {
 	int num = countContents(it);
 	for (int i = 0; i < num; ++i, ++it) {
-		//std::cout << *it << std::endl;
-		if (posSemicolon(*it) != -1) {
-			server.names_.push_back(it->substr(0, posSemicolon(*it)));
+		if (it->find(";") != std::string::npos) {
+			server.names_.push_back(it->substr(0, it->find(";")));
 		} else {
 			server.names_.push_back(*it);
 		}
@@ -89,12 +81,12 @@ void ConfigParser::parseServerName(ServerConfig &server, std::vector<std::string
 
 void ConfigParser::parseRoot(ServerConfig &server, std::vector<std::string>::iterator &it)
 {
-	server.root_ = it->substr(0, posSemicolon(*it));
+	server.root_ = it->substr(0, it->find(";"));
 }
 
 void ConfigParser::parseErrorPages(ServerConfig &server, std::vector<std::string>::iterator &it)
 {
-	server.error_pages_.insert(std::pair<int, std::string>(stoi(*it), (*(++it)).substr(0, posSemicolon(*it))));
+	server.error_pages_.insert(std::pair<int, std::string>(stoi(*it), (*(++it)).substr(0, it->find(";"))));
 }
 
 void ConfigParser::parseClientBodySizeLimit(ServerConfig &server, std::vector<std::string>::iterator &it)
@@ -104,16 +96,15 @@ void ConfigParser::parseClientBodySizeLimit(ServerConfig &server, std::vector<st
 
 void ConfigParser::parseLocationRoot(LocationConfig &location, std::vector<std::string>::iterator &it)
 {
-	location.root_ = it->substr(0, posSemicolon(*it));
+	location.root_ = it->substr(0, it->find(";"));
 }
 
 void ConfigParser::parseLocationAllowedMethods(LocationConfig &location, std::vector<std::string>::iterator &it)
 {
-	//std::cout << *it << std::endl;
 	int num = countContents(it);
 	for (int i = 0; i < num; ++i, ++it) {
-		if (posSemicolon(*it) != -1) {
-			location.allowed_methods_.push_back(it->substr(0, posSemicolon(*it)));
+		if (it->find(";") != std::string::npos) {
+			location.allowed_methods_.push_back(it->substr(0, it->find(";")));
 		} else {
 			location.allowed_methods_.push_back(*it);
 		}
@@ -123,11 +114,10 @@ void ConfigParser::parseLocationAllowedMethods(LocationConfig &location, std::ve
 
 void ConfigParser::parseLocationIndexes(LocationConfig &location, std::vector<std::string>::iterator &it)
 {
-	//std::cout << *it << std::endl;
 	int num = countContents(it);
 	for (int i = 0; i < num; ++i, ++it) {
-		if (posSemicolon(*it) != -1) {
-			location.indexes_.push_back(it->substr(0, posSemicolon(*it)));
+		if (it->find(";") != std::string::npos) {
+			location.indexes_.push_back(it->substr(0, it->find(";")));
 		} else {
 			location.indexes_.push_back(*it);
 		}
@@ -138,9 +128,9 @@ void ConfigParser::parseLocationIndexes(LocationConfig &location, std::vector<st
 
 void ConfigParser::parseLocationAutoindexes(LocationConfig &location, std::vector<std::string>::iterator &it)
 {
-	if (it->substr(0, posSemicolon(*it)) == "on") {
+	if (it->substr(0, it->find(";")) == "on") {
 		location.autoindex_ = true;
-	} else if (it->substr(0, posSemicolon(*it)) == "off") {
+	} else if (it->substr(0, it->find(";")) == "off") {
 		location.autoindex_ = false;
 	} else {
 		throw -1;
@@ -150,7 +140,7 @@ void ConfigParser::parseLocationAutoindexes(LocationConfig &location, std::vecto
 
 void ConfigParser::parseLocationCGIPath(LocationConfig &location, std::vector<std::string>::iterator &it)
 {
-	location.cgi_path_ = it->substr(0, posSemicolon(*it));
+	location.cgi_path_ = it->substr(0, it->find(";"));
 }
 
 void ConfigParser::parseLocation(LocationConfig &location, std::vector<std::string>::iterator &it)
@@ -192,7 +182,7 @@ void ConfigParser::parseServer(ServerConfig &server, std::vector<std::string>::i
 			parseLocation(location, ++it);
 			server.locations_.push_back(location);
 		} else {
-			throw -1;
+			throw std::invalid_argument("Error: Brackets are not closed.");
 		}
 	}
 }
@@ -221,38 +211,7 @@ size_t ConfigParser::count_lines(std::string str)
 	return line_num;
 }
 
-
-/* std::vector<std::string> ConfigParser::split(const std::string &s, char delim) { */
-/* 	std::vector<std::string> elems; */
-/* 	std::stringstream ss(s); */
-/* 	std::string item; */
-/* 	while (getline(ss, item, delim)) { */
-/* 		if (!item.empty()) { */
-/* 			elems.push_back(item); */
-/* 		} */
-/* 	} */
-/* 	return elems; */
-/* } */
-
-/* char ConfigParser::char_after_spaces(std::string str) { */
-/* 	for (int i = 0; str.at(i); i++) { */
-/* 		if (!(std::isspace(str.at(i)) && str.at(i) != '\n')) */
-/* 			return str.at(i); */
-/* 	} */
-/* 	return '\0'; */
-/* } */
-
-// スペースと改行だけの行、コメント行をvectorからdelete
-// スペースと改行だけの時にエラー isspaceの部分見直し
-/* void del_skip_lines(std::vector<std::string> &vec) { */
-/* 	std::vector<std::string>::iterator it = vec.begin(); */
-/* 	for(; it < vec.end(); it++) { */
-/* 		if (char_after_spaces(*it) == '\n' || char_after_spaces(*it) == '#') */
-/* 			vec.erase(it); */
-/* 	} */
-/* } */
-
-//syamaさんのやり方 後ほどリファクター
+//syamaさんのやり方参考
 std::vector<std::string> ConfigParser::isspaceSplit(std::string str) 
 {
 	std::vector<std::string> tokens;
@@ -275,21 +234,6 @@ std::vector<std::string> ConfigParser::isspaceSplit(std::string str)
 	return tokens;
 }
 
-/* void ConfigParser::parse_servers(std::vector<std::string> tokens) */
-/* { */
-/* 	std::vector<std::string>::iterator it = tokens.begin(); */
-/* 	std::vector<std::string>::iterator ite = tokens.end(); */
-/* 	for (; it < ite; it++) { */
-/* 			if (tokens.size() > 0 && *it == "server" && *(it + 1) == "{") { */
-/* 				std::cout << "OK" << std::endl; */
-
-/* 		} else { */
-/* 			std::cout << "something is wrong in config file" << std::endl; */
-/* 			exit(1); */
-/* 		} */
-/* 	} */
-/* } */
-		
 ConfigParser::ConfigParser(ConfigParser const &other)
 {
     *this = other;

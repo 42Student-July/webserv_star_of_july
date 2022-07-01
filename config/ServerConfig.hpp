@@ -4,7 +4,7 @@
 
 struct LocationConfig
 {
-	std::string uri_; //uri
+	std::string uri_;
 
 	// Define a HTTP redirection.
 	std::string root_;

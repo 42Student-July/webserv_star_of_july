@@ -14,8 +14,8 @@
 
 #define BUFFER_SIZE 128
 
-// コンストラクタでparseはしてしまう
-// parseメソッドで必要な情報を返す
+// コンストラクタでparseを実行
+// getServerConfigsで必要な情報(ServerConfigのベクター)を外部へ渡す
 class ConfigParser
 {
     public:
