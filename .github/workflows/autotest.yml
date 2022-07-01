@@ -10,7 +10,7 @@ on:
 
 jobs:
   googletest:
-    runs-on: macos-latast
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
     - name: test
