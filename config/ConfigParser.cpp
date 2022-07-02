@@ -36,10 +36,11 @@ ConfigParser::~ConfigParser()
 void ConfigParser::parseTokens(std::vector<std::string> tokens)
 {
 	std::vector<std::string>::iterator it = tokens.begin();
+	std::vector<std::string>::iterator ite = tokens.end();
 	for (; it < tokens.end(); it++) {
 		if (*it == "server" && *(++it) == "{") {
 			ServerConfig  server;
-			parseServer(server, ++it);
+			parseServer(server, ++it, ite);
 			serverconfigs_.push_back(server);
 		} else {
 			throw -1;
@@ -143,11 +144,11 @@ void ConfigParser::parseLocationCGIPath(LocationConfig &location, std::vector<st
 	location.cgi_path_ = it->substr(0, it->find(";"));
 }
 
-void ConfigParser::parseLocation(LocationConfig &location, std::vector<std::string>::iterator &it)
+void ConfigParser::parseLocation(LocationConfig &location, std::vector<std::string>::iterator &it, std::vector<std::string>::iterator &ite)
 {
 	location.uri_ = *it;
 	if (*(++it) == "{") {
-		for (; *it != "}"; ++it)
+		for (; it != ite; ++it)
 		{
 			if (*it == "root") {
 				parseLocationRoot(location, ++it);
@@ -159,14 +160,20 @@ void ConfigParser::parseLocation(LocationConfig &location, std::vector<std::stri
 				parseLocationAutoindexes(location, ++it);
 			} else if (*it == "cgi_path") {
 				parseLocationCGIPath(location, ++it);
-			}
+			} else if (*it == "}") {
+				break;
+			} 
+			/* } else { */
+			/* 	throw std::runtime_error("Error: Something is wrong in config file."); */
+			/* } */
 		}
 	}
 }
 
-void ConfigParser::parseServer(ServerConfig &server, std::vector<std::string>::iterator &it)
+void ConfigParser::parseServer(ServerConfig &server, std::vector<std::string>::iterator &it, std::vector<std::string>::iterator &ite)
 {
-	for (; *it != "}"; ++it) {
+	bool finished_with_bracket = false;
+	for (; it != ite; ++it) {
 		if (*it == "listen") {
 			parseListen(server, ++it); 
 		} else if (*it == "server_name") {
@@ -179,11 +186,17 @@ void ConfigParser::parseServer(ServerConfig &server, std::vector<std::string>::i
 			parseClientBodySizeLimit(server, ++it);
 		} else if (*it == "location") {
 			LocationConfig  location;
-			parseLocation(location, ++it);
+			parseLocation(location, ++it, ite);
 			server.locations_.push_back(location);
+		} else if (*it == "}") {
+			finished_with_bracket = true;
+			break;
 		} else {
-			throw std::invalid_argument("Error: Brackets are not closed.");
+			throw std::runtime_error("Error: Config: Wrong syntax");
 		}
+	}
+	if (finished_with_bracket == false) {
+		throw std::runtime_error("Error: Config: Need to be closed by brackets");
 	}
 }
 

@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <stdexcept>
 #include "../ConfigParser.hpp"
 
 TEST(ConfigParserServersTests, CanParseHost){
@@ -100,6 +101,29 @@ TEST(ConfigParserLocationsTests, CanParseLocationCGIPath){
 }
 
 TEST(Error, NoCurlyBracketsThrowsException) {
-	//ConfigParser configparser("./TestConfigs/ErrorCases/no_curly_brackets.conf");
-	ASSERT_THROW(ConfigParser configparser("./TestConfigs/ErrorCases/no_curly_brackets.conf"), std::invalid_argument);
+	try {
+		ASSERT_THROW(ConfigParser configparser("./TestConfigs/ErrorCases/no_curly_brackets.conf"), std::runtime_error);
+		ConfigParser configparser("./TestConfigs/ErrorCases/no_curly_brackets.conf");
+	} catch (std::exception &e) {
+		ASSERT_STREQ("Error: Config: Need to be closed by brackets", e.what()); 
+	}
 }
+
+TEST(Error, WrongSyntaxServerThrowsException) {
+	try {
+		ASSERT_THROW(ConfigParser configparser("./TestConfigs/ErrorCases/wrong_syntax_server.conf"), std::runtime_error);
+		ConfigParser configparser("./TestConfigs/ErrorCases/wrong_syntax_server.conf");
+	} catch (std::exception &e) {
+		ASSERT_STREQ("Error: Config: Wrong syntax", e.what());
+	}
+}
+
+TEST(Error, NoCurlyBracketsLocationThrowsException) {
+	try {
+		ASSERT_THROW(ConfigParser configparser("./TestConfigs/ErrorCases/no_curly_brackets_location.conf"), std::runtime_error);
+		ConfigParser configparser("./TestConfigs/ErrorCases/no_curly_brackets_location.conf");
+	} catch (std::exception &e) {
+		ASSERT_STREQ("Error: Config: Wrong syntax", e.what());
+	}
+}
+

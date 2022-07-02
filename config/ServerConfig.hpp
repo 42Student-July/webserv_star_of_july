@@ -26,6 +26,7 @@ struct LocationConfig
 struct ServerConfig
 {
 	// Choose the port and host of each ’server’.
+	// necessary
 	size_t port_;
 	std::string host_;
 
