@@ -11,6 +11,7 @@
 #include <vector>
 #include <cctype>
 #include <fstream>
+#include <stdexcept>
 
 #define BUFFER_SIZE 128
 
@@ -30,8 +31,8 @@ class ConfigParser
     private:
 		std::vector< ServerConfig > serverconfigs_;
 		
-		//std::vector<std::string> tokenize(std::vector<std::string> file_content);
-		void parseLocation(LocationConfig &location, std::vector<std::string>::iterator &it);
+		//void parseLocation(LocationConfig &location, std::vector<std::string>::iterator &it);
+		void parseLocation(LocationConfig &location, std::vector<std::string>::iterator &it, std::vector<std::string>::iterator &ite);
 		void parseLocationCGIPath(LocationConfig &location, std::vector<std::string>::iterator &it);
 		void parseLocationAutoindexes(LocationConfig &location, std::vector<std::string>::iterator &it);
 		void parseLocationIndexes(LocationConfig &location, std::vector<std::string>::iterator &it);
@@ -42,7 +43,8 @@ class ConfigParser
 		void parseRoot(ServerConfig &server, std::vector<std::string>::iterator &it);
 		void parseServerName(ServerConfig &server, std::vector<std::string>::iterator &it);
 		void parseListen(ServerConfig &server, std::vector<std::string>::iterator &it);
-		void parseServer(ServerConfig &server, std::vector<std::string>::iterator &it);
+		//void parseServer(ServerConfig &server, std::vector<std::string>::iterator &it);
+		void parseServer(ServerConfig &server, std::vector<std::string>::iterator &it, std::vector<std::string>::iterator &ite);
 		void parseTokens(std::vector<std::string> tokens);
 		std::string readFile(std::string file);
 		size_t count_lines(std::string str);
