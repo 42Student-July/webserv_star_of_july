@@ -1,58 +1,73 @@
 #ifndef CONFIG_HPP
-# define CONFIG_HPP
+#define CONFIG_HPP
 
-#include "ServerConfig.hpp"
-#include <unistd.h>
-#include <iostream>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-#include <sstream>
-#include <vector>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <cctype>
 #include <fstream>
+#include <iostream>
+#include <sstream>
 #include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "ServerConfig.hpp"
 
 #define BUFFER_SIZE 128
 
 // コンストラクタでparseを実行
 // getServerConfigsで必要な情報(ServerConfigのベクター)を外部へ渡す
-class ConfigParser
-{
-    public:
-        ConfigParser();
-        ConfigParser(std::string file);
-        virtual ~ConfigParser();
-        ConfigParser(ConfigParser const &other);
-        ConfigParser &operator=(ConfigParser const &other);
+class ConfigParser {
+ public:
+  ConfigParser();
+  explicit ConfigParser(std::string file);
+  virtual ~ConfigParser();
 
-		std::vector<ServerConfig> getServerConfigs() const;
+  std::vector<ServerConfig> getServerConfigs() const;
 
-    private:
-		std::vector< ServerConfig > serverconfigs_;
-		
-		//void parseLocation(LocationConfig &location, std::vector<std::string>::iterator &it);
-		void parseLocation(LocationConfig &location, std::vector<std::string>::iterator &it, std::vector<std::string>::iterator &ite);
-		void parseLocationCGIPath(LocationConfig &location, std::vector<std::string>::iterator &it);
-		void parseLocationAutoindexes(LocationConfig &location, std::vector<std::string>::iterator &it);
-		void parseLocationIndexes(LocationConfig &location, std::vector<std::string>::iterator &it);
-		void parseLocationRoot(LocationConfig &location, std::vector<std::string>::iterator &it);
-		void parseLocationAllowedMethods(LocationConfig &location, std::vector<std::string>::iterator &it);
-		void parseClientBodySizeLimit(ServerConfig &server, std::vector<std::string>::iterator &it);
-		void parseErrorPages(ServerConfig &server, std::vector<std::string>::iterator &it);
-		void parseRoot(ServerConfig &server, std::vector<std::string>::iterator &it);
-		void parseServerName(ServerConfig &server, std::vector<std::string>::iterator &it);
-		void parseListen(ServerConfig &server, std::vector<std::string>::iterator &it);
-		//void parseServer(ServerConfig &server, std::vector<std::string>::iterator &it);
-		void parseServer(ServerConfig &server, std::vector<std::string>::iterator &it, std::vector<std::string>::iterator &ite);
-		void parseTokens(std::vector<std::string> tokens);
-		std::string readFile(std::string file);
-		size_t count_lines(std::string str);
-		std::vector<std::string> split(const std::string &s, char delim);
-		char char_after_spaces(std::string str);
-		void parse_servers(std::vector<std::string> tokens);
-		std::vector<std::string> isspaceSplit(std::string str);
+ private:
+  std::vector<ServerConfig> serverconfigs_;
 
+  // locationのparse
+  void parseLocation(LocationConfig &location,
+                     std::vector<std::string>::iterator &it,
+                     std::vector<std::string>::iterator &ite);
+  void parseLocationCGIPath(LocationConfig &location,
+                            std::vector<std::string>::iterator &it);
+  void parseLocationAutoindexes(LocationConfig &location,
+                                std::vector<std::string>::iterator &it);
+  void parseLocationIndexes(LocationConfig &location,
+                            std::vector<std::string>::iterator &it);
+  void parseLocationRoot(LocationConfig &location,
+                         std::vector<std::string>::iterator &it);
+  void parseLocationAllowedMethods(LocationConfig &location,
+                                   std::vector<std::string>::iterator &it);
+
+  // serverのparse
+  void parseServer(ServerConfig &server, std::vector<std::string>::iterator &it,
+                   std::vector<std::string>::iterator &ite);
+  void parseClientBodySizeLimit(ServerConfig &server,
+                                std::vector<std::string>::iterator &it);
+  void parseErrorPages(ServerConfig &server,
+                       std::vector<std::string>::iterator &it);
+  void parseRoot(ServerConfig &server, std::vector<std::string>::iterator &it);
+  void parseServerName(ServerConfig &server,
+                       std::vector<std::string>::iterator &it);
+  void parseListen(ServerConfig &server,
+                   std::vector<std::string>::iterator &it);
+  void parseTokens(std::vector<std::string> tokens);
+
+  // token化のためのutils
+  std::string readFile(std::string const file);
+  std::vector<std::string> isspaceSplit(std::string const str);
+
+  // 使わない関数
+  ConfigParser(ConfigParser const &other);
+  ConfigParser &operator=(ConfigParser const &other);
 };
 
 #endif
