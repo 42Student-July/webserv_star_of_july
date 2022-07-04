@@ -23,11 +23,13 @@
 /* 	} */
 /* 	try { */
 /* 		ConfigParser configparser(av[1]); */
-/* 		std::vector<ServerConfig> serverconfigs = configparser.getServerConfigs(); */
+/* 		std::vector<ServerConfig> serverconfigs =
+ * configparser.getServerConfigs(); */
 /* 		printServerConfig(serverconfigs); */
 /* 		/1* std::cout << serverconfigs[0].names_[2] << std::endl; *1/ */
 /* 		/1* std::cout << serverconfigs[0].root_ << std::endl; *1/ */
-/* 		/1* std::cout << serverconfigs[0].locations_[0].uri_ << std::endl; *1/ */
+/* 		/1* std::cout << serverconfigs[0].locations_[0].uri_ <<
+ * std::endl; *1/ */
 
 /* 	} catch (...) { */
 /* 		std::cout << "something is wrong" << std::endl; */
