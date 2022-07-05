@@ -64,7 +64,7 @@ TEST(ConfigParserServersTests, CanParseClientBodySizeLimit) {
 TEST(ConfigParserLocationsTests, CanParseLocationUri) {
   ConfigParser configparser("./TestConfigs/location.conf");
   std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
-  ASSERT_EQ("/", serverconfig[0].locations_[0].uri_);
+  ASSERT_EQ("/", serverconfig[0].locations_[0].name_);
 }
 
 TEST(ConfigParserLocationsTests, CanParseLocationRoot) {

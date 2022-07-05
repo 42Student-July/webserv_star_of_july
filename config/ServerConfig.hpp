@@ -3,7 +3,8 @@
 #include <vector>
 
 struct LocationConfig {
-  std::string uri_;
+  //locationだとlocations_.location_になってしまうので一旦name_にしています
+  std::string name_;
 
   // Define a HTTP redirection.
   std::string root_;

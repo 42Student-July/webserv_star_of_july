@@ -139,7 +139,7 @@ void ConfigParser::parseLocationCGIPath(
 void ConfigParser::parseLocation(LocationConfig &location,
                                  std::vector<std::string>::iterator &it,
                                  std::vector<std::string>::iterator &ite) {
-  location.uri_ = *it;
+  location.name_ = *it;
   if (*(++it) == "{") {
     for (; it != ite; ++it) {
       if (*it == "root") {
