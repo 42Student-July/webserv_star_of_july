@@ -3,22 +3,23 @@
 
 #include <map>
 
-#include "Observer.hpp"
+class SocketObserver;
 
 class ASocket {
- public:
+public:
   ASocket(int fd);
   virtual ~ASocket();
-  virtual void notifyFdEvent(Observer* observer,
-                             std::map<int, ASocket*>* fd2socket) = 0;
+  virtual void communicateWithClient(SocketObserver *observer) = 0;
   int getFd() const;
 
- protected:
+protected:
   int fd_;
 
- private:
-  ASocket(const ASocket& other);
-  ASocket& operator=(const ASocket& other);
+private:
+  ASocket(const ASocket &other);
+  ASocket &operator=(const ASocket &other);
 };
+
+#include "SocketObserver.hpp"
 
 #endif /* ASOCKET_HPP */
