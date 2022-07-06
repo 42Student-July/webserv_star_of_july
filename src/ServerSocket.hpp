@@ -20,7 +20,7 @@ public:
   void communicateWithClient(SocketObserver *observer);
 
 private:
-  static const int kServerPort = 5000;
+  static const int kServerPort = 8000;
   static const int kMaxPendig = 5;
 
   ServerSocket(const ServerSocket &other);

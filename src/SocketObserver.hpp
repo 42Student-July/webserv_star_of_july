@@ -34,7 +34,7 @@ private:
     bool should_destroy;
   } UpdateReservation;
 
-  static const int kTimeoutSec = 5;
+  static const int kTimeoutSec = 10;
 
   SocketObserver(const SocketObserver &other);
   SocketObserver &operator=(const SocketObserver &other);
