@@ -7,6 +7,7 @@
 
 #include "ASocket.hpp"
 #include <iostream>
+#include <sys/select.h>
 
 class SocketObserver {
 public:
