@@ -10,23 +10,23 @@
 
 #include "ASocket.hpp"
 #include "Connection.hpp"
-#include "Observer.hpp"
+#include "SocketObserver.hpp"
 
 class ServerSocket : public ASocket {
- public:
+public:
   ServerSocket();
   ~ServerSocket();
 
-  void notifyFdEvent(Observer* observer, std::map<int, ASocket*>* fd2socket);
+  void communicateWithClient(SocketObserver *observer);
 
- private:
+private:
   static const int kServerPort = 5000;
   static const int kMaxPendig = 5;
 
-  ServerSocket(const ServerSocket& other);
-  ServerSocket& operator=(const ServerSocket& other);
+  ServerSocket(const ServerSocket &other);
+  ServerSocket &operator=(const ServerSocket &other);
 
-  Connection* createConnection(Observer* observer);
+  Connection *createConnection();
 };
 
 #endif /* SERVERSOCKET_HPP */

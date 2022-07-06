@@ -6,8 +6,9 @@ SocketObserver::~SocketObserver() {}
 
 void SocketObserver::run() {
   for (;;) {
-    observe();
     update();
+    showTarget();
+    observe();
   }
 }
 
@@ -31,15 +32,6 @@ void SocketObserver::modTarget(ASocket *socket, ObserveKind current,
   unwatch_reservation_.push_back(unwatch_rsv);
   watch_reservation_.push_back(watch_rsv);
 }
-
-// void SocketObserver::delTarget(ASocket *socket, ObserveKind kind);
-// void SocketObserver::modTarget(ASocket *socket, ObserveKind current,
-//                                ObserveKind next);
-
-// void SocketObserver::reserveUpdate(ASocket *socket, ObserveKind kind,
-//                                    bool should_destroy) {
-//   UpdateReservation reservation = {socket, kind, should_destroy};
-// }
 
 void SocketObserver::observe() {
   int maxfd = getMaxFd();
@@ -68,6 +60,23 @@ void SocketObserver::update() {
        it != watch_reservation_.end(); it++) {
     watch(*it);
   }
+  unwatch_reservation_.clear();
+  watch_reservation_.clear();
+}
+
+void SocketObserver::showTarget() {
+  std::cerr << "###Read Target  : ";
+  for (SocketMap::const_iterator it = read_sockets_.begin();
+       it != read_sockets_.cend(); it++) {
+    std::cerr << it->first << ", ";
+  }
+  std::cerr << std::endl;
+  std::cerr << "###Write Target : ";
+  for (SocketMap::const_iterator it = write_sockets_.begin();
+       it != write_sockets_.cend(); it++) {
+    std::cerr << it->first << ", ";
+  }
+  std::cerr << std::endl << std::endl;
 }
 
 void SocketObserver::unwatch(const UpdateReservation &reservation) {
@@ -120,33 +129,11 @@ fd_set SocketObserver::toFdset(const SocketMap &sockets) {
   return ret;
 }
 
-// EventLoop::EventLoop() : observer(new Observer) {}
-// EventLoop::EventLoop(const std::map<int, ASocket *> &fd2socket)
-//     : observer_(new Observer), fd2socket_(fd2socket) {
-//   std::map<int, ASocket *>::iterator it = fd2socket_.begin();
-//   std::map<int, ASocket *>::iterator ite = fd2socket_.end();
-//   for (; it != ite; it++) {
-//     observer_->addTargetReadFd(it->first);
-//   }
-// }
-
-// EventLoop::~EventLoop() { delete observer_; }
-
-// void EventLoop::loop() {
-//   while (true) {
-//     observer_->notifyFdEvent();
-//     std::set<int> readyfds = observer_->getReadyFds();
-//     std::set<int>::iterator it = readyfds.begin();
-//     std::set<int>::iterator ite = readyfds.end();
-//     for (; it != ite; it++) {
-//       fd2socket_[*it]->notifyFdEvent(observer_, &fd2socket_);
-//       // if (fd2socket_[*it]->getState() == CREATE) {
-//       //   ;
-//       //   ;
-//       // } else if (~~ == CLOSE) {
-//       // delete fd2socket_[*it];
-//       // fd2socket_.erase(*it);
-//       // }
-//     }
-//   }
-// }
+void SocketObserver::notifySockets(const SocketMap &sockets,
+                                   const fd_set &fdsets) {
+  for (SocketMap::const_iterator it = sockets.cbegin(); it != sockets.cend();
+       it++) {
+    if (FD_ISSET(it->first, &fdsets))
+      it->second->communicateWithClient(this);
+  }
+}

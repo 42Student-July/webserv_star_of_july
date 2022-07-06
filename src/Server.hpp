@@ -3,20 +3,20 @@
 
 #include <map>
 
-#include "EventLoop.hpp"
 #include "ServerSocket.hpp"
+#include "SocketObserver.hpp"
 
 class Server {
- public:
+public:
   Server();
   ~Server();
 
   void run();
 
- private:
+private:
   // not copy
-  Server(const Server& other);
-  Server& operator=(const Server& other);
+  Server(const Server &other);
+  Server &operator=(const Server &other);
 };
 
-#endif  // HTTPSERVER_SRC_SERVER_HPP_
+#endif // HTTPSERVER_SRC_SERVER_HPP_

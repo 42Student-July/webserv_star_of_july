@@ -3,6 +3,7 @@
 
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include <fstream>
 #include <iostream>
@@ -12,16 +13,16 @@
 #include "HttpRequest.hpp"
 #include "HttpRequestParser.hpp"
 #include "HttpResponse.hpp"
-#include "Observer.hpp"
+#include "SocketObserver.hpp"
 
 class Connection : public ASocket {
- public:
+public:
   explicit Connection(int accepted_fd);
   ~Connection();
 
-  void notifyFdEvent(Observer* observer, std::map<int, ASocket*>* fd2socket);
+  void communicateWithClient(SocketObserver *observer);
 
- private:
+private:
   enum State {
     READ,
     WRITE,
@@ -31,11 +32,11 @@ class Connection : public ASocket {
   // 65536, httpServerだとリクエストの文字数の上限かな
 
   Connection();
-  Connection(const Connection& other);
-  Connection& operator=(const Connection& other);
+  Connection(const Connection &other);
+  Connection &operator=(const Connection &other);
 
-  void handleReadEvent(Observer* observer, std::map<int, ASocket*>* fd2socket);
-  void handleWriteEvent(Observer* observer);
+  void handleReadEvent(SocketObserver *observer);
+  void handleWriteEvent(SocketObserver *observer);
   ssize_t recvFromClient();
   void generateRequest(ssize_t recv_size);
   void generateResponse(ssize_t recv_size);
@@ -47,8 +48,8 @@ class Connection : public ASocket {
   std::string response_;
   // この辺の変数のスコープと型（ポインタにするかしないかは後で考える)
   HttpRequestParser request_parser_;
-  HttpRequest* current_request_;
-  HttpResponse* current_response_;
+  HttpRequest *current_request_;
+  HttpResponse *current_response_;
 };
 
-#endif  // HTTPSERVER_SRC_CONNECTION_HPP_
+#endif // HTTPSERVER_SRC_CONNECTION_HPP_

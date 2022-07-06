@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "ASocket.hpp"
-#include "Observer.hpp"
+#include <iostream>
 
 class SocketObserver {
 public:
@@ -41,12 +41,12 @@ private:
 
   void observe();
   void update();
+  void showTarget();
   void unwatch(const UpdateReservation &reservation);
   void watch(const UpdateReservation &reservation);
   int getMaxFd();
   fd_set toFdset(const SocketMap &sockets);
   void notifySockets(const SocketMap &sockets, const fd_set &fdsets);
-  void reserveUpdate(ASocket *socket, ObserveKind kind, bool should_destroy);
 
   SocketMap read_sockets_;
   SocketMap write_sockets_;
