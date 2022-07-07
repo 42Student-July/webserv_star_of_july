@@ -12,15 +12,14 @@ int main(int argc, char const *argv[])
 	conf.buildDemoConf();
 	
 	// http request data
-	std::string method = "GET";
-	std::string path = "/";
-	std::string file = "index.html";
-	bool is_index = true;
-	HttpRequestData data = HttpRequestData(method, path, file, is_index);
+	HttpRequestDTO req;
+	req.method = "GET";
+	req.path = "/";
+	req.file = "index.html";
 
 	//builder
 	HttpResponseBuilder builder = HttpResponseBuilder(conf);
-	HttpResponse *res = builder.build(data);
+	HttpResponse *res = builder.build(req);
 	HttpResponseSerializer serializer = HttpResponseSerializer();
 	HttpResponsePlainText *plain_text = serializer.serialize(*res);
 	std::cout << plain_text->Text() << std::endl;

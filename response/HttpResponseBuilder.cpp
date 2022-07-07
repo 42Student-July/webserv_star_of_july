@@ -58,16 +58,16 @@ void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
 	closedir(dirp);
 }
 
-void HttpResponseBuilder::findFilepath(HttpRequestData &req)
+void HttpResponseBuilder::findFilepath(HttpRequestDTO &req)
 {
 	std::vector<LocationConfig>::iterator i = conf_.GetLocation().begin();
 	std::vector<LocationConfig>::iterator ie = conf_.GetLocation().end();
 
 	for (; i != ie; i++)
 	{
-		if ((*i).location_ == req.GetPathDir())
+		if ((*i).location_ == req.path)
 		{
-			findAbsPath((*i).root_ + (*i).location_, req.GetPathFile());
+			findAbsPath((*i).root_ + (*i).location_, req.file);
 		}
 	}
 	if (!t_abspath.exists)
@@ -101,7 +101,7 @@ void HttpResponseBuilder::buildHeader()
 	header_.accept_ranges = "bytes";
 }
 
-HttpResponse *HttpResponseBuilder::build(HttpRequestData &req)
+HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 {
 	try
 	{

@@ -12,10 +12,9 @@
 #include <cstring>
 
 #include "ConfigDTO.hpp"
-#include "HttpRequestData.hpp"
 #include "HttpResponse.hpp"
 #include "HttpResponseHeaderDTO.hpp"
-
+#include "HttpRequestDTO.hpp"
 
 
 class HttpResponseBuilder
@@ -28,16 +27,16 @@ private:
 		std::string filepath;
 		bool		exists;
 	} t_abspath;
-	static const std::string CRLF;
 	std::stringstream file_str_;
+	static const std::string CRLF;
 public:
 	HttpResponseBuilder();
 	HttpResponseBuilder(ConfigDTO conf);
 	~HttpResponseBuilder();
 	HttpResponseBuilder(const HttpResponseBuilder &other);
 	HttpResponseBuilder &operator=(const HttpResponseBuilder &other);
-	HttpResponse *build(HttpRequestData &req);
-	void findFilepath(HttpRequestData &req);
+	HttpResponse *build(HttpRequestDTO &req);
+	void findFilepath(HttpRequestDTO &req);
 	void findAbsPath(std::string dir, std::string file);
 	void readFile();
 	void buildHeader();

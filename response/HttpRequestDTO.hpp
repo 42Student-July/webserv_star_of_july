@@ -1,23 +1,19 @@
-#ifndef HTTPREQUESTDATA_HPP
-# define HTTPREQUESTDATA_HPP
+#ifndef HTTPREQUESTDTO_HPP
+# define HTTPREQUESTDTO_HPP
 
 #include <string>
 
-class HttpRequestData
+struct HttpRequestDTO
 {
-private:
-	std::string method_;
-	std::string path_dir_;
-	std::string path_file_;
-	bool        is_index_;
-public:	
-	HttpRequestData();
-	HttpRequestData(std::string method, std::string path, std::string file, bool is_index);
-	~HttpRequestData();
-	HttpRequestData(const HttpRequestData &other);
-	HttpRequestData &operator=(const HttpRequestData &other);
-	const std::string &GetPathDir() const;
-	const std::string &GetPathFile() const;
+	std::string method;
+	std::string path;
+	std::string version;
+	std::string connection;
+	std::string body;
+	
+	// TODO: 後で消す
+	std::string file;
 };
+
 
 #endif
