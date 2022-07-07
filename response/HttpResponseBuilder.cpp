@@ -96,7 +96,17 @@ void HttpResponseBuilder::buildHeader()
 			<< "ETag: \"62c29d55-e5\"" << CRLF
 			<< "Accept-Ranges: bytes" << CRLF
 			<< CRLF;
-	
+	header_dto_.version = "1.1";
+	header_dto_.status_code = "200";
+	header_dto_.reason_phrase = "OK";
+	header_dto_.server = "webserv";
+	header_dto_.date = "Tue, 05 Jul 2022 06:44:07 GMT";
+	header_dto_.content_type = "text/html";
+	header_dto_.content_length = "0";
+	header_dto_.last_modified = "Mon, 04 Jul 2022 07:57:09 GMT";
+	header_dto_.connection = "keep-alive";
+	header_dto_.etag = "\"62c29d55-e5\"";
+	header_dto_.accept_ranges = "bytes";
 }
 
 HttpResponse *HttpResponseBuilder::build(HttpRequestData &req)
@@ -114,9 +124,11 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestData &req)
 		std::exit(1);
 	}
 	
-	return new HttpResponse(
-		header_.str(), 
-		file_str_.str(),
-		file_str_.str().size(), 
-		header_.str().size() + file_str_.str().size());
+	return new HttpResponse(header_dto_, file_str_.str());
+	
+	// return new HttpResponse(
+	// 	header_.str(), 
+	// 	file_str_.str(),
+	// 	file_str_.str().size(), 
+	// 	header_.str().size() + file_str_.str().size());
 }

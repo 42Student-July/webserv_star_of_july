@@ -21,6 +21,7 @@ int main(int argc, char const *argv[])
 	//builder
 	HttpResponseBuilder builder = HttpResponseBuilder(conf);
 	HttpResponse *res = builder.build(data);
-	res->printResponse();
+	(void)res;
+	// res->printResponse();
 	return 0;
 }
