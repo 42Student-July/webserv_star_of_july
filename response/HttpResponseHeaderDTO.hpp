@@ -3,7 +3,7 @@
 
 #include <string>
 
-typedef struct s_header_dto
+struct HttpResponseHeaderDTO
 {
 	std::string version;
 	std::string status_code;
@@ -16,6 +16,6 @@ typedef struct s_header_dto
 	std::string connection;
 	std::string etag;
 	std::string accept_ranges;
-} t_header_dto;
+};
 
 #endif

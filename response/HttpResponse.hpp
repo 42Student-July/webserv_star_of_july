@@ -35,7 +35,7 @@ public:
 		std::size_t total_size
 	);
 	HttpResponse(
-		t_header_dto header,
+		HttpResponseHeaderDTO header,
 		std::string body
 	);
 	~HttpResponse();

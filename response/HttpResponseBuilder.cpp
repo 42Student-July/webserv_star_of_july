@@ -88,27 +88,17 @@ void HttpResponseBuilder::readFile()
 
 void HttpResponseBuilder::buildHeader()
 {
-	header_	<< "HTTP/1.1 200 OK" << CRLF
-			<< "Server: webserv" << CRLF
-			<< "Date: Tue, 05 Jul 2022 06:44:07 GMT" << CRLF
-			<< "Content-Type: text/html" << CRLF
-			<< "Content-Length: 0" << CRLF
-			<< "Last-Modified: Mon, 04 Jul 2022 07:57:09 GMT" << CRLF
-			<< "Connection: keep-alive" << CRLF
-			<< "ETag: \"62c29d55-e5\"" << CRLF
-			<< "Accept-Ranges: bytes" << CRLF
-			<< CRLF;
-	header_dto_.version = "1.1";
-	header_dto_.status_code = "200";
-	header_dto_.reason_phrase = "OK";
-	header_dto_.server = "webserv";
-	header_dto_.date = "Tue, 05 Jul 2022 06:44:07 GMT";
-	header_dto_.content_type = "text/html";
-	header_dto_.content_length = "0";
-	header_dto_.last_modified = "Mon, 04 Jul 2022 07:57:09 GMT";
-	header_dto_.connection = "keep-alive";
-	header_dto_.etag = "\"62c29d55-e5\"";
-	header_dto_.accept_ranges = "bytes";
+	header_.version = "1.1";
+	header_.status_code = "200";
+	header_.reason_phrase = "OK";
+	header_.server = "webserv";
+	header_.date = "Tue, 05 Jul 2022 06:44:07 GMT";
+	header_.content_type = "text/html";
+	header_.content_length = "0";
+	header_.last_modified = "Mon, 04 Jul 2022 07:57:09 GMT";
+	header_.connection = "keep-alive";
+	header_.etag = "\"62c29d55-e5\"";
+	header_.accept_ranges = "bytes";
 }
 
 HttpResponse *HttpResponseBuilder::build(HttpRequestData &req)
@@ -126,11 +116,5 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestData &req)
 		std::exit(1);
 	}
 	
-	return new HttpResponse(header_dto_, file_str_.str());
-	
-	// return new HttpResponse(
-	// 	header_.str(), 
-	// 	file_str_.str(),
-	// 	file_str_.str().size(), 
-	// 	header_.str().size() + file_str_.str().size());
+	return new HttpResponse(header_, file_str_.str());
 }
