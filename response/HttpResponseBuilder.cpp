@@ -96,6 +96,7 @@ void HttpResponseBuilder::buildHeader()
 			<< "ETag: \"62c29d55-e5\"" << CRLF
 			<< "Accept-Ranges: bytes" << CRLF
 			<< CRLF;
+	
 }
 
 HttpResponse *HttpResponseBuilder::build(HttpRequestData &req)
