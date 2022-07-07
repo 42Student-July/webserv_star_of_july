@@ -55,3 +55,52 @@ void HttpResponse::printResponse()
 {
 	std::cout << header_ << body_ << std::endl;
 }
+
+const std::string &HttpResponse::Version() const
+{
+	return version_;
+}
+const std::string &HttpResponse::StatusCode() const
+{
+	return status_code_;
+}
+const std::string &HttpResponse::ReasonPhrase() const
+{
+	return reason_phrase_;
+}
+const std::string &HttpResponse::Server() const {
+	return server_;
+}
+const std::string &HttpResponse::Date() const
+{
+	return date_;
+}
+const std::string &HttpResponse::ContentType() const
+{
+	return content_type_;
+}
+const std::string &HttpResponse::ContentLength() const
+{
+	return content_length_;
+}
+const std::string &HttpResponse::LastModified() const
+{
+	return last_modified_;
+}
+const std::string &HttpResponse::Connection() const
+{
+	return connection_;
+}
+const std::string &HttpResponse::ETag() const
+{
+	return etag_;
+}
+const std::string &HttpResponse::AcceptRanges() const
+{
+	return accept_ranges_;
+}
+
+const std::string &HttpResponse::Body() const
+{
+	return body_;
+}
