@@ -18,7 +18,7 @@ HttpResponse::HttpResponse(
 }
 
 HttpResponse::HttpResponse(
-	t_header_dto header,
+	HttpResponseHeaderDTO header,
 	std::string body
 )
 {

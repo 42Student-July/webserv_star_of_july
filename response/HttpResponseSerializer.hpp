@@ -6,8 +6,6 @@
 #include "HttpResponsePlainText.hpp"
 #include "HttpResponse.hpp"
 
-
-
 class HttpResponseSerializer
 {
 private:
