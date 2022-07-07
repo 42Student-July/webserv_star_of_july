@@ -36,7 +36,7 @@ void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
 	cwd = getcwd(NULL, 0);
 	
 	fullpath = std::string(cwd) + dir;
-	free(cwd);
+	std::free(cwd);
 	std::cout << "fullpath: " << fullpath << std::endl;
 	
 	
@@ -45,7 +45,7 @@ void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
 		throw std::runtime_error("directory not found");
 	while ((ent = readdir(dirp)) != NULL)
 	{
-		if (strcmp(ent->d_name,file.c_str()) == 0)
+		if (std::strcmp(ent->d_name,file.c_str()) == 0)
 		{
 			std::cout << "kita" << std::endl;
 			t_abspath.filepath = fullpath + file;
@@ -109,7 +109,8 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestData &req)
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
-		exit(1);
+		// TODO:直す
+		std::exit(1);
 	}
 	
 	return new HttpResponse(

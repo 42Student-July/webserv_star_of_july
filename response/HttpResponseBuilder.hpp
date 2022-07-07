@@ -12,6 +12,7 @@
 #include <dirent.h>
 #include <fstream>
 #include <ios>
+#include <cstring>
 
 const static std::string CRLF = "\r\n";
 
