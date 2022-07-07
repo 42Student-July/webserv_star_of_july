@@ -12,6 +12,7 @@ private:
 	// header attr
 	std::string version_;
 	std::string status_code_;
+	std::string reason_phrase_;
 	std::string server_;
 	std::string date_;
 	std::string content_type_;

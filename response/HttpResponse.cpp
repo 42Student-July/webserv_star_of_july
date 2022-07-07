@@ -24,6 +24,7 @@ HttpResponse::HttpResponse(
 {
 	version_ = header.version;
 	status_code_ = header.status_code;
+	reason_phrase_ = header.reason_phrase;
 	server_ = header.server;
 	date_ = header.date;
 	content_type_ = header.content_type;
