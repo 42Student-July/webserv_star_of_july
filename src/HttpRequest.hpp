@@ -6,8 +6,6 @@
 #include <string>
 
 class HttpRequest {
-  typedef std::map<std::string, std::string> HeaderFieldMap;
-
  public:
   HttpRequest();
   ~HttpRequest();
@@ -16,7 +14,6 @@ class HttpRequest {
   void setMethod(const std::string& method);
   void setUri(const std::string& uri);
   void setVersion(const std::string& version);
-  void setHeaderFieldMap(const HeaderFieldMap& field_to_value);
   void setIsValid(bool is_valid);
   // デバッグ用
   std::string toString() const;
@@ -26,11 +23,14 @@ class HttpRequest {
   HttpRequest& operator=(const HttpRequest& other);
 
   std::string method_;
-  std::string uri_;
+  std::string path_;
   std::string version_;
-  HeaderFieldMap field_to_value_;
+  std::string host_;
+  int port_;
+  std::string connection_;
   std::string body_;
-  bool is_valid_;
+  bool is_chanked_;
+  bool is_bad_request_;
 };
 
 std::ostream& operator<<(std::ostream& stream, const HttpRequest& rhs);
