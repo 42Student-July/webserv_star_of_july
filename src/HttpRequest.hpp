@@ -14,7 +14,7 @@ class HttpRequest {
   void setMethod(const std::string& method);
   void setUri(const std::string& uri);
   void setVersion(const std::string& version);
-  void setIsValid(bool is_valid);
+  void setIsBadRequest(bool is_bad_request_);
   // デバッグ用
   std::string toString() const;
 
