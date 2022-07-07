@@ -70,36 +70,36 @@ TEST(ConfigParserLocationsTests, CanParseLocationUri) {
 TEST(ConfigParserLocationsTests, CanParseLocationRoot) {
   ConfigParser configparser("./TestConfigs/location_root.conf");
   std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
-  ASSERT_EQ("/var/www/html/locationroot", serverconfig[0].locations_[0].root_);
+  ASSERT_EQ("/var/www/html/locationroot", serverconfig[0].locations_[0].root);
 }
 
 TEST(ConfigParserLocationsTests, CanParseLocationAllowedMethod) {
   ConfigParser configparser("./TestConfigs/location_allowed_method.conf");
   std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
-  ASSERT_EQ("GET", serverconfig[0].locations_[0].allowed_methods_[0]);
-  ASSERT_EQ("POST", serverconfig[0].locations_[0].allowed_methods_[1]);
-  ASSERT_EQ("DELETE", serverconfig[0].locations_[0].allowed_methods_[2]);
+  ASSERT_EQ("GET", serverconfig[0].locations_[0].allowed_methods[0]);
+  ASSERT_EQ("POST", serverconfig[0].locations_[0].allowed_methods[1]);
+  ASSERT_EQ("DELETE", serverconfig[0].locations_[0].allowed_methods[2]);
 }
 
 TEST(ConfigParserLocationsTests, CanParseLocationIndexes) {
   ConfigParser configparser("./TestConfigs/location_indexes.conf");
   std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
-  ASSERT_EQ("index.html", serverconfig[0].locations_[0].indexes_[0]);
-  ASSERT_EQ("index.php", serverconfig[0].locations_[0].indexes_[1]);
+  ASSERT_EQ("index.html", serverconfig[0].locations_[0].indexes[0]);
+  ASSERT_EQ("index.php", serverconfig[0].locations_[0].indexes[1]);
 }
 
 TEST(ConfigParserLocationsTests, CanParseLocationAutoindex) {
   ConfigParser configparser("./TestConfigs/location_autoindex.conf");
   std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
-  ASSERT_EQ(1, serverconfig[0].locations_[0].autoindex_);
-  ASSERT_EQ(0, serverconfig[0].locations_[1].autoindex_);
-  ASSERT_EQ(1, serverconfig[1].locations_[0].autoindex_);
+  ASSERT_EQ(1, serverconfig[0].locations_[0].autoindex);
+  ASSERT_EQ(0, serverconfig[0].locations_[1].autoindex);
+  ASSERT_EQ(1, serverconfig[1].locations_[0].autoindex);
 }
 
 TEST(ConfigParserLocationsTests, CanParseLocationCGIPath) {
   ConfigParser configparser("./TestConfigs/location_cgipath.conf");
   std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
-  ASSERT_EQ(".py", serverconfig[0].locations_[0].cgi_path_);
+  ASSERT_EQ(".py", serverconfig[0].locations_[0].cgi_path);
 }
 
 TEST(Error, NoCurlyBracketsThrowsException) {

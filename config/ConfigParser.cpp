@@ -90,7 +90,7 @@ void ConfigParser::parseClientBodySizeLimit(
 
 void ConfigParser::parseLocationRoot(LocationConfig &location,
                                      std::vector<std::string>::iterator &it) {
-  location.root_ = it->substr(0, it->find(";"));
+  location.root = it->substr(0, it->find(";"));
 }
 
 void ConfigParser::parseLocationAllowedMethods(
@@ -98,9 +98,9 @@ void ConfigParser::parseLocationAllowedMethods(
   int num = countContents(it);
   for (int i = 0; i < num; ++i, ++it) {
     if (it->find(";") != std::string::npos) {
-      location.allowed_methods_.push_back(it->substr(0, it->find(";")));
+      location.allowed_methods.push_back(it->substr(0, it->find(";")));
     } else {
-      location.allowed_methods_.push_back(*it);
+      location.allowed_methods.push_back(*it);
     }
   }
   it--;
@@ -111,9 +111,9 @@ void ConfigParser::parseLocationIndexes(
   int num = countContents(it);
   for (int i = 0; i < num; ++i, ++it) {
     if (it->find(";") != std::string::npos) {
-      location.indexes_.push_back(it->substr(0, it->find(";")));
+      location.indexes.push_back(it->substr(0, it->find(";")));
     } else {
-      location.indexes_.push_back(*it);
+      location.indexes.push_back(*it);
     }
   }
   it--;
@@ -122,9 +122,9 @@ void ConfigParser::parseLocationIndexes(
 void ConfigParser::parseLocationAutoindexes(
     LocationConfig &location, std::vector<std::string>::iterator &it) {
   if (it->substr(0, it->find(";")) == "on") {
-    location.autoindex_ = true;
+    location.autoindex = true;
   } else if (it->substr(0, it->find(";")) == "off") {
-    location.autoindex_ = false;
+    location.autoindex = false;
   } else {
     throw std::runtime_error("Error: Config: Wrong syntax");
   }
@@ -132,7 +132,7 @@ void ConfigParser::parseLocationAutoindexes(
 
 void ConfigParser::parseLocationCGIPath(
     LocationConfig &location, std::vector<std::string>::iterator &it) {
-  location.cgi_path_ = it->substr(0, it->find(";"));
+  location.cgi_path = it->substr(0, it->find(";"));
 }
 
 // ToDo:それぞれ1回ずつしか入力できないようにする
