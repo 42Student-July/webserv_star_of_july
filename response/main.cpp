@@ -21,6 +21,8 @@ int main(int argc, char const *argv[])
 	//builder
 	HttpResponseBuilder builder = HttpResponseBuilder(conf);
 	HttpResponse *res = builder.build(data);
-	res->printResponse();
+	HttpResponseSerializer serializer = HttpResponseSerializer();
+	HttpResponsePlainText *plain_text = serializer.serialize(*res);
+	std::cout << plain_text->Text() << std::endl;
 	return 0;
 }

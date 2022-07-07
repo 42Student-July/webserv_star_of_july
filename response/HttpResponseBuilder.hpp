@@ -1,9 +1,6 @@
 #ifndef HTTPRESPONSEBUILDER_HPP
 # define HTTPRESPONSEBUILDER_HPP
 
-#include "ConfigDTO.hpp"
-#include "HttpRequestData.hpp"
-#include "HttpResponse.hpp"
 #include <vector>
 #include <iostream>
 #include <unistd.h>
@@ -12,8 +9,14 @@
 #include <dirent.h>
 #include <fstream>
 #include <ios>
+#include <cstring>
 
-const static std::string CRLF = "\r\n";
+#include "ConfigDTO.hpp"
+#include "HttpRequestData.hpp"
+#include "HttpResponse.hpp"
+#include "HttpResponseHeaderDTO.hpp"
+
+
 
 class HttpResponseBuilder
 {
@@ -24,6 +27,8 @@ private:
 		std::string filepath;
 		bool		exists;
 	} t_abspath;
+	static const std::string CRLF;
+	t_header_dto header_dto_;
 	std::ostringstream header_;
 	std::stringstream file_str_;
 public:

@@ -1,5 +1,7 @@
 #include "HttpResponseBuilder.hpp"
 
+const std::string HttpResponseBuilder::CRLF = "\r\n";
+
 HttpResponseBuilder::HttpResponseBuilder()
 {
 }
@@ -36,7 +38,7 @@ void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
 	cwd = getcwd(NULL, 0);
 	
 	fullpath = std::string(cwd) + dir;
-	free(cwd);
+	std::free(cwd);
 	std::cout << "fullpath: " << fullpath << std::endl;
 	
 	
@@ -45,7 +47,7 @@ void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
 		throw std::runtime_error("directory not found");
 	while ((ent = readdir(dirp)) != NULL)
 	{
-		if (strcmp(ent->d_name,file.c_str()) == 0)
+		if (std::strcmp(ent->d_name,file.c_str()) == 0)
 		{
 			std::cout << "kita" << std::endl;
 			t_abspath.filepath = fullpath + file;
@@ -96,6 +98,17 @@ void HttpResponseBuilder::buildHeader()
 			<< "ETag: \"62c29d55-e5\"" << CRLF
 			<< "Accept-Ranges: bytes" << CRLF
 			<< CRLF;
+	header_dto_.version = "1.1";
+	header_dto_.status_code = "200";
+	header_dto_.reason_phrase = "OK";
+	header_dto_.server = "webserv";
+	header_dto_.date = "Tue, 05 Jul 2022 06:44:07 GMT";
+	header_dto_.content_type = "text/html";
+	header_dto_.content_length = "0";
+	header_dto_.last_modified = "Mon, 04 Jul 2022 07:57:09 GMT";
+	header_dto_.connection = "keep-alive";
+	header_dto_.etag = "\"62c29d55-e5\"";
+	header_dto_.accept_ranges = "bytes";
 }
 
 HttpResponse *HttpResponseBuilder::build(HttpRequestData &req)
@@ -109,12 +122,15 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestData &req)
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
-		exit(1);
+		// TODO:直す
+		std::exit(1);
 	}
 	
-	return new HttpResponse(
-		header_.str(), 
-		file_str_.str(),
-		file_str_.str().size(), 
-		header_.str().size() + file_str_.str().size());
+	return new HttpResponse(header_dto_, file_str_.str());
+	
+	// return new HttpResponse(
+	// 	header_.str(), 
+	// 	file_str_.str(),
+	// 	file_str_.str().size(), 
+	// 	header_.str().size() + file_str_.str().size());
 }
