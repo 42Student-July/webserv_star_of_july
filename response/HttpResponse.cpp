@@ -17,6 +17,24 @@ HttpResponse::HttpResponse(
 	total_size_ = total_size;
 }
 
+HttpResponse::HttpResponse(
+	t_header_dto header,
+	std::string body
+)
+{
+	version_ = header.version;
+	status_code_ = header.status_code;
+	server_ = header.server;
+	date_ = header.date;
+	content_type_ = header.content_type;
+	content_length_ = header.content_length;
+	last_modified_ = header.last_modified;
+	connection_ = header.connection;
+	etag_ = header.etag;
+	accept_ranges_ = header.accept_ranges;
+	body_ = body;
+}
+
 HttpResponse::~HttpResponse()
 {
 }

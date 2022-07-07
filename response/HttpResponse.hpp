@@ -4,12 +4,14 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+
+#include "HttpResponseHeaderDTO.hpp"
 class HttpResponse
 {
 private:
 	// header attr
 	std::string version_;
-	std::string http_status_;
+	std::string status_code_;
 	std::string server_;
 	std::string date_;
 	std::string content_type_;
@@ -31,7 +33,10 @@ public:
 		std::size_t body_size, 
 		std::size_t total_size
 	);
-	
+	HttpResponse(
+		t_header_dto header,
+		std::string body
+	);
 	~HttpResponse();
 	HttpResponse(const HttpResponse &other);
 	HttpResponse &operator=(const HttpResponse &other);
