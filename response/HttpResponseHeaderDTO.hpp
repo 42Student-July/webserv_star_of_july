@@ -6,7 +6,7 @@
 typedef struct s_header_dto
 {
 	std::string version;
-	std::string http_status;
+	std::string status_code;
 	std::string server;
 	std::string date;
 	std::string content_type;
