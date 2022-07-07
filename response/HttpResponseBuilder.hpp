@@ -16,7 +16,7 @@
 #include "HttpResponse.hpp"
 #include "HttpResponseHeaderDTO.hpp"
 
-const static std::string CRLF = "\r\n";
+
 
 class HttpResponseBuilder
 {
@@ -27,6 +27,7 @@ private:
 		std::string filepath;
 		bool		exists;
 	} t_abspath;
+	static const std::string CRLF;
 	t_header_dto header_dto_;
 	std::ostringstream header_;
 	std::stringstream file_str_;

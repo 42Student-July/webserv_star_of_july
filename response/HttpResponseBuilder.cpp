@@ -1,5 +1,7 @@
 #include "HttpResponseBuilder.hpp"
 
+const std::string HttpResponseBuilder::CRLF = "\r\n";
+
 HttpResponseBuilder::HttpResponseBuilder()
 {
 }
