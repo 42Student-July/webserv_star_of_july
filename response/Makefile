@@ -6,15 +6,14 @@
 #    By: mhirabay <mhirabay@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/13 18:47:47 by mhirabay          #+#    #+#              #
-#    Updated: 2022/07/07 17:26:44 by mhirabay         ###   ########.fr        #
+#    Updated: 2022/07/07 18:04:32 by mhirabay         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME			:= a.out
 
 SRCS			:=	main.cpp \
-					ConfigDTO.cpp \
-					HttpRequestData.cpp \
+					HttpResponse.cpp \
 					HttpResponseBuilder.cpp \
 					HttpResponseSerializer.cpp \
 					HttpResponsePlainText.cpp \

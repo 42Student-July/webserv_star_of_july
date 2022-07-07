@@ -49,7 +49,6 @@ void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
 	{
 		if (std::strcmp(ent->d_name,file.c_str()) == 0)
 		{
-			std::cout << "kita" << std::endl;
 			t_abspath.filepath = fullpath + file;
 			t_abspath.exists = true;
 			break;
@@ -60,14 +59,14 @@ void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
 
 void HttpResponseBuilder::findFilepath(HttpRequestDTO &req)
 {
-	std::vector<LocationConfig>::iterator i = conf_.GetLocation().begin();
-	std::vector<LocationConfig>::iterator ie = conf_.GetLocation().end();
+	std::vector<LocationConfig>::iterator i = conf_.locations.begin();
+	std::vector<LocationConfig>::iterator ie = conf_.locations.end();
 
 	for (; i != ie; i++)
 	{
-		if ((*i).location_ == req.path)
+		if ((*i).location == req.path)
 		{
-			findAbsPath((*i).root_ + (*i).location_, req.file);
+			findAbsPath((*i).root + (*i).location, req.file);
 		}
 	}
 	if (!t_abspath.exists)
