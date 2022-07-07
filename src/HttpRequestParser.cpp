@@ -36,7 +36,7 @@ void HttpRequestParser::parseRequestLine() {
   current_request_->setMethod(method);
   current_request_->setUri(uri);
   current_request_->setVersion(version);
-  current_request_->setIsValid(true);
+  current_request_->setIsBadRequest(true);
 }
 
 // void HttpRequestParser::parseHeaderField() {
