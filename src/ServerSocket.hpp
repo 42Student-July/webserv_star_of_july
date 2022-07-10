@@ -10,14 +10,15 @@
 
 #include "ASocket.hpp"
 #include "Connection.hpp"
-#include "SocketObserver.hpp"
+#include "Selector.hpp"
 
 class ServerSocket : public ASocket {
 public:
   ServerSocket();
   ~ServerSocket();
 
-  void communicateWithClient(SocketObserver *observer);
+  // void communicateWithClient(Selector *observer);
+  Connection *createConnection() const;
 
 private:
   static const int kServerPort = 8000;
@@ -25,8 +26,6 @@ private:
 
   ServerSocket(const ServerSocket &other);
   ServerSocket &operator=(const ServerSocket &other);
-
-  Connection *createConnection();
 };
 
 #endif /* SERVERSOCKET_HPP */

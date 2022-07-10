@@ -8,34 +8,30 @@ Connection::~Connection() {
   }
 }
 
-void Connection::communicateWithClient(SocketObserver *observer) {
-  std::cout << "@From Connection  : " << fd_ << ", communicateWithClient"
-            << std::endl
-            << std::endl;
+void Connection::handleCommunication() {
   if (state_ == READ) {
-    handleReadEvent(observer);
+    handleReadEvent();
   } else {
-    handleWriteEvent(observer);
+    handleWriteEvent();
   }
 }
 
-void Connection::handleReadEvent(SocketObserver *observer) {
+Connection::State Connection::getState() const { return state_; }
+
+void Connection::handleReadEvent() {
   ssize_t recv_size = recvFromClient();
 
   if (recv_size == 0) {
-    observer->delTarget(this, SocketObserver::READ);
     state_ = CLOSE;
     return;
   }
   generateRequest(recv_size);
   generateResponse(recv_size);
-  observer->modTarget(this, SocketObserver::READ, SocketObserver::WRITE);
   state_ = WRITE;
 }
 
-void Connection::handleWriteEvent(SocketObserver *observer) {
+void Connection::handleWriteEvent() {
   sendResponse();
-  observer->modTarget(this, SocketObserver::WRITE, SocketObserver::READ);
   state_ = READ;
 }
 

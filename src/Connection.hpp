@@ -13,21 +13,23 @@
 #include "HttpRequest.hpp"
 #include "HttpRequestParser.hpp"
 #include "HttpResponse.hpp"
-#include "SocketObserver.hpp"
 
 class Connection : public ASocket {
 public:
-  explicit Connection(int accepted_fd);
-  ~Connection();
-
-  void communicateWithClient(SocketObserver *observer);
-
-private:
   enum State {
     READ,
     WRITE,
     CLOSE,
   };
+
+  explicit Connection(int accepted_fd);
+  ~Connection();
+
+  // void communicateWithClient(Selector *observer);
+  void handleCommunication();
+  State getState() const;
+
+private:
   static const int kRecvBufferSize = (1 << 16);
   // 65536, httpServerだとリクエストの文字数の上限かな
 
@@ -35,8 +37,8 @@ private:
   Connection(const Connection &other);
   Connection &operator=(const Connection &other);
 
-  void handleReadEvent(SocketObserver *observer);
-  void handleWriteEvent(SocketObserver *observer);
+  void handleReadEvent();
+  void handleWriteEvent();
   ssize_t recvFromClient();
   void generateRequest(ssize_t recv_size);
   void generateResponse(ssize_t recv_size);
