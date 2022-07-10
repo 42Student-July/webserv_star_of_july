@@ -1,5 +1,5 @@
-#ifndef HTTPSERVER_SRC_HTTPREQUESTPARSER_HPP_
-#define HTTPSERVER_SRC_HTTPREQUESTPARSER_HPP_
+#ifndef SRC_HTTPREQUESTPARSER_HPP_
+#define SRC_HTTPREQUESTPARSER_HPP_
 
 #include <iostream>
 #include <string>
@@ -19,7 +19,7 @@ class HttpRequestParser {
 
   void parseRequestLine();
   void parseHeaderField();
-  bool getLine(std::string& line);
+  bool getLine(std::string* line);
   void setBody(const char* buffer);
 
   HttpRequest* current_request_;
@@ -27,4 +27,4 @@ class HttpRequestParser {
   std::string buffer_offset_;
 };
 
-#endif  // HTTPSERVER_SRC_HTTPREQUESTPARSER_HPP_
+#endif  // SRC_HTTPREQUESTPARSER_HPP_

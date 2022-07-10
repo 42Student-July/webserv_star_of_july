@@ -1,5 +1,5 @@
-#ifndef HTTPSERVER_SRC_HTTPREQUEST_HPP_
-#define HTTPSERVER_SRC_HTTPREQUEST_HPP_
+#ifndef SRC_HTTPREQUEST_HPP_
+#define SRC_HTTPREQUEST_HPP_
 
 #include <map>
 #include <sstream>
@@ -35,4 +35,4 @@ class HttpRequest {
 
 std::ostream& operator<<(std::ostream& stream, const HttpRequest& rhs);
 
-#endif  // HTTPSERVER_SRC_HTTPREQUEST_HPP_
+#endif  // SRC_HTTPREQUEST_HPP_

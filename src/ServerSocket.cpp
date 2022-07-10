@@ -30,14 +30,6 @@ ServerSocket::ServerSocket()
 
 ServerSocket::~ServerSocket() {}
 
-// void ServerSocket::communicateWithClient(Selector *observer) {
-//   std::cout << "@From ServerSocket: " << fd_ << ", communicateWithClient"
-//             << std::endl
-//             << std::endl;
-//   Connection *new_connection = createConnection();
-//   observer->addTarget(new_connection, Selector::READ);
-// }
-
 Connection *ServerSocket::createConnection() const {
   int new_socket = accept(fd_, NULL, NULL);
 

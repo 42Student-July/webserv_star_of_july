@@ -41,7 +41,8 @@ int Selector::select(const SocketMap &fd2socket) {
   int event_count = ::select(maxfd + 1, &readfds, &writefds, NULL, &timeout);
   if (event_count < 0) {
     throw std::runtime_error("select() failed");
-  } else if (event_count == 0) {
+  }
+  if (event_count == 0) {
     std::cerr << "Time out, you had tea break?" << std::endl;
   } else {
     ready_read_ = toSocketMap(readfds, target_read_);
@@ -113,14 +114,14 @@ Selector::SocketMap Selector::toSocketMap(const fd_set &fdset,
 
 void Selector::addTarget(Connection *connection) {
   switch (connection->getState()) {
-  case Connection::READ:
-    target_read_[connection->getFd()] = connection;
-    break;
-  case Connection::WRITE:
-    target_write_[connection->getFd()] = connection;
-    break;
-  case Connection::CLOSE:
-    throw std::runtime_error("unexpected state");
-    break;
+    case Connection::READ:
+      target_read_[connection->getFd()] = connection;
+      break;
+    case Connection::WRITE:
+      target_write_[connection->getFd()] = connection;
+      break;
+    case Connection::CLOSE:
+      throw std::runtime_error("unexpected state");
+      break;
   }
 }

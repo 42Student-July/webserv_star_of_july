@@ -1,5 +1,5 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#ifndef SRC_UTILS_HPP_
+#define SRC_UTILS_HPP_
 
 #include "ASocket.hpp"
 #include "Connection.hpp"
@@ -7,6 +7,6 @@
 
 namespace utils {
 bool isServerSocket(ASocket *socket);
-} // namespace utils
+}  // namespace utils
 
-#endif /* UTILS_HPP */
+#endif  // SRC_UTILS_HPP_

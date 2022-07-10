@@ -17,7 +17,7 @@ HttpRequest* HttpRequestParser::parse(const char* buffer) {
 void HttpRequestParser::parseRequestLine() {
   std::string request_line;
 
-  if (!getLine(request_line)) {
+  if (!getLine(&request_line)) {
     return;
   }
 
@@ -50,13 +50,13 @@ void HttpRequestParser::parseRequestLine() {
 // }
 
 // 現在のオフセットから一行読み取る関数。読み取ったら改行の次の文字にoffsetを進める
-bool HttpRequestParser::getLine(std::string& line) {
+bool HttpRequestParser::getLine(std::string* line) {
   std::string::size_type n = buffer_offset_.find("\r\n");
 
   if (n == std::string::npos) {
     return false;
   }
-  line = buffer_offset_.substr(0, n);
+  *line = buffer_offset_.substr(0, n);
   buffer_offset_ = buffer_offset_.substr(n + 2);
   return true;
 }

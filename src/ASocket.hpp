@@ -1,21 +1,21 @@
-#ifndef ASOCKET_HPP
-#define ASOCKET_HPP
+#ifndef SRC_ASOCKET_HPP_
+#define SRC_ASOCKET_HPP_
 
 #include <map>
 
 class ASocket {
-public:
-  ASocket(int fd);
+ public:
+  explicit ASocket(int fd);
   virtual ~ASocket();
-  // virtual void communicateWithClient(Selector *observer) = 0;
+
   int getFd() const;
 
-protected:
+ protected:
   int fd_;
 
-private:
+ private:
   ASocket(const ASocket &other);
   ASocket &operator=(const ASocket &other);
 };
 
-#endif /* ASOCKET_HPP */
+#endif  // SRC_ASOCKET_HPP_
