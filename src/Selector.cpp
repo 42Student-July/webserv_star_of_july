@@ -24,7 +24,7 @@ void Selector::init(const SocketMap &target) {
     if (utils::isServerSocket(it->second)) {
       target_read_[it->first] = it->second;
     } else {
-      addTarget(dynamic_cast<Connection *>(it->second));
+      addTarget(dynamic_cast<ConnectionSocket *>(it->second));
     }
   }
 }
@@ -112,15 +112,15 @@ Selector::SocketMap Selector::toSocketMap(const fd_set &fdset,
   return fd2set;
 }
 
-void Selector::addTarget(Connection *connection) {
-  switch (connection->getState()) {
-    case Connection::READ:
-      target_read_[connection->getFd()] = connection;
+void Selector::addTarget(ConnectionSocket *ConnectionSocket) {
+  switch (ConnectionSocket->getState()) {
+    case ConnectionSocket::READ:
+      target_read_[ConnectionSocket->getFd()] = ConnectionSocket;
       break;
-    case Connection::WRITE:
-      target_write_[connection->getFd()] = connection;
+    case ConnectionSocket::WRITE:
+      target_write_[ConnectionSocket->getFd()] = ConnectionSocket;
       break;
-    case Connection::CLOSE:
+    case ConnectionSocket::CLOSE:
       throw std::runtime_error("unexpected state");
       break;
   }

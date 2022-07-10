@@ -13,7 +13,7 @@ void Server::run() {
     selector_.select(fd2socket_);
     SocketMap ready = selector_.getReadySockets();
     handleSockets(ready);
-    destroyConnections();
+    destroyConnectionSockets();
   }
 }
 
@@ -23,29 +23,29 @@ void Server::handleSockets(const Selector::SocketMap &sockets) {
     if (utils::isServerSocket(it->second)) {
       handleServerSocket(dynamic_cast<ServerSocket *>(it->second));
     } else {
-      handleConnection(dynamic_cast<Connection *>(it->second));
+      handleConnectionSocket(dynamic_cast<ConnectionSocket *>(it->second));
     }
   }
 }
 
 void Server::handleServerSocket(const ServerSocket *socket) {
-  Connection *new_connection = socket->createConnection();
+  ConnectionSocket *new_ConnectionSocket = socket->createConnectionSocket();
 
-  fd2socket_[new_connection->getFd()] = new_connection;
+  fd2socket_[new_ConnectionSocket->getFd()] = new_ConnectionSocket;
 }
 
-void Server::handleConnection(Connection *socket) {
+void Server::handleConnectionSocket(ConnectionSocket *socket) {
   socket->handleCommunication();
 }
 
-// 通信を終えたConnectionSocketを破棄する
-void Server::destroyConnections() {
+// 通信を終えたConnectionSocketSocketを破棄する
+void Server::destroyConnectionSockets() {
   for (SocketMap::const_iterator it = fd2socket_.begin();
        it != fd2socket_.cend(); it++) {
     if (!utils::isServerSocket(it->second)) {
-      Connection::State state =
-          dynamic_cast<Connection *>(it->second)->getState();
-      if (state == Connection::CLOSE) {
+      ConnectionSocket::State state =
+          dynamic_cast<ConnectionSocket *>(it->second)->getState();
+      if (state == ConnectionSocket::CLOSE) {
         delete it->second;
         fd2socket_.erase(it);
       }

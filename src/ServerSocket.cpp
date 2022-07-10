@@ -30,13 +30,13 @@ ServerSocket::ServerSocket()
 
 ServerSocket::~ServerSocket() {}
 
-Connection *ServerSocket::createConnection() const {
+ConnectionSocket *ServerSocket::createConnectionSocket() const {
   int new_socket = accept(fd_, NULL, NULL);
 
   if (new_socket < 0) {
     throw std::runtime_error("accept failed()");
   }
-  Connection *new_connection = new Connection(new_socket);
+  ConnectionSocket *new_ConnectionSocket = new ConnectionSocket(new_socket);
   // クライアントの数のバリデーション
-  return new_connection;
+  return new_ConnectionSocket;
 }

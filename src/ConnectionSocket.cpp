@@ -1,14 +1,15 @@
-#include "Connection.hpp"
+#include "ConnectionSocket.hpp"
 
-Connection::Connection(int accepted_fd) : ASocket(accepted_fd), state_(READ) {}
+ConnectionSocket::ConnectionSocket(int accepted_fd)
+    : ASocket(accepted_fd), state_(READ) {}
 
-Connection::~Connection() {
+ConnectionSocket::~ConnectionSocket() {
   if (close(fd_) < 0) {
     std::runtime_error("close() failed");
   }
 }
 
-void Connection::handleCommunication() {
+void ConnectionSocket::handleCommunication() {
   if (state_ == READ) {
     handleReadEvent();
   } else {
@@ -16,9 +17,9 @@ void Connection::handleCommunication() {
   }
 }
 
-Connection::State Connection::getState() const { return state_; }
+ConnectionSocket::State ConnectionSocket::getState() const { return state_; }
 
-void Connection::handleReadEvent() {
+void ConnectionSocket::handleReadEvent() {
   ssize_t recv_size = recvFromClient();
 
   if (recv_size == 0) {
@@ -30,12 +31,12 @@ void Connection::handleReadEvent() {
   state_ = WRITE;
 }
 
-void Connection::handleWriteEvent() {
+void ConnectionSocket::handleWriteEvent() {
   sendResponse();
   state_ = READ;
 }
 
-ssize_t Connection::recvFromClient() {
+ssize_t ConnectionSocket::recvFromClient() {
   ssize_t recv_size = recv(fd_, recv_buffer_, kRecvBufferSize, 0);
 
   if (recv_size < 0) {
@@ -48,7 +49,7 @@ ssize_t Connection::recvFromClient() {
   return recv_size;
 }
 
-void Connection::generateRequest(ssize_t recv_size) {
+void ConnectionSocket::generateRequest(ssize_t recv_size) {
   recv_buffer_[recv_size] = '\0';
   current_request_ = request_parser_.parse(recv_buffer_);
 
@@ -56,7 +57,7 @@ void Connection::generateRequest(ssize_t recv_size) {
 }
 
 // // GETメソッドのファイル決め打ち
-void Connection::generateResponse(ssize_t recv_size) {
+void ConnectionSocket::generateResponse(ssize_t recv_size) {
   recv_buffer_[recv_size] = '\0';
 
   current_response_ = new HttpResponse();
@@ -67,7 +68,7 @@ void Connection::generateResponse(ssize_t recv_size) {
   response_ = current_response_->toString();
 }
 
-void Connection::sendResponse() const {
+void ConnectionSocket::sendResponse() const {
   const char *response = response_.c_str();
   size_t response_len = response_.size();
 

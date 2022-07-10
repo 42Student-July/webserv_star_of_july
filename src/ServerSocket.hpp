@@ -9,14 +9,14 @@
 #include <iostream>
 
 #include "ASocket.hpp"
-#include "Connection.hpp"
+#include "ConnectionSocket.hpp"
 
 class ServerSocket : public ASocket {
  public:
   ServerSocket();
   ~ServerSocket();
 
-  Connection *createConnection() const;
+  ConnectionSocket *createConnectionSocket() const;
 
  private:
   static const int kServerPort = 8000;

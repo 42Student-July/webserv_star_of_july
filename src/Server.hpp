@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include "Connection.hpp"
+#include "ConnectionSocket.hpp"
 #include "Selector.hpp"
 #include "ServerSocket.hpp"
 #include "utils.hpp"
@@ -24,8 +24,8 @@ class Server {
 
   void handleSockets(const SocketMap &sockets);
   void handleServerSocket(const ServerSocket *socket);
-  static void handleConnection(Connection *socket);
-  void destroyConnections();
+  static void handleConnectionSocket(ConnectionSocket *socket);
+  void destroyConnectionSockets();
 
   Selector selector_;
   SocketMap fd2socket_;

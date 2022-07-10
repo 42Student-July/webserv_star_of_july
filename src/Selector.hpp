@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "ASocket.hpp"
-#include "Connection.hpp"
+#include "ConnectionSocket.hpp"
 #include "ServerSocket.hpp"
 #include "utils.hpp"
 
@@ -37,7 +37,7 @@ class Selector {
   void init(const SocketMap &fd2socket);
   void showTarget();
   int getMaxFd();
-  void addTarget(Connection *sockets);
+  void addTarget(ConnectionSocket *sockets);
 
   static fd_set toFdset(const SocketMap &sockets);
   static SocketMap toSocketMap(const fd_set &fdset,

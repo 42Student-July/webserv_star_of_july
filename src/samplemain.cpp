@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "Connection.hpp"
+#include "ConnectionSocket.hpp"
 #include "Server.hpp"
 #include "ServerSocket.hpp"
 #include "color.hpp"
