@@ -15,6 +15,7 @@
 #include "HttpResponse.hpp"
 #include "HttpResponseHeaderDTO.hpp"
 #include "HttpRequestDTO.hpp"
+#include "HttpStatus.hpp"
 
 
 class HttpResponseBuilder
@@ -39,7 +40,7 @@ public:
 	void findFilepath(HttpRequestDTO &req);
 	void findAbsPath(std::string dir, std::string file);
 	void readFile();
-	void buildHeader();
+	void buildHeader(HttpRequestDTO &req);
 };
 
 #endif

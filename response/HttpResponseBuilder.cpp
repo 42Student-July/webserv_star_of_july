@@ -85,18 +85,17 @@ void HttpResponseBuilder::readFile()
     }
 }
 
-void HttpResponseBuilder::buildHeader()
+void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 {
-	header_.version = "1.1";
-	header_.status_code = "200";
-	header_.reason_phrase = "OK";
-	header_.server = "webserv";
+	header_.version = req.version;
+	header_.status_code = HttpStatus::OK;
+	header_.reason_phrase = HttpStatus::ReasonPhrase::OK;
 	header_.date = "Tue, 05 Jul 2022 06:44:07 GMT";
 	header_.server = conf_.server;
 	header_.content_type = "text/html";
 	header_.content_length = "0";
 	header_.last_modified = "Mon, 04 Jul 2022 07:57:09 GMT";
-	header_.connection = "keep-alive";
+	header_.connection = req.connection;
 	header_.etag = "\"62c29d55-e5\"";
 	header_.accept_ranges = "bytes";
 }
@@ -107,7 +106,7 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 	{
 		findFilepath(req);
 		readFile();
-		buildHeader();
+		buildHeader(req);
 	}
 	catch(const std::exception& e)
 	{
