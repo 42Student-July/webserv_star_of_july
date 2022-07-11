@@ -1,12 +1,21 @@
 #include <iostream>
 
-#include "ConnectionSocket.hpp"
+#include "ConfigParser.hpp"
 #include "Server.hpp"
-#include "ServerSocket.hpp"
 #include "color.hpp"
 
-int main() {
-  std::cout << YELLOW "start program" RESET << std::endl;
-  Server server;
-  server.run();
+int main(int argc, const char **argv) {
+  if (argc != 2) {
+    std::cerr << "Usage: ./webserv  <configfile>" << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  try {
+    ConfigParser config_parser(argv[1]);
+    Server server(config_parser.getServerConfigs());
+
+    server.run();
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << std::endl;
+  }
 }

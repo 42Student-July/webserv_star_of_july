@@ -1,7 +1,8 @@
 #include "ConnectionSocket.hpp"
 
-ConnectionSocket::ConnectionSocket(int accepted_fd)
-    : ASocket(accepted_fd), state_(READ) {}
+ConnectionSocket::ConnectionSocket(int accepted_fd,
+                                   const ServerConfig &serverconfig)
+    : ASocket(accepted_fd, serverconfig), state_(READ) {}
 
 ConnectionSocket::~ConnectionSocket() {
   if (close(fd_) < 0) {

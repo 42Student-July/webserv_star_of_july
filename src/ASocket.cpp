@@ -1,6 +1,7 @@
 #include "ASocket.hpp"
 
-ASocket::ASocket(int fd) : fd_(fd) {}
+ASocket::ASocket(int fd, const ServerConfig &serverconfig)
+    : fd_(fd), serverconfig_(serverconfig) {}
 
 ASocket::~ASocket() {}
 
