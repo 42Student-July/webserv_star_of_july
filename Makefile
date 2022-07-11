@@ -4,55 +4,52 @@ CXX = c++
 CXXFLAGS = -g -Wall -Werror -Wextra -fsanitize=address
 
 SRCS_DIR = ./src
-OBJS_DIR = ./obj
+CONFIG_DIR = $(SRCS_DIR)/config
+SERVER_DIR = $(SRCS_DIR)/server
+MODULE_DIRS = $(CONFIG_DIR) $(SERVER_DIR)
 
-SRCS = $(shell find src -name '*.cpp')
-
-OBJS = $(addprefix $(OBJS_DIR)/, $(notdir $(SRCS:.cpp=.o)))
-
+SRCS = $(SRCS_DIR)/main.cpp
+OBJS = $(SRCS:.cpp=.o)
 DEPS = $(OBJS:.o=.d)
 
-$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
-	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
+HEADERS = $(CONFIG_DIR) \
+		  $(SERVER_DIR) \
+		  $(NULL)
+
+INCLUDES = $(addprefix -I, $(HEADERS))
+
+LIB_CONFIG = $(CONFIG_DIR)/libconfig.a
+LIB_SERVER = $(SERVER_DIR)/libserver.a
+
+LIBS = $(LIB_SERVER) $(LIB_CONFIG)
+
+%.o: %.cpp
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
 
 .PHONY: all
-all: $(OBJS_DIR) $(NAME)
+all: $(NAME)
 
 -include $(DEPS)
 
-$(OBJS_DIR):
-	mkdir $@
+$(NAME): $(OBJS) $(LIBS)
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) $(LIBS) -o $@
+	@printf "$(GREEN)Compile done:)\n$(END)"
 
-$(NAME): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $@
+$(LIBS):
+	@for dir in $(MODULE_DIRS); do make -C $$dir; done
 
 .PHONY: clean
 clean:
-	$(RM) $(OBJS) $(DEPS)
+	@for dir in $(MODULE_DIRS); do make -C $$dir clean; done
+	@$(RM) $(OBJS) $(DEPS)
 
 .PHONY: fclean
 fclean: clean
-	$(RM) $(NAME)
+	@for dir in $(MODULE_DIRS); do make -C $$dir fclean; done
+	@$(RM) $(NAME)
 
 .PHONY: re
 re: fclean all
-
-.PHONY: lint
-LINT_TARGET = $(shell find src -type f \( -name '*.cpp' -o -name '*.hpp' \))
-lint: cpplint tidylint
-
-.PHONY: cpplint
-cpplint:
-	@cpplint --filter=-build/include_subdir,-legal/copyright \
-			$(LINT_TARGET) > /dev/null
-	@printf "$(GREEN)Pass cpplint:)$(END)"
-	@printf "$(GREEN)Wao, What a clean code:)$(END)"
-
-.PHONY: tidylint
-tidylint:
-	@clang-tidy $(LINT_TARGET) -- $(CXXFLAGS)
-	@printf "$(GREEN)Pass clang-tidy:)$(END)"
-	@printf "$(GREEN)Wao, What a clean code:)$(END)"
 
 ## Color
 END		= \e[0m
