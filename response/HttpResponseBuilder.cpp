@@ -10,6 +10,8 @@ HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf)
 {
 	conf_ = conf;
 	t_abspath.exists = false;
+	// builder初期化時に現在時刻を更新
+	time(&now_);
 }
 
 HttpResponseBuilder::~HttpResponseBuilder()
@@ -85,12 +87,24 @@ void HttpResponseBuilder::readFile()
     }
 }
 
+std::string HttpResponseBuilder::buildNow()
+{
+	std::string date;
+	
+	date = asctime(gmtime(&now_));
+	// asctimeがデフォルトで改行がつく使用なので、改行を削除
+	date.pop_back();
+	date += " GMT";
+	return date;
+}
+
 void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 {
+
 	header_.version = req.version;
 	header_.status_code = HttpStatus::OK;
 	header_.reason_phrase = HttpStatus::ReasonPhrase::OK;
-	header_.date = "Tue, 05 Jul 2022 06:44:07 GMT";
+	header_.date = buildNow();
 	header_.server = conf_.server;
 	header_.content_type = "text/html";
 	header_.content_length = "0";

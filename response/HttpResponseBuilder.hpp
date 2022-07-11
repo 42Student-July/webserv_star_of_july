@@ -10,6 +10,7 @@
 #include <fstream>
 #include <ios>
 #include <cstring>
+#include <time.h>
 
 #include "ConfigDTO.hpp"
 #include "HttpResponse.hpp"
@@ -30,6 +31,7 @@ private:
 	} t_abspath;
 	std::stringstream file_str_;
 	static const std::string CRLF;
+	time_t now_;
 public:
 	HttpResponseBuilder();
 	HttpResponseBuilder(ConfigDTO conf);
@@ -41,6 +43,7 @@ public:
 	void findAbsPath(std::string dir, std::string file);
 	void readFile();
 	void buildHeader(HttpRequestDTO &req);
+	std::string buildNow();
 };
 
 #endif
