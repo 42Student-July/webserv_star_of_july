@@ -1,6 +1,9 @@
 #include "HttpResponseBuilder.hpp"
 
 const std::string HttpResponseBuilder::CRLF = "\r\n";
+const std::string HttpResponseBuilder::ACCEPT_RANGES = "none";
+const std::string HttpResponseBuilder::OCTET_STREAM = "application/octet-stream";
+
 
 HttpResponseBuilder::HttpResponseBuilder()
 {
@@ -123,12 +126,15 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 	header_.reason_phrase = HttpStatus::ReasonPhrase::OK;
 	header_.date = buildDate();
 	header_.server = conf_.server;
-	header_.content_type = "text/html";
+	header_.content_type = OCTET_STREAM;
 	header_.content_length = file_str_.str().size();
 	header_.last_modified = buildLastModified();
 	header_.connection = req.connection;
+	// 特にこういうふうにしろみたいな指定があるわけでもなさそう RFC7232
+	// なので固定文字列をおいてみる
 	header_.etag = "\"62c29d55-e5\"";
-	header_.accept_ranges = "bytes";
+	// noneで固定
+	header_.accept_ranges = ACCEPT_RANGES;
 }
 
 HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)

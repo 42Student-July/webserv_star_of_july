@@ -32,6 +32,8 @@ private:
 	} filepath;
 	std::stringstream file_str_;
 	static const std::string CRLF;
+	static const std::string ACCEPT_RANGES;
+	static const std::string OCTET_STREAM;
 	time_t now_;
 public:
 	HttpResponseBuilder();
