@@ -92,6 +92,7 @@ void HttpResponseBuilder::buildHeader()
 	header_.reason_phrase = "OK";
 	header_.server = "webserv";
 	header_.date = "Tue, 05 Jul 2022 06:44:07 GMT";
+	header_.server = conf_.server;
 	header_.content_type = "text/html";
 	header_.content_length = "0";
 	header_.last_modified = "Mon, 04 Jul 2022 07:57:09 GMT";
