@@ -1,5 +1,5 @@
-#ifndef HTTPSERVER_SRC_COLOR_HPP_
-#define HTTPSERVER_SRC_COLOR_HPP_
+#ifndef SRC_COLOR_HPP_
+#define SRC_COLOR_HPP_
 
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
@@ -9,4 +9,4 @@
 #define CYAN "\x1b[36m"
 #define RESET "\x1b[39m"
 
-#endif  // HTTPSERVER_SRC_COLOR_HPP_
+#endif  // SRC_COLOR_HPP_

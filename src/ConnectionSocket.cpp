@@ -1,45 +1,42 @@
-#include "Connection.hpp"
+#include "ConnectionSocket.hpp"
 
-Connection::Connection(int accepted_fd) : ASocket(accepted_fd), state_(READ) {}
+ConnectionSocket::ConnectionSocket(int accepted_fd)
+    : ASocket(accepted_fd), state_(READ) {}
 
-Connection::~Connection() {
+ConnectionSocket::~ConnectionSocket() {
   if (close(fd_) < 0) {
     std::runtime_error("close() failed");
   }
 }
 
-void Connection::communicateWithClient(SocketObserver *observer) {
-  std::cout << "@From Connection  : " << fd_ << ", communicateWithClient"
-            << std::endl
-            << std::endl;
+void ConnectionSocket::handleCommunication() {
   if (state_ == READ) {
-    handleReadEvent(observer);
+    handleReadEvent();
   } else {
-    handleWriteEvent(observer);
+    handleWriteEvent();
   }
 }
 
-void Connection::handleReadEvent(SocketObserver *observer) {
+ConnectionSocket::State ConnectionSocket::getState() const { return state_; }
+
+void ConnectionSocket::handleReadEvent() {
   ssize_t recv_size = recvFromClient();
 
   if (recv_size == 0) {
-    observer->delTarget(this, SocketObserver::READ);
     state_ = CLOSE;
     return;
   }
   generateRequest(recv_size);
   generateResponse(recv_size);
-  observer->modTarget(this, SocketObserver::READ, SocketObserver::WRITE);
   state_ = WRITE;
 }
 
-void Connection::handleWriteEvent(SocketObserver *observer) {
+void ConnectionSocket::handleWriteEvent() {
   sendResponse();
-  observer->modTarget(this, SocketObserver::WRITE, SocketObserver::READ);
   state_ = READ;
 }
 
-ssize_t Connection::recvFromClient() {
+ssize_t ConnectionSocket::recvFromClient() {
   ssize_t recv_size = recv(fd_, recv_buffer_, kRecvBufferSize, 0);
 
   if (recv_size < 0) {
@@ -52,7 +49,7 @@ ssize_t Connection::recvFromClient() {
   return recv_size;
 }
 
-void Connection::generateRequest(ssize_t recv_size) {
+void ConnectionSocket::generateRequest(ssize_t recv_size) {
   recv_buffer_[recv_size] = '\0';
   current_request_ = request_parser_.parse(recv_buffer_);
 
@@ -60,7 +57,7 @@ void Connection::generateRequest(ssize_t recv_size) {
 }
 
 // // GETメソッドのファイル決め打ち
-void Connection::generateResponse(ssize_t recv_size) {
+void ConnectionSocket::generateResponse(ssize_t recv_size) {
   recv_buffer_[recv_size] = '\0';
 
   current_response_ = new HttpResponse();
@@ -71,7 +68,7 @@ void Connection::generateResponse(ssize_t recv_size) {
   response_ = current_response_->toString();
 }
 
-void Connection::sendResponse() const {
+void ConnectionSocket::sendResponse() const {
   const char *response = response_.c_str();
   size_t response_len = response_.size();
 

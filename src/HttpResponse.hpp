@@ -1,5 +1,5 @@
-#ifndef HTTPSERVER_SRC_HTTPRESPONSE_HPP_
-#define HTTPSERVER_SRC_HTTPRESPONSE_HPP_
+#ifndef SRC_HTTPRESPONSE_HPP_
+#define SRC_HTTPRESPONSE_HPP_
 
 #include <cmath>
 #include <iostream>
@@ -67,4 +67,4 @@ class HttpResponse {
   static const char* kHttpReasonUnknown;
 };
 
-#endif  // HTTPSERVER_SRC_HTTPRESPONSE_HPP_
+#endif  // SRC_HTTPRESPONSE_HPP_

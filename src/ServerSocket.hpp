@@ -1,5 +1,5 @@
-#ifndef SERVERSOCKET_HPP
-#define SERVERSOCKET_HPP
+#ifndef SRC_SERVERSOCKET_HPP_
+#define SRC_SERVERSOCKET_HPP_
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -9,24 +9,21 @@
 #include <iostream>
 
 #include "ASocket.hpp"
-#include "Connection.hpp"
-#include "SocketObserver.hpp"
+#include "ConnectionSocket.hpp"
 
 class ServerSocket : public ASocket {
-public:
+ public:
   ServerSocket();
   ~ServerSocket();
 
-  void communicateWithClient(SocketObserver *observer);
+  ConnectionSocket *createConnectionSocket() const;
 
-private:
+ private:
   static const int kServerPort = 8000;
   static const int kMaxPendig = 5;
 
   ServerSocket(const ServerSocket &other);
   ServerSocket &operator=(const ServerSocket &other);
-
-  Connection *createConnection();
 };
 
-#endif /* SERVERSOCKET_HPP */
+#endif  // SRC_SERVERSOCKET_HPP_

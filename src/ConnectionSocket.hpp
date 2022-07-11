@@ -1,5 +1,5 @@
-#ifndef HTTPSERVER_SRC_CONNECTION_HPP_
-#define HTTPSERVER_SRC_CONNECTION_HPP_
+#ifndef SRC_CONNECTIONSOCKET_HPP_
+#define SRC_CONNECTIONSOCKET_HPP_
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -13,30 +13,31 @@
 #include "HttpRequest.hpp"
 #include "HttpRequestParser.hpp"
 #include "HttpResponse.hpp"
-#include "SocketObserver.hpp"
 
-class Connection : public ASocket {
-public:
-  explicit Connection(int accepted_fd);
-  ~Connection();
-
-  void communicateWithClient(SocketObserver *observer);
-
-private:
+class ConnectionSocket : public ASocket {
+ public:
   enum State {
     READ,
     WRITE,
     CLOSE,
   };
+
+  explicit ConnectionSocket(int accepted_fd);
+  ~ConnectionSocket();
+
+  void handleCommunication();
+  State getState() const;
+
+ private:
   static const int kRecvBufferSize = (1 << 16);
   // 65536, httpServerだとリクエストの文字数の上限かな
 
-  Connection();
-  Connection(const Connection &other);
-  Connection &operator=(const Connection &other);
+  ConnectionSocket();
+  ConnectionSocket(const ConnectionSocket &other);
+  ConnectionSocket &operator=(const ConnectionSocket &other);
 
-  void handleReadEvent(SocketObserver *observer);
-  void handleWriteEvent(SocketObserver *observer);
+  void handleReadEvent();
+  void handleWriteEvent();
   ssize_t recvFromClient();
   void generateRequest(ssize_t recv_size);
   void generateResponse(ssize_t recv_size);
@@ -52,4 +53,4 @@ private:
   HttpResponse *current_response_;
 };
 
-#endif // HTTPSERVER_SRC_CONNECTION_HPP_
+#endif  // SRC_CONNECTIONSOCKET_HPP_
