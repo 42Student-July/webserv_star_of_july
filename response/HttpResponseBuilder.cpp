@@ -9,7 +9,7 @@ HttpResponseBuilder::HttpResponseBuilder()
 HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf)
 {
 	conf_ = conf;
-	t_abspath.exists = false;
+	filepath.exists = false;
 	// builder初期化時に現在時刻を更新
 	time(&now_);
 }
@@ -51,8 +51,8 @@ void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
 	{
 		if (std::strcmp(ent->d_name,file.c_str()) == 0)
 		{
-			t_abspath.filepath = fullpath + file;
-			t_abspath.exists = true;
+			filepath.path = fullpath + file;
+			filepath.exists = true;
 			break;
 		}
 	}
@@ -71,13 +71,13 @@ void HttpResponseBuilder::findFilepath(HttpRequestDTO &req)
 			findAbsPath((*i).root + (*i).location, req.file);
 		}
 	}
-	if (!t_abspath.exists)
+	if (!filepath.exists)
 		throw std::runtime_error("file not found");
 }
 
 void HttpResponseBuilder::readFile()
 {
-	std::ifstream ifs(t_abspath.filepath);
+	std::ifstream ifs(filepath.path);
 	std::string line;
 	
 	if (ifs.fail())
@@ -87,7 +87,7 @@ void HttpResponseBuilder::readFile()
     }
 }
 
-std::string HttpResponseBuilder::buildNow()
+std::string HttpResponseBuilder::buildDate()
 {
 	std::string date;
 	
@@ -98,17 +98,34 @@ std::string HttpResponseBuilder::buildNow()
 	return date;
 }
 
+std::string HttpResponseBuilder::buildLastModified()
+{
+	std::string mod_time;
+	struct stat s;
+	time_t time;
+	
+	if(stat(filepath.path.c_str(), &s) == -1)
+	{
+		std::runtime_error("stat");
+	}
+	time = s.st_mtimespec.tv_sec;
+	mod_time = asctime(gmtime(&time));
+	mod_time.pop_back();
+	mod_time += " GMT";
+	return mod_time;
+}
+
 void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 {
 
 	header_.version = req.version;
 	header_.status_code = HttpStatus::OK;
 	header_.reason_phrase = HttpStatus::ReasonPhrase::OK;
-	header_.date = buildNow();
+	header_.date = buildDate();
 	header_.server = conf_.server;
 	header_.content_type = "text/html";
-	header_.content_length = "0";
-	header_.last_modified = "Mon, 04 Jul 2022 07:57:09 GMT";
+	header_.content_length = file_str_.str().size();
+	header_.last_modified = buildLastModified();
 	header_.connection = req.connection;
 	header_.etag = "\"62c29d55-e5\"";
 	header_.accept_ranges = "bytes";

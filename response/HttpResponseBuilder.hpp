@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <dirent.h>
 #include <fstream>
 #include <ios>
@@ -24,11 +25,11 @@ class HttpResponseBuilder
 private:
 	ConfigDTO conf_;
 	HttpResponseHeaderDTO header_;
-	struct s_abspath
+	struct Filepath
 	{
-		std::string filepath;
+		std::string path;
 		bool		exists;
-	} t_abspath;
+	} filepath;
 	std::stringstream file_str_;
 	static const std::string CRLF;
 	time_t now_;
@@ -43,7 +44,8 @@ public:
 	void findAbsPath(std::string dir, std::string file);
 	void readFile();
 	void buildHeader(HttpRequestDTO &req);
-	std::string buildNow();
+	std::string buildDate();
+	std::string buildLastModified();
 };
 
 #endif
