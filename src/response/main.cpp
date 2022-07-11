@@ -22,6 +22,7 @@ int main(int argc, char const *argv[])
 	req.method = "GET";
 	req.path = "/";
 	req.file = "index.html";
+	req.connection = "Keep-Alive";
 
 	//builder
 	HttpResponseBuilder builder = HttpResponseBuilder(conf_);

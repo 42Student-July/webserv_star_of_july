@@ -6,15 +6,18 @@
 #include <unistd.h>
 #include <limits.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <dirent.h>
 #include <fstream>
 #include <ios>
 #include <cstring>
+#include <time.h>
 
 #include "ConfigDTO.hpp"
 #include "HttpResponse.hpp"
 #include "HttpResponseHeaderDTO.hpp"
 #include "HttpRequestDTO.hpp"
+#include "HttpStatus.hpp"
 
 
 class HttpResponseBuilder
@@ -22,13 +25,16 @@ class HttpResponseBuilder
 private:
 	ConfigDTO conf_;
 	HttpResponseHeaderDTO header_;
-	struct s_abspath
+	struct Filepath
 	{
-		std::string filepath;
+		std::string path;
 		bool		exists;
-	} t_abspath;
+	} filepath;
 	std::stringstream file_str_;
 	static const std::string CRLF;
+	static const std::string ACCEPT_RANGES;
+	static const std::string OCTET_STREAM;
+	time_t now_;
 public:
 	HttpResponseBuilder();
 	HttpResponseBuilder(ConfigDTO conf);
@@ -39,7 +45,9 @@ public:
 	void findFilepath(HttpRequestDTO &req);
 	void findAbsPath(std::string dir, std::string file);
 	void readFile();
-	void buildHeader();
+	void buildHeader(HttpRequestDTO &req);
+	std::string buildDate();
+	std::string buildLastModified();
 };
 
 #endif
