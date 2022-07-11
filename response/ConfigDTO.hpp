@@ -28,6 +28,7 @@ struct ConfigDTO
 {
 	std::map<int, std::string> error_pages;
 	std::string root;
+	std::string server;
 	std::vector<LocationConfig> locations;
 };
 
