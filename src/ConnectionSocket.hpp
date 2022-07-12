@@ -22,7 +22,7 @@ class ConnectionSocket : public ASocket {
     CLOSE,
   };
 
-  explicit ConnectionSocket(int accepted_fd);
+  ConnectionSocket(int accepted_fd, const ServerConfig &serverconfig);
   ~ConnectionSocket();
 
   void handleCommunication();

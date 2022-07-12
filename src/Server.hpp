@@ -2,23 +2,26 @@
 #define SRC_SERVER_HPP_
 
 #include <map>
+#include <vector>
 
 #include "ConnectionSocket.hpp"
 #include "Selector.hpp"
+#include "ServerConfig.hpp"
 #include "ServerSocket.hpp"
+#include "color.hpp"
 #include "utils.hpp"
 
 class Server {
  public:
   typedef std::map<int, ASocket *> SocketMap;
 
-  Server();
+  explicit Server(const std::vector<ServerConfig> &serverconfigs);
   ~Server();
 
   void run();
 
  private:
-  // not copy
+  Server();
   Server(const Server &other);
   Server &operator=(const Server &other);
 

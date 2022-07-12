@@ -1,14 +1,17 @@
 #include "Server.hpp"
 
-Server::Server() {
-  ServerSocket *serv_sock = new ServerSocket;
-
-  fd2socket_[serv_sock->getFd()] = serv_sock;
+Server::Server(const std::vector<ServerConfig> &serverconfigs) {
+  for (std::vector<ServerConfig>::const_iterator it = serverconfigs.cbegin();
+       it != serverconfigs.cend(); it++) {
+    ServerSocket *serv_sock = new ServerSocket(*it);
+    fd2socket_[serv_sock->getFd()] = serv_sock;
+  }
 }
 
 Server::~Server() {}
 
 void Server::run() {
+  std::cerr << YELLOW "run server" RESET << std::endl;
   for (;;) {
     selector_.select(fd2socket_);
     SocketMap ready = selector_.getReadySockets();

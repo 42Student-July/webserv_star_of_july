@@ -10,10 +10,11 @@
 
 #include "ASocket.hpp"
 #include "ConnectionSocket.hpp"
+#include "ServerConfig.hpp"
 
 class ServerSocket : public ASocket {
  public:
-  ServerSocket();
+  explicit ServerSocket(const ServerConfig &serverconfig);
   ~ServerSocket();
 
   ConnectionSocket *createConnectionSocket() const;
@@ -22,6 +23,7 @@ class ServerSocket : public ASocket {
   static const int kServerPort = 8000;
   static const int kMaxPendig = 5;
 
+  ServerSocket();
   ServerSocket(const ServerSocket &other);
   ServerSocket &operator=(const ServerSocket &other);
 };

@@ -1,9 +1,12 @@
+#ifndef CONFIG_SERVERCONFIG_HPP_
+#define CONFIG_SERVERCONFIG_HPP_
+
 #include <map>
 #include <string>
 #include <vector>
 
 struct LocationConfig {
-  //locationだとlocations_.location_になってしまうので一旦name_にしています
+  // locationだとlocations_.location_になってしまうので一旦name_にしています
   std::string name_;
 
   // Define a HTTP redirection.
@@ -43,3 +46,5 @@ struct ServerConfig {
 
   std::vector<LocationConfig> locations_;
 };
+
+#endif  // CONFIG_SERVERCONFIG_HPP_

@@ -3,15 +3,18 @@
 
 #include <map>
 
+#include "ServerConfig.hpp"
+
 class ASocket {
  public:
-  explicit ASocket(int fd);
+  ASocket(int fd, const ServerConfig &serverconfig);
   virtual ~ASocket();
 
   int getFd() const;
 
  protected:
   int fd_;
+  ServerConfig serverconfig_;
 
  private:
   ASocket(const ASocket &other);
