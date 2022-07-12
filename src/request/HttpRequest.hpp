@@ -26,10 +26,9 @@ class HttpRequest {
   std::string path_;
   std::string version_;
   std::string host_;
-  int port_;
-  std::string ConnectionSocket_;
+  std::string connection_;
   std::string body_;
-  bool is_chanked_;
+  bool is_chunked_;
   bool is_bad_request_;
 };
 
