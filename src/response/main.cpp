@@ -20,7 +20,7 @@ int main(int argc, char const *argv[])
 	// http request data
 	HttpRequestDTO req;
 	req.method = "GET";
-	req.path = "/";
+	req.path = "/index.html";
 	req.file = "index.html";
 	req.connection = "Keep-Alive";
 
