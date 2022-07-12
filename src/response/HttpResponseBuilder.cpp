@@ -96,7 +96,7 @@ std::string HttpResponseBuilder::buildDate()
 	
 	date = asctime(gmtime(&now_));
 	// asctimeがデフォルトで改行がつく使用なので、改行を削除
-	date.pop_back();
+	date.erase(date.size() - 1);
 	date += " GMT";
 	return date;
 }
