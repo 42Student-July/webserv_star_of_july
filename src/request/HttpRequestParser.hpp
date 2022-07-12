@@ -4,25 +4,26 @@
 #include <iostream>
 #include <string>
 
-#include "HttpRequest.hpp"
+#include "HttpRequestDTO.hpp"
 
 class HttpRequestParser {
  public:
   HttpRequestParser();
   ~HttpRequestParser();
 
-  HttpRequest* parse(const char* buffer);
+  HttpRequestDTO* parse(const char* buffer);
 
  private:
+  static const std::string CRLF;
   HttpRequestParser(const HttpRequestParser& other);
-  HttpRequestParser& operator=(const HttpRequest& other);
+  HttpRequestParser& operator=(const HttpRequestParser& other);
 
   void parseRequestLine();
   void parseHeaderField();
   bool getLine(std::string* line);
   void setBody(const char* buffer);
 
-  HttpRequest* current_request_;
+  HttpRequestDTO* current_request_;
   std::string current_buffer_;
   std::string buffer_offset_;
 };

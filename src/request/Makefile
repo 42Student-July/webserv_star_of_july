@@ -15,7 +15,7 @@
 NAME = librequest.a
 
 CXX = c++
-CXXFLAGS = -g -Wall -Werror -Wextra -fsanitize=address
+CXXFLAGS = -Wall -Werror -Wextra
 
 HEADERS = . \
 		  $(NULL)

@@ -1,21 +1,26 @@
 CXX = c++
 CXXFLAGS = -std=c++11
 
+SRC_DIR = ../
 GTEST_DIR = gtest
 GTEST_SRC_DIR = $(GTEST_DIR)/src
 GTEST_LIB_DIR = gtest/googletest-release-1.12.1/lib
 
-GTEST_INCLUDES = -Igtest/googletest-release-1.12.1/googletest/include
+GTEST_SRCS = $(shell find $(GTEST_SRC_DIR) -name '*.cpp')
+
+GTEST_INCLUDES = -Igtest/googletest-release-1.12.1/googletest/include \
+				 -I$(SRC_DIR) \
+				 $(NULL)
 
 GTEST_LIBS = -lgtest \
 			 -lgtest_main \
 			 -lpthread \
 			 $(NULL)
 
-GTEST_SRCS = $(shell find $(GTEST_SRC_DIR) -name '*.cpp')
+TEST_LIB = $(SRC_DIR)/librequest.a
 
-googletest: $(GTEST_DIR)
-	@$(CXX) $(CXXFLAGS) $(GTEST_INCLUDES) $(GTEST_SRCS) -L$(GTEST_LIB_DIR) $(GTEST_LIBS) -o test
+googletest: $(GTEST_DIR) $(TEST_LIB)
+	@$(CXX) $(CXXFLAGS) $(GTEST_INCLUDES) $(GTEST_SRCS) $(TEST_LIB) -L$(GTEST_LIB_DIR) $(GTEST_LIBS) -o test
 	@./test
 	@$(RM) test
 
@@ -28,3 +33,14 @@ $(GTEST_DIR):
 	(cd $(GTEST_DIR)/googletest-release-1.12.1 && \
 	cmake . && \
 	make)
+
+$(TEST_LIB):
+	@make -C $(SRC_DIR)
+
+.PHONY: clean
+clean:
+	@make -C $(SRC_DIR) clean
+
+.PHONY: fclean
+fclean: clean
+	@make -C $(SRC_DIR) fclean

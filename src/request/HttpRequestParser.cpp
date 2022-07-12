@@ -4,8 +4,8 @@ HttpRequestParser::HttpRequestParser() {}
 
 HttpRequestParser::~HttpRequestParser() {}
 
-HttpRequest* HttpRequestParser::parse(const char* buffer) {
-  current_request_ = new HttpRequest;
+HttpRequestDTO* HttpRequestParser::parse(const char* buffer) {
+  current_request_ = new HttpRequestDTO;
   current_buffer_ = buffer;
   buffer_offset_ = buffer;
 
@@ -33,10 +33,10 @@ void HttpRequestParser::parseRequestLine() {
   // validateする
   // validateRequestLine();
 
-  current_request_->setMethod(method);
-  current_request_->setUri(uri);
-  current_request_->setVersion(version);
-  current_request_->setIsBadRequest(true);
+  current_request_->method = method;
+  current_request_->uri = uri;
+  current_request_->version = version;
+  current_request_->is_bad_request = false;
 }
 
 // void HttpRequestParser::parseHeaderField() {
@@ -51,7 +51,7 @@ void HttpRequestParser::parseRequestLine() {
 
 // 現在のオフセットから一行読み取る関数。読み取ったら改行の次の文字にoffsetを進める
 bool HttpRequestParser::getLine(std::string* line) {
-  std::string::size_type n = buffer_offset_.find("\r\n");
+  std::string::size_type n = buffer_offset_.find(CRLF);
 
   if (n == std::string::npos) {
     return false;
@@ -61,3 +61,5 @@ bool HttpRequestParser::getLine(std::string* line) {
   return true;
 }
 // void HttpRequestParser::parseHeaderField();
+
+const std::string HttpRequestParser::CRLF = "\r\n";
