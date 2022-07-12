@@ -62,16 +62,30 @@ void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
 	closedir(dirp);
 }
 
+void parsePath(std::string &dir, std::string &file, std::string req_path)
+{
+	size_t last_slash_pos = req_path.find_last_of('/');
+	if (last_slash_pos == std::string::npos) {
+		throw std::runtime_error("no slash found in request path");
+    }
+	dir = req_path.substr(0, last_slash_pos + 1);
+	file = req_path.substr(last_slash_pos + 1);
+}
+
 void HttpResponseBuilder::findFilepath(HttpRequestDTO &req)
 {
+	std::string dir;
+	std::string file;
+	
+	parsePath(dir, file, req.path);
 	std::vector<LocationConfig>::iterator i = conf_.locations.begin();
 	std::vector<LocationConfig>::iterator ie = conf_.locations.end();
 
 	for (; i != ie; i++)
 	{
-		if ((*i).location == req.path)
+		if ((*i).location == dir)
 		{
-			findAbsPath((*i).root + (*i).location, req.file);
+			findAbsPath((*i).root + (*i).location, file);
 		}
 	}
 	if (!filepath.exists)
@@ -96,7 +110,7 @@ std::string HttpResponseBuilder::buildDate()
 	
 	date = asctime(gmtime(&now_));
 	// asctimeがデフォルトで改行がつく使用なので、改行を削除
-	date.pop_back();
+	date.erase(date.size() - 1);
 	date += " GMT";
 	return date;
 }
