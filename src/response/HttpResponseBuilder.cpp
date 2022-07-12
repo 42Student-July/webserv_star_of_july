@@ -70,8 +70,6 @@ void parsePath(std::string &dir, std::string &file, std::string req_path)
     }
 	dir = req_path.substr(0, last_slash_pos + 1);
 	file = req_path.substr(last_slash_pos + 1);
-	std::cout << "dir: " << dir << std::endl;
-	std::cout << "file: " << file << std::endl;
 }
 
 void HttpResponseBuilder::findFilepath(HttpRequestDTO &req)
