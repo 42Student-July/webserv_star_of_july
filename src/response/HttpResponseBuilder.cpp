@@ -35,7 +35,7 @@ HttpResponseBuilder &HttpResponseBuilder::operator=(const HttpResponseBuilder &o
 }
 
 // 基本的に文字列操作はmallocを使いたくないのでstringに変換して行いたい
-void HttpResponseBuilder::findFileInServer(std::string dir, std::string file)
+void HttpResponseBuilder::findActualFilepath(std::string dir, std::string file)
 {
 	DIR				*dirp;
 	struct dirent	*ent;
@@ -73,25 +73,33 @@ void HttpResponseBuilder::parseRequestPath(std::string req_path)
 	file_ = req_path.substr(last_slash_pos + 1);
 }
 
-void HttpResponseBuilder::parseIndexCondition(LocationConfig location)
+void HttpResponseBuilder::findIndexFilepath(LocationConfig location)
 {
 	if (location.indexes.size() == 0)
 		// indexが存在しない場合はindex.htmlがデフォルトで入る
 		file_ = "index.html";
-	
+	std::vector<std::string>::iterator it = location.indexes.begin();
+	std::vector<std::string>::iterator ite = location.indexes.end();
+	for (; it != ite; it++)
+	{
+		findActualFilepath(location.root + location.location, *it);
+		if (filepath.exists)
+			break;
+	}
 }
 
 void HttpResponseBuilder::findFilepath(HttpRequestDTO &req)
 {
 	parseRequestPath(req.path);
-
+	// TODO: 定義が重複しているときのアルゴリズム作成
 	for (; loc_it_ != loc_ite_; loc_it_++)
 	{
 		if ((*loc_it_).location == dir_)
 		{
 			if (file_.empty())
-				parseIndexCondition(*loc_it_);
-			findFileInServer((*loc_it_).root + (*loc_it_).location, file_);
+				findIndexFilepath(*loc_it_);
+			else
+				findActualFilepath((*loc_it_).root + (*loc_it_).location, file_);
 		}
 	}
 	if (!filepath.exists)

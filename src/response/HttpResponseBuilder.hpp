@@ -48,10 +48,10 @@ public:
 	HttpResponseBuilder &operator=(const HttpResponseBuilder &other);
 	HttpResponse *build(HttpRequestDTO &req);
 	void findFilepath(HttpRequestDTO &req);
-	void findFileInServer(std::string dir, std::string file);
+	void findActualFilepath(std::string dir, std::string file);
 	void readFile();
 	void buildHeader(HttpRequestDTO &req);
-	void parseIndexCondition(LocationConfig location);
+	void findIndexFilepath(LocationConfig location);
 	std::string buildDate();
 	std::string buildLastModified();
 	void parseRequestPath(std::string req_path);
