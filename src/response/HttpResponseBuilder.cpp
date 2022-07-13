@@ -127,7 +127,7 @@ std::string HttpResponseBuilder::buildLastModified()
 	}
 	time = s.st_mtimespec.tv_sec;
 	mod_time = asctime(gmtime(&time));
-	mod_time.pop_back();
+	mod_time.erase(mod_time.size() - 1);
 	mod_time += " GMT";
 	return mod_time;
 }
