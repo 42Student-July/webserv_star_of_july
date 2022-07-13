@@ -33,7 +33,7 @@ HttpResponseBuilder &HttpResponseBuilder::operator=(const HttpResponseBuilder &o
 }
 
 // 基本的に文字列操作はmallocを使いたくないのでstringに変換して行いたい
-void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
+void HttpResponseBuilder::findFileInServer(std::string dir, std::string file)
 {
 	DIR				*dirp;
 	struct dirent	*ent;
@@ -41,11 +41,9 @@ void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
 	std::string		fullpath;
 	
 	cwd = getcwd(NULL, 0);
-	
 	fullpath = std::string(cwd) + dir;
 	std::free(cwd);
 	std::cout << "fullpath: " << fullpath << std::endl;
-	
 	
 	dirp = opendir(fullpath.c_str());
 	if (dirp == NULL)
@@ -85,7 +83,7 @@ void HttpResponseBuilder::findFilepath(HttpRequestDTO &req)
 	{
 		if ((*i).location == dir)
 		{
-			findAbsPath((*i).root + (*i).location, file);
+			findFileInServer((*i).root + (*i).location, file);
 		}
 	}
 	if (!filepath.exists)

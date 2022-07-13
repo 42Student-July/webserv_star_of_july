@@ -43,7 +43,7 @@ public:
 	HttpResponseBuilder &operator=(const HttpResponseBuilder &other);
 	HttpResponse *build(HttpRequestDTO &req);
 	void findFilepath(HttpRequestDTO &req);
-	void findAbsPath(std::string dir, std::string file);
+	void findFileInServer(std::string dir, std::string file);
 	void readFile();
 	void buildHeader(HttpRequestDTO &req);
 	std::string buildDate();
