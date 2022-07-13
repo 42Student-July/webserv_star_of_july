@@ -15,6 +15,8 @@ HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf)
 	filepath.exists = false;
 	// builder初期化時に現在時刻を更新
 	time(&now_);
+	loc_it_ = conf_.locations.begin();
+	loc_ite_ = conf_.locations.end();
 }
 
 HttpResponseBuilder::~HttpResponseBuilder()
@@ -33,7 +35,7 @@ HttpResponseBuilder &HttpResponseBuilder::operator=(const HttpResponseBuilder &o
 }
 
 // 基本的に文字列操作はmallocを使いたくないのでstringに変換して行いたい
-void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
+void HttpResponseBuilder::findActualFilepath(std::string dir, std::string file)
 {
 	DIR				*dirp;
 	struct dirent	*ent;
@@ -41,11 +43,9 @@ void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
 	std::string		fullpath;
 	
 	cwd = getcwd(NULL, 0);
-	
 	fullpath = std::string(cwd) + dir;
 	std::free(cwd);
 	std::cout << "fullpath: " << fullpath << std::endl;
-	
 	
 	dirp = opendir(fullpath.c_str());
 	if (dirp == NULL)
@@ -62,30 +62,44 @@ void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
 	closedir(dirp);
 }
 
-void parsePath(std::string &dir, std::string &file, std::string req_path)
+// http requestのpathをdirの部分とfileの部分に分解
+void HttpResponseBuilder::parseRequestPath(std::string req_path)
 {
 	size_t last_slash_pos = req_path.find_last_of('/');
 	if (last_slash_pos == std::string::npos) {
 		throw std::runtime_error("no slash found in request path");
     }
-	dir = req_path.substr(0, last_slash_pos + 1);
-	file = req_path.substr(last_slash_pos + 1);
+	dir_ = req_path.substr(0, last_slash_pos + 1);
+	file_ = req_path.substr(last_slash_pos + 1);
+}
+
+void HttpResponseBuilder::findIndexFilepath(LocationConfig location)
+{
+	if (location.indexes.size() == 0)
+		// indexが存在しない場合はindex.htmlがデフォルトで入る
+		file_ = "index.html";
+	std::vector<std::string>::iterator it = location.indexes.begin();
+	std::vector<std::string>::iterator ite = location.indexes.end();
+	for (; it != ite; it++)
+	{
+		findActualFilepath(location.root + location.location, *it);
+		if (filepath.exists)
+			break;
+	}
 }
 
 void HttpResponseBuilder::findFilepath(HttpRequestDTO &req)
 {
-	std::string dir;
-	std::string file;
-	
-	parsePath(dir, file, req.path);
-	std::vector<LocationConfig>::iterator i = conf_.locations.begin();
-	std::vector<LocationConfig>::iterator ie = conf_.locations.end();
-
-	for (; i != ie; i++)
+	parseRequestPath(req.path);
+	// TODO: 定義が重複しているときのアルゴリズム作成
+	for (; loc_it_ != loc_ite_; loc_it_++)
 	{
-		if ((*i).location == dir)
+		if ((*loc_it_).location == dir_)
 		{
-			findAbsPath((*i).root + (*i).location, file);
+			if (file_.empty())
+				findIndexFilepath(*loc_it_);
+			else
+				findActualFilepath((*loc_it_).root + (*loc_it_).location, file_);
 		}
 	}
 	if (!filepath.exists)
@@ -127,7 +141,7 @@ std::string HttpResponseBuilder::buildLastModified()
 	}
 	time = s.st_mtimespec.tv_sec;
 	mod_time = asctime(gmtime(&time));
-	mod_time.pop_back();
+	mod_time.erase(mod_time.size() - 1);
 	mod_time += " GMT";
 	return mod_time;
 }
