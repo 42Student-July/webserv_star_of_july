@@ -108,7 +108,7 @@ void HttpResponseBuilder::findFilepath(HttpRequestDTO &req)
 
 void HttpResponseBuilder::readFile()
 {
-	std::ifstream ifs(filepath.path);
+	std::ifstream ifs(filepath.path.c_str());
 	std::string line;
 	
 	if (ifs.fail())
@@ -139,7 +139,7 @@ std::string HttpResponseBuilder::buildLastModified()
 	{
 		std::runtime_error("stat");
 	}
-	time = s.st_mtimespec.tv_sec;
+	time = s.st_mtime;
 	mod_time = asctime(gmtime(&time));
 	mod_time.erase(mod_time.size() - 1);
 	mod_time += " GMT";
@@ -148,7 +148,6 @@ std::string HttpResponseBuilder::buildLastModified()
 
 void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 {
-
 	header_.version = req.version;
 	header_.status_code = HttpStatus::OK;
 	header_.reason_phrase = HttpStatus::ReasonPhrase::OK;

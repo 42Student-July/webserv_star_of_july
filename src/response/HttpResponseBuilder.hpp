@@ -10,6 +10,7 @@
 #include <dirent.h>
 #include <fstream>
 #include <ios>
+#include <cstdlib>
 #include <cstring>
 #include <time.h>
 
