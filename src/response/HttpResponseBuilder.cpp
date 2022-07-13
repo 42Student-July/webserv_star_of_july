@@ -60,30 +60,35 @@ void HttpResponseBuilder::findFileInServer(std::string dir, std::string file)
 	closedir(dirp);
 }
 
-void parsePath(std::string &dir, std::string &file, std::string req_path)
+// http requestのpathをdirの部分とfileの部分に分解
+void HttpResponseBuilder::parseRequestPath(std::string req_path)
 {
 	size_t last_slash_pos = req_path.find_last_of('/');
 	if (last_slash_pos == std::string::npos) {
 		throw std::runtime_error("no slash found in request path");
     }
-	dir = req_path.substr(0, last_slash_pos + 1);
-	file = req_path.substr(last_slash_pos + 1);
+	dir_ = req_path.substr(0, last_slash_pos + 1);
+	file_ = req_path.substr(last_slash_pos + 1);
+}
+
+void HttpResponseBuilder::parseIndexCondition(LocationConfig location)
+{
+	
 }
 
 void HttpResponseBuilder::findFilepath(HttpRequestDTO &req)
 {
-	std::string dir;
-	std::string file;
-	
-	parsePath(dir, file, req.path);
+	parseRequestPath(req.path);
 	std::vector<LocationConfig>::iterator i = conf_.locations.begin();
 	std::vector<LocationConfig>::iterator ie = conf_.locations.end();
 
 	for (; i != ie; i++)
 	{
-		if ((*i).location == dir)
+		if ((*i).location == dir_)
 		{
-			findFileInServer((*i).root + (*i).location, file);
+			if (file_.empty())
+				parseIndexCondition(*i);
+			findFileInServer((*i).root + (*i).location, file_);
 		}
 	}
 	if (!filepath.exists)
