@@ -19,7 +19,7 @@ std::string readFile(const char *filepath) {
 
 TEST(HttpParserTest, Requestline) {
   HttpRequestParser parser;
-  std::string file_content = readFile("gtest/request/simple_get.crlf");
+  std::string file_content = readFile("request/simple_get.crlf");
   HttpRequestDTO *request = parser.parse(file_content.c_str());
 
   ASSERT_STREQ("GET", request->method.c_str());
@@ -29,7 +29,7 @@ TEST(HttpParserTest, Requestline) {
 
 TEST(HttpParserTest, StoreHeaderFieldWithCurl) {
   HttpRequestParser parser;
-  std::string file_content = readFile("gtest/request/curl.crlf");
+  std::string file_content = readFile("request/curl.crlf");
   HttpRequestDTO *request = parser.parse(file_content.c_str());
   HttpRequestParser::HeaderFieldMap headerfields = parser.getHeaderFieldMap();
 
@@ -41,7 +41,7 @@ TEST(HttpParserTest, StoreHeaderFieldWithCurl) {
 
 TEST(HttpParserTest, StoreHeaderFieldWithChrome) {
   HttpRequestParser parser;
-  std::string file_content = readFile("gtest/request/chrome.crlf");
+  std::string file_content = readFile("request/chrome.crlf");
   HttpRequestDTO *request = parser.parse(file_content.c_str());
   HttpRequestParser::HeaderFieldMap headerfields = parser.getHeaderFieldMap();
 
@@ -74,7 +74,7 @@ TEST(HttpParserTest, StoreHeaderFieldWithChrome) {
 
 TEST(HttpParserTest, SetHeaderToHttpRequestDTO) {
   HttpRequestParser parser;
-  std::string file_content = readFile("gtest/request/chrome.crlf");
+  std::string file_content = readFile("request/chrome.crlf");
   HttpRequestDTO *request = parser.parse(file_content.c_str());
 
   ASSERT_STREQ("GET", request->method.c_str());
