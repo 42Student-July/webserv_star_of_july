@@ -15,6 +15,8 @@ HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf)
 	filepath.exists = false;
 	// builder初期化時に現在時刻を更新
 	time(&now_);
+	loc_it_ = conf_.locations.begin();
+	loc_ite_ = conf_.locations.end();
 }
 
 HttpResponseBuilder::~HttpResponseBuilder()
@@ -73,22 +75,23 @@ void HttpResponseBuilder::parseRequestPath(std::string req_path)
 
 void HttpResponseBuilder::parseIndexCondition(LocationConfig location)
 {
+	if (location.indexes.size() == 0)
+		// indexが存在しない場合はindex.htmlがデフォルトで入る
+		file_ = "index.html";
 	
 }
 
 void HttpResponseBuilder::findFilepath(HttpRequestDTO &req)
 {
 	parseRequestPath(req.path);
-	std::vector<LocationConfig>::iterator i = conf_.locations.begin();
-	std::vector<LocationConfig>::iterator ie = conf_.locations.end();
 
-	for (; i != ie; i++)
+	for (; loc_it_ != loc_ite_; loc_it_++)
 	{
-		if ((*i).location == dir_)
+		if ((*loc_it_).location == dir_)
 		{
 			if (file_.empty())
-				parseIndexCondition(*i);
-			findFileInServer((*i).root + (*i).location, file_);
+				parseIndexCondition(*loc_it_);
+			findFileInServer((*loc_it_).root + (*loc_it_).location, file_);
 		}
 	}
 	if (!filepath.exists)
