@@ -1,0 +1,18 @@
+POST /hoge/ HTTP/1.1
+Host: localhost:80
+Connection: keep-alive
+Content-Length:36 
+Cache-Control: max-age=0
+Origin: http://localhost:8080
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36
+Content-Type: application/x-www-form-urlencoded
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Referer: http://localhost:8080/hoge/
+Accept-Encoding: gzip, deflate, br
+Accept-Language: ja,en-US;q=0.8,en;q=0.6
+
+name=hoge&comment=hoge
+2ndline
+3rdline
+

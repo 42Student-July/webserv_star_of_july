@@ -20,8 +20,8 @@ std::string readFile(const char *filepath) {
 TEST(HttpParserTest, Requestline) {
   HttpRequestParser parser;
   std::string file_content = readFile("gtest/request/simple_get.crlf");
-
   HttpRequestDTO *request = parser.parse(file_content.c_str());
+
   ASSERT_STREQ("GET", request->method.c_str());
   ASSERT_STREQ("/", request->uri.c_str());
   ASSERT_STREQ("HTTP/1.1", request->version.c_str());
@@ -30,9 +30,9 @@ TEST(HttpParserTest, Requestline) {
 TEST(HttpParserTest, StoreHeaderFieldWithCurl) {
   HttpRequestParser parser;
   std::string file_content = readFile("gtest/request/curl.crlf");
-
   HttpRequestDTO *request = parser.parse(file_content.c_str());
   HttpRequestParser::HeaderFieldMap headerfields = parser.getHeaderFieldMap();
+
   ASSERT_STREQ("localhost:4242", headerfields["Host"].c_str());
   ASSERT_STREQ("curl/7.68.0", headerfields["User-Agent"].c_str());
   ASSERT_STREQ("*/*", headerfields["Accept"].c_str());
@@ -42,9 +42,9 @@ TEST(HttpParserTest, StoreHeaderFieldWithCurl) {
 TEST(HttpParserTest, StoreHeaderFieldWithChrome) {
   HttpRequestParser parser;
   std::string file_content = readFile("gtest/request/chrome.crlf");
-
   HttpRequestDTO *request = parser.parse(file_content.c_str());
   HttpRequestParser::HeaderFieldMap headerfields = parser.getHeaderFieldMap();
+
   ASSERT_STREQ("localhost:4242", headerfields["Host"].c_str());
   ASSERT_STREQ("keep-alive", headerfields["Connection"].c_str());
   ASSERT_STREQ("max-age=0", headerfields["Cache-Control"].c_str());
@@ -70,4 +70,16 @@ TEST(HttpParserTest, StoreHeaderFieldWithChrome) {
   ASSERT_STREQ("ja,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
                headerfields["Accept-Language"].c_str());
   ASSERT_EQ(15, headerfields.size());
+}
+
+TEST(HttpParserTest, SetHeaderToHttpRequestDTO) {
+  HttpRequestParser parser;
+  std::string file_content = readFile("gtest/request/chrome.crlf");
+  HttpRequestDTO *request = parser.parse(file_content.c_str());
+
+  ASSERT_STREQ("GET", request->method.c_str());
+  ASSERT_STREQ("/", request->uri.c_str());
+  ASSERT_STREQ("HTTP/1.1", request->version.c_str());
+  ASSERT_STREQ("localhost:4242", request->host.c_str());
+  ASSERT_STREQ("keep-alive", request->connection.c_str());
 }

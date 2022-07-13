@@ -12,7 +12,7 @@ typedef struct {
   std::string host;
   std::string connection;
   std::string body;
-  bool is_chunked;
+  // bool is_chunked; //responseにはいらない情報？あとで調べる
   bool is_bad_request;
 } HttpRequestDTO;
 
