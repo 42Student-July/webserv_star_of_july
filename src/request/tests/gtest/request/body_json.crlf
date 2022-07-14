@@ -1,0 +1,10 @@
+POST / HTTP/1.1
+Host: admin
+User-Agent: send_response.sh
+Content-Type: application/json
+
+{
+	"asa-gohan":"misosiru",
+	"oyatsu":"karl"
+}
+

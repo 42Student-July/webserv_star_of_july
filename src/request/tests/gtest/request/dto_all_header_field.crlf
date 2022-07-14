@@ -1,0 +1,15 @@
+POST / HTTP/1.1
+Host: localhost:80
+Authorization: Basic fugafuga==
+Content-Length: 21
+Content-Type: text/html
+Accept: text/html,application/json
+Forwarded: ?
+Referer: ??
+User_Agent: gtest
+X_Forwarded_For: ???
+
+1stline
+2ndline
+3rdline
+
