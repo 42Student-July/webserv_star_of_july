@@ -204,6 +204,13 @@ void HttpResponseBuilder::doCGI()
 {
 	//TODO: ここにCGIの処理を追加
 }
+HttpResponse *HttpResponseBuilder::buildErrorResponse(int httpstatus)
+{
+	std::string error_page = conf_.error_pages[httpstatus];
+	if (error_page.empty())
+		return buildDefaultErrorPage(httpstatus);
+	
+}
 
 HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 {
@@ -223,6 +230,11 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 			buildHeader(req);
 		}
 	}
+	catch(const ResponseException re)
+	{
+		std::cout << "re.GetHttpStatus: " << re.GetHttpStatus() << std::endl;
+		return buildErrorResponse(re.GetHttpStatus());
+	}
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
@@ -230,4 +242,14 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 		std::exit(1);
 	}
 	return new HttpResponse(header_, file_str_.str());
+}
+
+HttpResponseBuilder::ResponseException::ResponseException(const char *_msg, int http_status) : runtime_error(_msg)
+{	
+	http_status_ = http_status;
+}
+
+const int &HttpResponseBuilder::ResponseException::GetHttpStatus() const
+{
+	return http_status_;
 }

@@ -61,7 +61,15 @@ public:
 	void reflectLocationStatus();
 	bool isCGI(std::string file);
 	void doCGI();
-	
+	HttpResponse *buildErrorResponse(int httpstatus);
+	class ResponseException : public std::runtime_error {
+	private:
+		int http_status_;
+	public:
+		ResponseException(const char *_msg, int http_status);
+		const int &GetHttpStatus() const;
+	};
+
 };
 
 #endif
