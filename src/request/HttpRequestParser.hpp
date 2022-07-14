@@ -5,7 +5,7 @@
 #include <map>
 #include <string>
 
-#include "HttpRequestDTO.hpp"
+#include "HttpRequest.hpp"
 
 class HttpRequestParser {
  public:
@@ -15,8 +15,7 @@ class HttpRequestParser {
   HttpRequestParser();
   ~HttpRequestParser();
 
-  HttpRequestDTO* parse(const char* request_str);
-  const HeaderFieldMap& getHeaderFieldMap() const;
+  HttpRequest* parse(const char* request_str);
 
  private:
   static const std::string CRLF;
@@ -25,15 +24,12 @@ class HttpRequestParser {
   HttpRequestParser(const HttpRequestParser& other);
   HttpRequestParser& operator=(const HttpRequestParser& other);
 
-  void parseRequestLine(HttpRequestDTO* request);
-  void parseHeaderField(HttpRequestDTO* request);
+  void parseRequestLine(HttpRequest* request);
+  void parseHeaderField(HttpRequest* request);
   // void parseBody();
-  void storeHeaderField();
-  void setHeaderField(HttpRequestDTO* request);
   bool getLine(std::string* line);
 
   std::string offset_;
-  HeaderFieldMap name_value_map_;
 };
 
 #endif  // SRC_HTTPREQUESTPARSER_HPP_

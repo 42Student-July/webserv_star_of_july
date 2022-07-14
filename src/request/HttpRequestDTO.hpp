@@ -1,5 +1,5 @@
-#ifndef SRC_HTTPREQUEST_HPP_
-#define SRC_HTTPREQUEST_HPP_
+#ifndef SRC_HTTPREQUEST_DTO_HPP_
+#define SRC_HTTPREQUEST_DTO_HPP_
 
 #include <map>
 #include <sstream>
@@ -18,4 +18,4 @@ typedef struct {
 
 std::ostream& operator<<(std::ostream& stream, const HttpRequestDTO& rhs);
 
-#endif  // SRC_HTTPREQUEST_HPP_
+#endif  // SRC_HTTPREQUEST_DTO_HPP_

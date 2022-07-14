@@ -1,7 +1,7 @@
 
 #include <fstream>
 
-#include "HttpRequestDTO.hpp"
+#include "HttpRequest.hpp"
 #include "HttpRequestParser.hpp"
 
 std::string readFile(const char *filepath) {
@@ -19,6 +19,7 @@ std::string readFile(const char *filepath) {
 int main() {
   HttpRequestParser parser;
   std::string file_content = readFile("tests/gtest/request/simple_get.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str());
 
-  HttpRequestDTO *request = parser.parse(file_content.c_str());
+  std::cout << *request;
 }

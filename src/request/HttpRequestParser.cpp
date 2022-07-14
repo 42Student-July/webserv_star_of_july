@@ -4,14 +4,8 @@ HttpRequestParser::HttpRequestParser() {}
 
 HttpRequestParser::~HttpRequestParser() {}
 
-// googleテスト用の関数
-const HttpRequestParser::HeaderFieldMap& HttpRequestParser::getHeaderFieldMap()
-    const {
-  return name_value_map_;
-}
-
-HttpRequestDTO* HttpRequestParser::parse(const char* request_str) {
-  HttpRequestDTO* request = new HttpRequestDTO;
+HttpRequest* HttpRequestParser::parse(const char* request_str) {
+  HttpRequest* request = new HttpRequest;
   request->is_bad_request = false;
   offset_ = request_str;
 
@@ -20,7 +14,7 @@ HttpRequestDTO* HttpRequestParser::parse(const char* request_str) {
   return request;
 }
 
-void HttpRequestParser::parseRequestLine(HttpRequestDTO* request) {
+void HttpRequestParser::parseRequestLine(HttpRequest* request) {
   std::string line;
 
   if (!getLine(&line)) {
@@ -36,14 +30,8 @@ void HttpRequestParser::parseRequestLine(HttpRequestDTO* request) {
   request->version = line.substr(uri_end + 1);
 }
 
-void HttpRequestParser::parseHeaderField(HttpRequestDTO* request) {
-  storeHeaderField();
-  setHeaderField(request);
-}
-
-// ヘッダーフィールドをすべてパースして、メンバ変数として持っておく。
-// responseモジュールに渡す項目はsetHeaderFieldで判断する
-void HttpRequestParser::storeHeaderField() {
+void HttpRequestParser::parseHeaderField(HttpRequest* request) {
+  HttpRequest::HeaderFieldMap name_value_map;
   std::string line;
 
   while (getLine(&line) && line.size() != 0) {
@@ -53,19 +41,20 @@ void HttpRequestParser::storeHeaderField() {
         line.find_first_not_of(WS, name_end + 1);
     std::string value = line.substr(value_begin);
 
-    name_value_map_[name] = value;
+    name_value_map[name] = value;
   }
+  request->name_value_map = name_value_map;
 }
 
 // responseモジュールに渡す項目をDTOにいれる
-void HttpRequestParser::setHeaderField(HttpRequestDTO* request) {
-  if (name_value_map_.find("Host") != name_value_map_.end()) {
-    request->host = name_value_map_["Host"];
-  }
-  if (name_value_map_.find("Connection") != name_value_map_.end()) {
-    request->connection = name_value_map_["Connection"];
-  }
-}
+// void HttpRequestParser::setHeaderField(HttpRequest* request) {
+//   if (name_value_map_.find("Host") != name_value_map_.end()) {
+//     request->host = name_value_map_["Host"];
+//   }
+//   if (name_value_map_.find("Connection") != name_value_map_.end()) {
+//     request->connection = name_value_map_["Connection"];
+//   }
+// }
 
 // void HttpRequestParser::parseBody() {
 //   std::string line;
