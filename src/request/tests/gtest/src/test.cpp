@@ -30,8 +30,12 @@ void checkHeaderField(HttpRequest *request, const std::string &name,
   ASSERT_STREQ(value.c_str(), request->name_value_map[name].c_str());
 }
 
+void checkBody(HttpRequest *request, const std::string &body) {
+  ASSERT_STREQ(body.c_str(), request->body.c_str());
+}
+
 // ここからテスト
-TEST(HttpParserTest, Requestline) {
+TEST(HttpParserTest, StoreRequestline) {
   HttpRequestParser parser;
   std::string file_content = readFile("request/simple_get.crlf");
   HttpRequest *request = parser.parse(file_content.c_str());
@@ -83,4 +87,40 @@ TEST(HttpParserTest, StoreHeaderFieldWithChrome) {
   checkHeaderField(request, "Accept-Language",
                    "ja,en;q=0.9,zh-CN;q=0.8,zh;q=0.7");
   ASSERT_EQ(15, request->name_value_map.size());
+}
+
+TEST(HttpParserTest, StoreOneLineToBody) {
+  HttpRequestParser parser;
+  std::string file_content = readFile("request/body_one_line.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str());
+
+  checkRequestline(request, "POST", "/", "HTTP/1.1");
+  checkHeaderField(request, "Host", "localhost:80");
+  checkBody(request, "name=hoge&comment=hoge\n");
+  ASSERT_EQ(1, request->name_value_map.size());
+}
+
+TEST(HttpParserTest, StoreBodyMultiLinesToBody) {
+  HttpRequestParser parser;
+  std::string file_content = readFile("request/body_multi_lines.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str());
+
+  checkRequestline(request, "POST", "/", "HTTP/1.1");
+  checkHeaderField(request, "Host", "localhost:80");
+  checkBody(request, "1stline\n2ndline\n3rdline\n");
+  ASSERT_EQ(1, request->name_value_map.size());
+}
+
+TEST(HttpParserTest, StoreJsonToBody) {
+  HttpRequestParser parser;
+  std::string file_content = readFile("request/body_json.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str());
+
+  checkRequestline(request, "POST", "/", "HTTP/1.1");
+  checkHeaderField(request, "Host", "admin");
+  checkHeaderField(request, "User-Agent", "send_response.sh");
+  checkHeaderField(request, "Content-Type", "application/json");
+  checkBody(request,
+            "{\n\t\"asa-gohan\":\"misosiru\",\n\t\"oyatsu\":\"karl\"\n}\n");
+  ASSERT_EQ(3, request->name_value_map.size());
 }

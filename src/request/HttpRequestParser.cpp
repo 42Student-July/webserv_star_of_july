@@ -11,6 +11,7 @@ HttpRequest* HttpRequestParser::parse(const char* request_str) {
 
   parseRequestLine(request);
   parseHeaderField(request);
+  parseBody(request);
   return request;
 }
 
@@ -46,6 +47,17 @@ void HttpRequestParser::parseHeaderField(HttpRequest* request) {
   request->name_value_map = name_value_map;
 }
 
+void HttpRequestParser::parseBody(HttpRequest* request) {
+  std::string line;
+  std::string body;
+
+  while (getLine(&line) && line.size() != 0) {
+    body += line;
+    body += "\n";
+  }
+  request->body = body;
+}
+
 // responseモジュールに渡す項目をDTOにいれる
 // void HttpRequestParser::setHeaderField(HttpRequest* request) {
 //   if (name_value_map_.find("Host") != name_value_map_.end()) {
@@ -54,17 +66,6 @@ void HttpRequestParser::parseHeaderField(HttpRequest* request) {
 //   if (name_value_map_.find("Connection") != name_value_map_.end()) {
 //     request->connection = name_value_map_["Connection"];
 //   }
-// }
-
-// void HttpRequestParser::parseBody() {
-//   std::string line;
-//   std::string body;
-
-//   while (getLine(&line) && line.size() != 0) {
-//     body += line;
-//     body += "\n";
-//   };
-//   current_request_->body = body;
 // }
 
 // 現在のオフセットから一行読み取る関数。読み取ったら改行の次の文字にoffsetを進める

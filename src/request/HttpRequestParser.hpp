@@ -26,7 +26,7 @@ class HttpRequestParser {
 
   void parseRequestLine(HttpRequest* request);
   void parseHeaderField(HttpRequest* request);
-  // void parseBody();
+  void parseBody(HttpRequest* request);
   bool getLine(std::string* line);
 
   std::string offset_;
