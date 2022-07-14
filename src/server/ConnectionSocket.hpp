@@ -49,7 +49,7 @@ class ConnectionSocket : public ASocket {
   std::string response_;
   // この辺の変数のスコープと型（ポインタにするかしないかは後で考える)
   HttpRequestParser request_parser_;
-  HttpRequestDTO *current_request_;
+  HttpRequest *current_request_;
   HttpResponse *current_response_;
 };
 

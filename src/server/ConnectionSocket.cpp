@@ -52,7 +52,7 @@ ssize_t ConnectionSocket::recvFromClient() {
 
 void ConnectionSocket::generateRequest(ssize_t recv_size) {
   recv_buffer_[recv_size] = '\0';
-  current_request_ = request_parser_.parse(recv_buffer_);
+  current_request_ = request_parser_.parse(recv_buffer_, serverconfig_);
 
   std::cerr << *current_request_;
 }
