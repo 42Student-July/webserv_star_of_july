@@ -99,7 +99,7 @@ TEST(ConfigParserLocationsTests, CanParseLocationAutoindex) {
 TEST(ConfigParserLocationsTests, CanParseLocationCGIPath) {
   ConfigParser configparser("./TestConfigs/location_cgipath.conf");
   std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
-  ASSERT_EQ(".py", serverconfig[0].locations_[0].cgi_path);
+  ASSERT_EQ(".py", serverconfig[0].locations_[0].cgi_extentions[0]);
 }
 
 TEST(Error, NoCurlyBracketsThrowsException) {
