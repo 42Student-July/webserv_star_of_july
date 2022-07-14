@@ -58,7 +58,7 @@ public:
 	std::string buildDate();
 	std::string buildLastModified();
 	void parseRequestPath(std::string req_path);
-	void checkFileStatus();
+	void reflectLocationStatus();
 	bool isCGI(std::string file);
 	void doCGI();
 	

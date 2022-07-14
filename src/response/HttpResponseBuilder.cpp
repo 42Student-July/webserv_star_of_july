@@ -193,7 +193,7 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 	header_.accept_ranges = ACCEPT_RANGES;
 }
 
-void HttpResponseBuilder::checkFileStatus()
+void HttpResponseBuilder::reflectLocationStatus()
 {
 	if (isCGI(file_))
 		is_file_cgi = true;
@@ -211,7 +211,7 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 	{
 		parseRequestPath(req.path);
 		findFileInServer();
-		checkFileStatus();
+		reflectLocationStatus();
 		if (is_file_cgi)
 		{
 			doCGI();
