@@ -4,9 +4,11 @@ HttpRequestParser::HttpRequestParser() {}
 
 HttpRequestParser::~HttpRequestParser() {}
 
-HttpRequest* HttpRequestParser::parse(const char* request_str) {
+HttpRequest* HttpRequestParser::parse(const char* request_str,
+                                      const ServerConfig& server_config) {
   HttpRequest* request = new HttpRequest;
   request->is_bad_request = false;
+  request->server_config = server_config;
   offset_ = request_str;
 
   parseRequestLine(request);

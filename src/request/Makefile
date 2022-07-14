@@ -18,6 +18,7 @@ CXX = c++
 CXXFLAGS = -Wall -Werror -Wextra
 
 HEADERS = . \
+		  ../config \
 		  $(NULL)
 
 INCLUDES = $(addprefix -I, $(HEADERS))
@@ -37,9 +38,14 @@ $(NAME):$(OBJS)
 %.o: %.cpp
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
 
+run: $(OBJS) main.o
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) main.o -MMD -MP -o test
+	@./test
+	@$(RM) test
+
 .PHONY: clean
 clean:
-	@$(RM) $(OBJS) $(DEPS)
+	@$(RM) $(OBJS) $(DEPS) main.o
 
 .PHONY: fclean
 fclean: clean

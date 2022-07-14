@@ -6,6 +6,7 @@
 #include <string>
 
 #include "HttpRequest.hpp"
+#include "ServerConfig.hpp"
 
 class HttpRequestParser {
  public:
@@ -15,7 +16,8 @@ class HttpRequestParser {
   HttpRequestParser();
   ~HttpRequestParser();
 
-  HttpRequest* parse(const char* request_str);
+  HttpRequest* parse(const char* request_str,
+                     const ServerConfig& server_config);
 
  private:
   static const std::string CRLF;

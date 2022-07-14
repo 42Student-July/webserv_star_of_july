@@ -5,12 +5,14 @@ SRC_DIR = ../../
 GTEST_DIR = googletest-release-1.12.1
 TEST_SRC_DIR = src
 GTEST_LIB_DIR = $(GTEST_DIR)/lib
+INCLUDE_DIR = $(GTEST_DIR)/googletest/include \
+ 			  $(SRC_DIR) \
+ 			   ../../../config \
+ 			   $(NULL)
 
 TEST_SRCS = $(shell find $(TEST_SRC_DIR) -name '*.cpp')
 
-GTEST_INCLUDES = -I$(GTEST_DIR)/googletest/include \
-				 -I$(SRC_DIR) \
-				 $(NULL)
+GTEST_INCLUDES = $(addprefix -I, $(INCLUDE_DIR))
 
 GTEST_LIBS = -lgtest \
 			 -lgtest_main \

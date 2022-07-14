@@ -15,7 +15,7 @@ std::ostream &operator<<(std::ostream &stream, const HttpRequest &rhs) {
          << "#RequestLine" << std::endl
          << "method: " << rhs.method << std::endl
          << "uri: " << rhs.uri << std::endl
-         << "versin: " << rhs.version << std::endl
+         << "version: " << rhs.version << std::endl
          << std::endl
          << "#HeaderFields" << std::endl
          << rhs.name_value_map << std::endl

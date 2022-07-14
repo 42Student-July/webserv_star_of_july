@@ -2,8 +2,10 @@
 #define SRC_HTTPREQUEST_HPP_
 
 #include <map>
-#include <sstream>
+#include <ostream>
 #include <string>
+
+#include "ServerConfig.hpp"
 
 struct HttpRequest {
   typedef std::map<std::string, std::string> HeaderFieldMap;
@@ -14,6 +16,7 @@ struct HttpRequest {
   HeaderFieldMap name_value_map;
   std::string body;
   bool is_bad_request;
+  ServerConfig server_config;
 };
 
 std::ostream& operator<<(std::ostream& stream, const HttpRequest& rhs);
