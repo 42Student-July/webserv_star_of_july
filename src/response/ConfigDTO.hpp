@@ -21,7 +21,7 @@ struct LocationConfig {
   bool autoindex;
 
   // Execute CGI based on certain file extension (for example .php).
-  std::string cgi_path;
+   std::vector<std::string> cgi_extensions;
 };
 
 struct ConfigDTO
