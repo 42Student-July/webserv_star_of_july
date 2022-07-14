@@ -133,7 +133,7 @@ void ConfigParser::parseLocationAutoindexes(
 void ConfigParser::parseLocationCGIPath(
     LocationConfig &location, std::vector<std::string>::iterator &it) {
 	//後ほど修正必要
-  location.cgi_extentions.push_back(it->substr(0, it->find(";")));
+  location.cgi_extensions.push_back(it->substr(0, it->find(";")));
 }
 
 // ToDo:それぞれ1回ずつしか入力できないようにする
