@@ -13,8 +13,11 @@ HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf)
 {
 	conf_ = conf;
 	filepath.exists = false;
+	is_file_cgi = false;
 	// builder初期化時に現在時刻を更新
 	time(&now_);
+	loc_it_ = conf_.locations.begin();
+	loc_ite_ = conf_.locations.end();
 }
 
 HttpResponseBuilder::~HttpResponseBuilder()
@@ -32,8 +35,25 @@ HttpResponseBuilder &HttpResponseBuilder::operator=(const HttpResponseBuilder &o
 	return *this;
 }
 
+bool HttpResponseBuilder::isCGI(std::string file)
+{
+	size_t extension_pos;
+	std::vector<std::string>::iterator it = found_location_.cgi_extensions.begin();
+	std::vector<std::string>::iterator ite = found_location_.cgi_extensions.end();
+	for (; it != ite; it++)
+	{
+		extension_pos = file.find(*it);
+		// TODO:拡張子のみのファイル名の場合の処理を検討
+		if (extension_pos != std::string::npos) {
+			std::cout << "is cgi true" << std::endl;
+			return true;
+		}
+	}
+	return false;
+}
+
 // 基本的に文字列操作はmallocを使いたくないのでstringに変換して行いたい
-void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
+void HttpResponseBuilder::findActualFilepath(std::string dir, std::string file)
 {
 	DIR				*dirp;
 	struct dirent	*ent;
@@ -41,18 +61,16 @@ void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
 	std::string		fullpath;
 	
 	cwd = getcwd(NULL, 0);
-	
 	fullpath = std::string(cwd) + dir;
 	std::free(cwd);
 	std::cout << "fullpath: " << fullpath << std::endl;
-	
 	
 	dirp = opendir(fullpath.c_str());
 	if (dirp == NULL)
 		throw std::runtime_error("directory not found");
 	while ((ent = readdir(dirp)) != NULL)
 	{
-		if (std::strcmp(ent->d_name,file.c_str()) == 0)
+		if (std::strcmp(ent->d_name, file.c_str()) == 0)
 		{
 			filepath.path = fullpath + file;
 			filepath.exists = true;
@@ -62,16 +80,55 @@ void HttpResponseBuilder::findAbsPath(std::string dir, std::string file)
 	closedir(dirp);
 }
 
-void HttpResponseBuilder::findFilepath(HttpRequestDTO &req)
+// http requestのpathをdirの部分とfileの部分に分解
+void HttpResponseBuilder::parseRequestPath(std::string req_path)
 {
-	std::vector<LocationConfig>::iterator i = conf_.locations.begin();
-	std::vector<LocationConfig>::iterator ie = conf_.locations.end();
+	size_t last_slash_pos = req_path.find_last_of('/');
+	if (last_slash_pos == std::string::npos) {
+		throw std::runtime_error("no slash found in request path");
+    }
+	dir_ = req_path.substr(0, last_slash_pos + 1);
+	file_ = req_path.substr(last_slash_pos + 1);
+}
 
-	for (; i != ie; i++)
+void HttpResponseBuilder::findIndexFilepath(LocationConfig location)
+{
+	if (location.indexes.size() == 0)
 	{
-		if ((*i).location == req.path)
+		// indexが存在しない場合はindex.htmlがデフォルトで入る
+		file_ = "index.html";
+		findActualFilepath(location.root + location.location, file_);
+		return;
+	}
+	std::vector<std::string>::iterator it = location.indexes.begin();
+	std::vector<std::string>::iterator ite = location.indexes.end();
+	for (; it != ite; it++)
+	{
+		findActualFilepath(location.root + location.location, *it);
+		if (filepath.exists)
 		{
-			findAbsPath((*i).root + (*i).location, req.file);
+			file_ = *it;
+			break;
+		}
+	}
+}
+
+void HttpResponseBuilder::findFileInServer()
+{
+	// TODO: 定義が重複しているときのアルゴリズム作成
+	for (; loc_it_ != loc_ite_; loc_it_++)
+	{
+		if ((*loc_it_).location == dir_)
+		{
+			if (file_.empty())
+				findIndexFilepath(*loc_it_);
+			else
+				findActualFilepath((*loc_it_).root + (*loc_it_).location, file_);
+			if (filepath.exists)
+			{
+				found_location_ = *loc_it_;
+				break;
+			}
 		}
 	}
 	if (!filepath.exists)
@@ -80,7 +137,7 @@ void HttpResponseBuilder::findFilepath(HttpRequestDTO &req)
 
 void HttpResponseBuilder::readFile()
 {
-	std::ifstream ifs(filepath.path);
+	std::ifstream ifs(filepath.path.c_str());
 	std::string line;
 	
 	if (ifs.fail())
@@ -96,7 +153,7 @@ std::string HttpResponseBuilder::buildDate()
 	
 	date = asctime(gmtime(&now_));
 	// asctimeがデフォルトで改行がつく使用なので、改行を削除
-	date.pop_back();
+	date.erase(date.size() - 1);
 	date += " GMT";
 	return date;
 }
@@ -111,16 +168,15 @@ std::string HttpResponseBuilder::buildLastModified()
 	{
 		std::runtime_error("stat");
 	}
-	time = s.st_mtimespec.tv_sec;
+	time = s.st_mtime;
 	mod_time = asctime(gmtime(&time));
-	mod_time.pop_back();
+	mod_time.erase(mod_time.size() - 1);
 	mod_time += " GMT";
 	return mod_time;
 }
 
 void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 {
-
 	header_.version = req.version;
 	header_.status_code = HttpStatus::OK;
 	header_.reason_phrase = HttpStatus::ReasonPhrase::OK;
@@ -137,13 +193,35 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 	header_.accept_ranges = ACCEPT_RANGES;
 }
 
+void HttpResponseBuilder::checkFileStatus()
+{
+	if (isCGI(file_))
+		is_file_cgi = true;
+	//TODO: allowed_methodとかはこっちにおく
+}
+
+void HttpResponseBuilder::doCGI()
+{
+	//TODO: ここにCGIの処理を追加
+}
+
 HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 {
 	try
 	{
-		findFilepath(req);
-		readFile();
-		buildHeader(req);
+		parseRequestPath(req.path);
+		findFileInServer();
+		checkFileStatus();
+		if (is_file_cgi)
+		{
+			doCGI();
+			// ここにcgi用のbuidlerとかを配置
+		}
+		else
+		{
+			readFile();
+			buildHeader(req);
+		}
 	}
 	catch(const std::exception& e)
 	{
@@ -151,6 +229,5 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 		// TODO:直す
 		std::exit(1);
 	}
-	
 	return new HttpResponse(header_, file_str_.str());
 }

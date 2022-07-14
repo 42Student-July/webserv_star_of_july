@@ -13,13 +13,14 @@ int main(int argc, char const *argv[])
 	loc_demo.allowed_methods.push_back("GET");
 	loc_demo.autoindex = true;
 	loc_demo.indexes.push_back("index.html");
-	loc_demo.cgi_path = std::string();
+	loc_demo.cgi_extensions.push_back(".py");
 	conf_.locations.push_back(loc_demo);
 
 	
 	// http request data
 	HttpRequestDTO req;
 	req.method = "GET";
+	// req.path = "/index.html";
 	req.path = "/";
 	req.file = "index.html";
 	req.connection = "Keep-Alive";

@@ -10,6 +10,7 @@
 #include <dirent.h>
 #include <fstream>
 #include <ios>
+#include <cstdlib>
 #include <cstring>
 #include <time.h>
 
@@ -31,6 +32,13 @@ private:
 		bool		exists;
 	} filepath;
 	std::stringstream file_str_;
+	std::string dir_;
+	std::string file_;
+	
+	std::vector<LocationConfig>::iterator loc_it_;
+	std::vector<LocationConfig>::iterator loc_ite_;
+	LocationConfig found_location_;
+	bool is_file_cgi;
 	static const std::string CRLF;
 	static const std::string ACCEPT_RANGES;
 	static const std::string OCTET_STREAM;
@@ -42,12 +50,18 @@ public:
 	HttpResponseBuilder(const HttpResponseBuilder &other);
 	HttpResponseBuilder &operator=(const HttpResponseBuilder &other);
 	HttpResponse *build(HttpRequestDTO &req);
-	void findFilepath(HttpRequestDTO &req);
-	void findAbsPath(std::string dir, std::string file);
+	void findFileInServer();
+	void findActualFilepath(std::string dir, std::string file);
 	void readFile();
 	void buildHeader(HttpRequestDTO &req);
+	void findIndexFilepath(LocationConfig location);
 	std::string buildDate();
 	std::string buildLastModified();
+	void parseRequestPath(std::string req_path);
+	void checkFileStatus();
+	bool isCGI(std::string file);
+	void doCGI();
+	
 };
 
 #endif
