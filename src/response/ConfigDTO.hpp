@@ -1,9 +1,9 @@
 #ifndef CONFIG_HPP
 # define CONFIG_HPP
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 struct LocationConfig {
   std::string location;

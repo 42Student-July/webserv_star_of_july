@@ -27,7 +27,7 @@ void CGI::run()
 	
 }
 
-std::string CGI::getBodyFromCGI() const
+std::string CGI::getResponseFromCGI() const
 {
 	return cgi_body_;
 }
@@ -37,7 +37,7 @@ void CGI::readCGI()
 	size_t size = 0;
 	char buf[BUF_SIZE];
 	memset(buf, 0, sizeof(buf));
-	size = read(pipe_child2parent_[READ], buf, BUF_SIZE - 1);
+	size = read(pipe_c2p_[READ], buf, BUF_SIZE - 1);
 
 }
 
@@ -75,25 +75,31 @@ void CGI::createArgs()
 void CGI::createEnvs()
 {
 	std::map< std::string, std::string > map_env;
-	map_env["AUTH_TYPE"] = "";
-	map_env["CONTENT_LENGTH"] = "";
-	map_env["CONTENT_TYPE"] = "application/x-www-form-urlencoded";
+	map_env["AUTH_TYPE"] = req_.authorization;
+	map_env["CONTENT_LENGTH"] = req_.content_length;
+	map_env["CONTENT_TYPE"] = req_.content_type;
 	map_env["GATEWAY_INTERFACE"] = "CGI/1.1";
-	map_env["HTTP_ACCEPT"] = "";
-	map_env["HTTP_FORWARDED"] = "";
-	map_env["HTTP_REFERER"] = "";
-	map_env["HTTP_USER_AGENT"] = "";
-	map_env["HTTP_X_FORWARDED_FOR"] = "";
-	map_env["PATH_INFO"] = "";
+	map_env["HTTP_ACCEPT"] = req_.accept;
+	map_env["HTTP_FORWARDED"] = req_.forwarded;
+	map_env["HTTP_REFERER"] = req_.referer;
+	map_env["HTTP_USER_AGENT"] = req_.user_agent;
+	map_env["HTTP_X_FORWARDED_FOR"] = req_.x_forwarded_for;
+	map_env["PATH_INFO"] = req_.path;
+	//ここわからないので後ほど調べる
 	map_env["PATH_TRANSLATED"] = "";
+	//一旦空白
 	map_env["QUERY_STRING"] = "";
 	map_env["REMOTE_ADDR"] = "127.0.0.1";
-	map_env["REMOTE_HOST"] = "abc.com";
+	//要修正
+	map_env["REMOTE_HOST"] = "webserv.com";
+	//一旦空白
 	map_env["REMOTE_IDENT"] = "";
 	map_env["REMOTE_USER"] = "";
-	map_env["REQUEST_METHOD"] = "GET";
+
+	map_env["REQUEST_METHOD"] = req_.method;
+	//要パース
 	map_env["SCRIPT_NAME"] = "";
-	map_env["SERVER_NAME"] = "";
+	map_env["SERVER_NAME"] = conf_.server;
 	std::stringstream ss;
 	ss << conf_.port;
 	map_env["SERVER_PORT"] = ss.str();
@@ -107,11 +113,11 @@ void CGI::createEnvs()
 void CGI::createPipe()
 {
 	if (req_.method == "POST") {
-		if (pipe(pipe_parent2child_) < 0) {
+		if (pipe(pipe_p2c_) < 0) {
 			throw -1;
 		}
 	}
-	if (pipe(pipe_child2parent_) < 0) {
+	if (pipe(pipe_c2p_) < 0) {
 		throw -1;
 	}
 }
@@ -124,7 +130,7 @@ void CGI::spawnChild()
 	}
 	if (pid == 0) {
 		//child process
-		IODup();
+		dupIO();
 		int a = execve(exec_args_[0], exec_args_, cgi_envs_);
 		if (a < 0) {
 			std::cerr << "error: a = " << a << std::endl; 
@@ -133,32 +139,32 @@ void CGI::spawnChild()
 	} else {
 		//parent_process
 		if (req_.method == "POST") {
-			close(pipe_parent2child_[READ]);
+			close(pipe_p2c_[READ]);
 		}
-		close(pipe_child2parent_[WRITE]);
+		close(pipe_c2p_[WRITE]);
 
-		write(pipe_parent2child_[WRITE], req_.body.c_str(), req_.body.length());
+		write(pipe_p2c_[WRITE], req_.body.c_str(), req_.body.length());
 
 		char buf[BUF_SIZE];
 		memset(buf, 0, sizeof(buf));
 		ssize_t read_size = 0;
-		read_size = read(pipe_child2parent_[READ], buf, BUF_SIZE);
+		read_size = read(pipe_c2p_[READ], buf, BUF_SIZE);
 		buf[read_size] = '\0';
 		cgi_body_ = buf;
 	}
 }
 
-void CGI::IODup()
+void CGI::dupIO()
 {
 	if (req_.method == "POST")
 	{
-		dupFd(pipe_parent2child_[READ], STDIN_FILENO);
-		close(pipe_parent2child_[WRITE]);
+		dupFd(pipe_p2c_[READ], STDIN_FILENO);
+		close(pipe_p2c_[WRITE]);
 		//ここ要検討
 		//close(STDIN_FILENO);
 	}
-	dupFd(pipe_child2parent_[WRITE], STDOUT_FILENO);
-	close(pipe_child2parent_[READ]);
+	dupFd(pipe_c2p_[WRITE], STDOUT_FILENO);
+	close(pipe_c2p_[READ]);
 	//ここ要検討
 	//close(STDOUT_FILENO);
 }

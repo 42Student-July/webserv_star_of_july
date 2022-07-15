@@ -17,13 +17,11 @@ void CGIParser::run()
 
 void CGIParser::parseHeader()
 {
-	for (;;) {
-		size_t end = 0;
-		end = cgi_response_.find("\r\n");
-		std::string header_line = cgi_response_.substr(0, end);
-		std::cout << header_line << std::endl;
+	size_t body_start = 0;
+	while (true) {
+		body_start = cgi_response_.find("\r\n");
+		std::string header = cgi_response_.substr(0, body_start)
 	}
-
 }
 
 CGIParser::CGIParser(CGIParser const &other)

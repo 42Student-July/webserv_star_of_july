@@ -3,11 +3,11 @@
 
 #include "ConfigDTO.hpp"
 #include "HttpRequestDTO.hpp"
-#include <unistd.h>
 
 #include <iostream>
 #include <sstream>
 #include <sys/types.h>
+#include <unistd.h>
 
 const int READ = 0;
 const int WRITE = 1;
@@ -22,18 +22,21 @@ class CGI
 		void createEnvs();
 		void createPipe();
 		void spawnChild();
-		void IODup();
+		void dupIO();
 		void dupFd(int oldfd, int newfd);
 		void createArgs();
 		void readCGI();
 
-		std::string getBodyFromCGI() const;
+		void makeCGIResponseLines(std::string cgi_body_);
+		std::string getResponseFromCGI() const;
 
         CGI(CGI const &other);
         CGI &operator=(CGI const &other);
 
     private:
+		//どちらかに統一する
 		std::string cgi_body_;
+		std::vector<std::string> cgi_response_lines;
 
 		HttpRequestDTO req_;
 		ConfigDTO conf_;
@@ -42,8 +45,8 @@ class CGI
 		std::string ip_;
 		char **exec_args_;
 		char **cgi_envs_;
-		int pipe_child2parent_[2];
-		int pipe_parent2child_[2];
+		int pipe_c2p_[2];
+		int pipe_p2c_[2];
 		//pid_t child_pid_;
 		
 };
