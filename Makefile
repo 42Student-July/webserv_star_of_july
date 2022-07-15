@@ -6,22 +6,29 @@ CXXFLAGS = -g -Wall -Werror -Wextra -fsanitize=address
 SRCS_DIR = ./src
 CONFIG_DIR = $(SRCS_DIR)/config
 SERVER_DIR = $(SRCS_DIR)/server
-MODULE_DIRS = $(CONFIG_DIR) $(SERVER_DIR)
+REQUEST_DIR = $(SRCS_DIR)/request
+RESPONSE_DIR = $(SRCS_DIR)/response_hyoshie
+MODULE_DIRS = $(CONFIG_DIR) \
+			  $(SERVER_DIR) \
+			  $(REQUEST_DIR) \
+			  $(RESPONSE_DIR) \
+			  $(NULL)
 
 SRCS = $(SRCS_DIR)/main.cpp
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(OBJS:.o=.d)
 
-HEADERS = $(CONFIG_DIR) \
-		  $(SERVER_DIR) \
-		  $(NULL)
-
-INCLUDES = $(addprefix -I, $(HEADERS))
+INCLUDES = $(addprefix -I, $(MODULE_DIRS))
 
 LIB_CONFIG = $(CONFIG_DIR)/libconfig.a
 LIB_SERVER = $(SERVER_DIR)/libserver.a
-
-LIBS = $(LIB_SERVER) $(LIB_CONFIG)
+LIB_REQUEST = $(REQUEST_DIR)/librequest.a
+LIB_RESPONSE = $(RESPONSE_DIR)/libresponse.a
+LIBS = $(LIB_SERVER) \
+	   $(LIB_CONFIG) \
+	   $(LIB_REQUEST) \
+	   $(LIB_RESPONSE) \
+	   $(NULL)
 
 %.o: %.cpp
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@

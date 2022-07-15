@@ -1,19 +1,20 @@
 #include "response.h"
 
-int main(int argc, char const *argv[]) {
-  (void)argc;
-  (void)argv;
-  // conf
-  ConfigDTO conf_;
-  conf_.root = "html";
-  LocationConfig loc_demo;
-  loc_demo.location = "/";
-  loc_demo.root = "/html";
-  loc_demo.allowed_methods.push_back("GET");
-  loc_demo.autoindex = true;
-  loc_demo.indexes.push_back("index.html");
-  loc_demo.cgi_path = std::string();
-  conf_.locations.push_back(loc_demo);
+int main(int argc, char const *argv[])
+{
+	(void)argc;
+	(void)argv;
+	//conf
+	ConfigDTO conf_;
+	conf_.root = "html";
+	LocationConfig loc_demo;
+	loc_demo.location = "/";
+	loc_demo.root = "/html";
+	loc_demo.allowed_methods.push_back("GET");
+	loc_demo.autoindex = true;
+	loc_demo.indexes.push_back("index.html");
+	loc_demo.cgi_extensions.push_back(".py");
+	conf_.locations.push_back(loc_demo);
 
   // http request data
   HttpRequestDTO req;

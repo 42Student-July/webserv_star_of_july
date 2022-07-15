@@ -55,7 +55,7 @@ int setPost(ConfigDTO &conf_, LocationConfig &loc_demo, HttpRequestDTO &req)
 TEST(CGITests, CanRunCGI)
 {
 	ConfigDTO conf_;
-	LocationConfig loc_demo;
+	LocationDTO loc_demo;
 	HttpRequestDTO req;
 	setGet(conf_, loc_demo, req);
 	CGI cgi(req, conf_);
@@ -65,7 +65,7 @@ TEST(CGITests, CanRunCGI)
 TEST(CGITests, CanGetBodyFromCGI)
 {
 	ConfigDTO conf_;
-	LocationConfig loc_demo;
+	LocationDTO loc_demo;
 	HttpRequestDTO req;
 	setGet(conf_, loc_demo, req);
 	CGI cgi(req, conf_);
@@ -89,7 +89,7 @@ TEST(CGITests, CanPOST)
 TEST(CGIParserTests, CanParse)
 {
 	ConfigDTO conf_;
-	LocationConfig loc_demo;
+	LocationDTO loc_demo;
 	HttpRequestDTO req;
 	setGet(conf_, loc_demo, req);
 	CGI cgi(req, conf_);
