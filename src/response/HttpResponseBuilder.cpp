@@ -2,11 +2,18 @@
 
 const std::string HttpResponseBuilder::CRLF = "\r\n";
 const std::string HttpResponseBuilder::ACCEPT_RANGES = "none";
-const std::string HttpResponseBuilder::OCTET_STREAM = "application/octet-stream";
+const std::string HttpResponseBuilder::OCTET_STREAM =
+    "application/octet-stream";
 
+HttpResponseBuilder::HttpResponseBuilder() {}
 
-HttpResponseBuilder::HttpResponseBuilder()
-{
+HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf) {
+  conf_ = conf;
+  filepath.exists = false;
+  // builder初期化時に現在時刻を更新
+  time(&now_);
+  loc_it_ = conf_.locations.begin();
+  loc_ite_ = conf_.locations.end();
 }
 
 HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf)
@@ -19,20 +26,11 @@ HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf)
 	loc_it_ = conf_.locations.begin();
 	loc_ite_ = conf_.locations.end();
 }
-
-HttpResponseBuilder::~HttpResponseBuilder()
-{
-}
-HttpResponseBuilder::HttpResponseBuilder(const HttpResponseBuilder &other)
-{
-	*this = other;
-}
-HttpResponseBuilder &HttpResponseBuilder::operator=(const HttpResponseBuilder &other)
-{
-	if (this != &other)
-	{
-	}
-	return *this;
+HttpResponseBuilder &HttpResponseBuilder::operator=(
+    const HttpResponseBuilder &other) {
+  if (this != &other) {
+  }
+  return *this;
 }
 
 bool HttpResponseBuilder::isCGI(std::string file)
@@ -80,15 +78,21 @@ void HttpResponseBuilder::findActualFilepath(std::string dir, std::string file)
 	closedir(dirp);
 }
 
-// http requestのpathをdirの部分とfileの部分に分解
-void HttpResponseBuilder::parseRequestPath(std::string req_path)
-{
-	size_t last_slash_pos = req_path.find_last_of('/');
-	if (last_slash_pos == std::string::npos) {
-		throw std::runtime_error("no slash found in request path");
+  cwd = getcwd(NULL, 0);
+  fullpath = std::string(cwd) + dir;
+  std::free(cwd);
+  std::cout << "fullpath: " << fullpath << std::endl;
+
+  dirp = opendir(fullpath.c_str());
+  if (dirp == NULL) throw std::runtime_error("directory not found");
+  while ((ent = readdir(dirp)) != NULL) {
+    if (std::strcmp(ent->d_name, file.c_str()) == 0) {
+      filepath.path = fullpath + file;
+      filepath.exists = true;
+      break;
     }
-	dir_ = req_path.substr(0, last_slash_pos + 1);
-	file_ = req_path.substr(last_slash_pos + 1);
+  }
+  closedir(dirp);
 }
 
 void HttpResponseBuilder::findIndexFilepath(LocationConfig location)

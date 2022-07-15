@@ -10,7 +10,7 @@
 #include <string>
 
 #include "ASocket.hpp"
-#include "HttpRequest.hpp"
+#include "HttpRequestDTO.hpp"
 #include "HttpRequestParser.hpp"
 #include "HttpResponse.hpp"
 

@@ -7,7 +7,7 @@
 
 struct LocationConfig {
   // locationだとlocations_.location_になってしまうので一旦name_にしています
-  std::string name_;
+  std::string location;
 
   // Define a HTTP redirection.
   std::string root;
@@ -28,23 +28,23 @@ struct LocationConfig {
 struct ServerConfig {
   // Choose the port and host of each ’server’.
   // necessary
-  size_t port_;
-  std::string host_;
+  size_t port;
+  std::string host;
 
   // Setup the server_names or not.
-  std::vector<std::string> names_;
+  std::vector<std::string> server;
 
   // Setup default error pages.
-  std::map<int, std::string> error_pages_;
+  std::map<int, std::string> error_pages;
 
   // Setup routes with one or multiple of the following rules/configuration
   // (routes wont be using regexp)
-  std::string root_;
+  std::string root;
 
   // Limit client body size.
-  size_t client_body_size_limit_;
+  size_t client_body_size_limit;
 
-  std::vector<LocationConfig> locations_;
+  std::vector<LocationConfig> locations;
 };
 
 #endif  // CONFIG_SERVERCONFIG_HPP_

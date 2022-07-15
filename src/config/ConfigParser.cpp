@@ -51,11 +51,11 @@ int countContents(std::vector<std::string>::iterator it) {
 void ConfigParser::parseListen(ServerConfig &server,
                                std::vector<std::string>::iterator &it) {
   if (it->find(":") != std::string::npos) {
-    server.host_ = it->substr(0, it->find(":"));
-    server.port_ = stoi(it->substr(it->find(":") + 1, it->find(";")));
+    server.host = it->substr(0, it->find(":"));
+    server.port = stoi(it->substr(it->find(":") + 1, it->find(";")));
   } else {
-    server.host_ = it->substr(0, it->find(":"));
-    server.port_ = stoi(it->substr(it->find(":") + 1, it->find(";")));
+    server.host = it->substr(0, it->find(":"));
+    server.port = stoi(it->substr(it->find(":") + 1, it->find(";")));
   }
 }
 
@@ -64,9 +64,9 @@ void ConfigParser::parseServerName(ServerConfig &server,
   int num = countContents(it);
   for (int i = 0; i < num; ++i, ++it) {
     if (it->find(";") != std::string::npos) {
-      server.names_.push_back(it->substr(0, it->find(";")));
+      server.server.push_back(it->substr(0, it->find(";")));
     } else {
-      server.names_.push_back(*it);
+      server.server.push_back(*it);
     }
   }
   it--;
@@ -74,18 +74,18 @@ void ConfigParser::parseServerName(ServerConfig &server,
 
 void ConfigParser::parseRoot(ServerConfig &server,
                              std::vector<std::string>::iterator &it) {
-  server.root_ = it->substr(0, it->find(";"));
+  server.root = it->substr(0, it->find(";"));
 }
 
 void ConfigParser::parseErrorPages(ServerConfig &server,
                                    std::vector<std::string>::iterator &it) {
-  server.error_pages_.insert(std::pair<int, std::string>(
+  server.error_pages.insert(std::pair<int, std::string>(
       stoi(*it), (*(++it)).substr(0, it->find(";"))));
 }
 
 void ConfigParser::parseClientBodySizeLimit(
     ServerConfig &server, std::vector<std::string>::iterator &it) {
-  server.client_body_size_limit_ = stoi(*it);
+  server.client_body_size_limit = stoi(*it);
 }
 
 void ConfigParser::parseLocationRoot(LocationConfig &location,
@@ -140,7 +140,7 @@ void ConfigParser::parseLocationCGIPath(
 void ConfigParser::parseLocation(LocationConfig &location,
                                  std::vector<std::string>::iterator &it,
                                  std::vector<std::string>::iterator &ite) {
-  location.name_ = *it;
+  location.location = *it;
   if (*(++it) == "{") {
     for (; it != ite; ++it) {
       if (*it == "root") {
@@ -183,7 +183,7 @@ void ConfigParser::parseServer(ServerConfig &server,
     } else if (*it == "location") {
       LocationConfig location;
       parseLocation(location, ++it, ite);
-      server.locations_.push_back(location);
+      server.locations.push_back(location);
     } else if (*it == "}") {
       finished_with_bracket = true;
       break;
