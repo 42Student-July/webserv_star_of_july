@@ -2,19 +2,9 @@
 
 const std::string HttpResponseBuilder::CRLF = "\r\n";
 const std::string HttpResponseBuilder::ACCEPT_RANGES = "none";
-const std::string HttpResponseBuilder::OCTET_STREAM =
-    "application/octet-stream";
+const std::string HttpResponseBuilder::OCTET_STREAM = "application/octet-stream";
 
 HttpResponseBuilder::HttpResponseBuilder() {}
-
-HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf) {
-  conf_ = conf;
-  filepath_.exists = false;
-  // builder初期化時に現在時刻を更新
-  time(&now_);
-  loc_it_ = conf_.locations.begin();
-  loc_ite_ = conf_.locations.end();
-}
 
 HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf)
 {
@@ -26,6 +16,7 @@ HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf)
 	loc_it_ = conf_.locations.begin();
 	loc_ite_ = conf_.locations.end();
 }
+
 HttpResponseBuilder &HttpResponseBuilder::operator=(
     const HttpResponseBuilder &other) {
   if (this != &other) {
@@ -65,13 +56,40 @@ void HttpResponseBuilder::findActualFilepath(std::string dir, std::string file)
 	
 	dirp = opendir(fullpath.c_str());
 	if (dirp == NULL)
-		throw std::runtime_error("directory not found");
+		throw ResponseException("directory not found", 404);
 	while ((ent = readdir(dirp)) != NULL)
 	{
 		if (std::strcmp(ent->d_name, file.c_str()) == 0)
 		{
 			filepath_.path = fullpath + file;
 			filepath_.exists = true;
+			break;
+		}
+	}
+	closedir(dirp);
+}
+
+void HttpResponseBuilder::findActualErrorFilepath(std::string dir, std::string file)
+{
+	DIR				*dirp;
+	struct dirent	*ent;
+	char			*cwd;
+	std::string		fullpath;
+	
+	cwd = getcwd(NULL, 0);
+	fullpath = std::string(cwd) + dir;
+	std::free(cwd);
+	std::cout << "fullpath: " << fullpath << std::endl;
+	
+	dirp = opendir(fullpath.c_str());
+	if (dirp == NULL)
+		throw std::runtime_error("directory not found");
+	while ((ent = readdir(dirp)) != NULL)
+	{
+		if (std::strcmp(ent->d_name, file.c_str()) == 0)
+		{
+			errorFilepath_.path = fullpath + file;
+			errorFilepath_.exists = true;
 			break;
 		}
 	}
@@ -119,7 +137,7 @@ void HttpResponseBuilder::findFileInServer()
 		}
 	}
 	if (!filepath_.exists)
-		throw std::runtime_error("file not found");
+		throw ResponseException("file not found", 404);
 }
 
 void HttpResponseBuilder::readFile(std::string fullpath)
@@ -128,11 +146,24 @@ void HttpResponseBuilder::readFile(std::string fullpath)
 	std::string line;
 	
 	if (ifs.fail())
-		throw std::ios_base::failure("file input error");
+		throw ResponseException("file input error", 500);
     while (std::getline(ifs, line)){
         file_str_ << line << CRLF;
     }
 }
+
+void HttpResponseBuilder::readErrorFile(std::string fullpath)
+{
+	std::ifstream ifs(fullpath.c_str());
+	std::string line;
+	
+	if (ifs.fail())
+		throw std::runtime_error("read error");
+    while (std::getline(ifs, line)){
+        file_str_ << line << CRLF;
+    }
+}
+
 
 std::string HttpResponseBuilder::buildDate()
 {
@@ -153,7 +184,8 @@ std::string HttpResponseBuilder::buildLastModified()
 	
 	if(stat(filepath_.path.c_str(), &s) == -1)
 	{
-		std::runtime_error("stat");
+		// TODO: forbidden 403のときのハンドリングする
+		throw ResponseException("stat", 500);
 	}
 	time = s.st_mtime;
 	mod_time = asctime(gmtime(&time));
@@ -191,12 +223,41 @@ void HttpResponseBuilder::doCGI()
 {
 	//TODO: ここにCGIの処理を追加
 }
-HttpResponse *HttpResponseBuilder::buildErrorResponse(int httpstatus)
+HttpResponse *HttpResponseBuilder::buildDefaultErrorPage(int httpstatus, HttpRequestDTO &req)
+{
+	//TODO: nginxのデフォルトの文字列を配置する
+	(void)httpstatus;
+	buildHeader(req);
+	return new HttpResponse(header_, file_str_.str());
+}
+
+// http requestのpathをdirの部分とfileの部分に分解
+void HttpResponseBuilder::parseRequestPath(std::string req_path)
+{
+	size_t last_slash_pos = req_path.find_last_of('/');
+	if (last_slash_pos == std::string::npos) {
+		throw std::runtime_error("no slash found in request path");
+    }
+	dir_ = req_path.substr(0, last_slash_pos + 1);
+	file_ = req_path.substr(last_slash_pos + 1);
+}
+
+HttpResponse *HttpResponseBuilder::buildErrorResponse(int httpstatus, HttpRequestDTO &req)
 {
 	std::string error_page = conf_.error_pages[httpstatus];
 	if (error_page.empty())
-		return buildDefaultErrorPage(httpstatus);
-	readFile()	
+		return buildDefaultErrorPage(httpstatus, req);
+	try
+	{
+		readFile(found_location_.root + error_page);
+		buildHeader(req);
+	}
+	catch(const std::runtime_error& e)
+	{
+		return buildDefaultErrorPage(httpstatus, req);
+	}
+	
+	return new HttpResponse(header_, file_str_.str());
 }
 
 HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
@@ -220,7 +281,7 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 	catch(const ResponseException re)
 	{
 		std::cout << "re.GetHttpStatus: " << re.GetHttpStatus() << std::endl;
-		return buildErrorResponse(re.GetHttpStatus());
+		return buildErrorResponse(re.GetHttpStatus(), req);
 	}
 	catch(const std::exception& e)
 	{

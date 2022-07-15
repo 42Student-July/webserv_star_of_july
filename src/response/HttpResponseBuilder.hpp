@@ -31,6 +31,11 @@ private:
 		std::string path;
 		bool		exists;
 	} filepath_;
+	struct ErrorFilepath
+	{
+		std::string path;
+		bool		exists;
+	} errorFilepath_;
 	std::stringstream file_str_;
 	std::string dir_;
 	std::string file_;
@@ -46,13 +51,15 @@ private:
 public:
 	HttpResponseBuilder();
 	HttpResponseBuilder(ConfigDTO conf);
-	~HttpResponseBuilder();
+	// ~HttpResponseBuilder();
 	HttpResponseBuilder(const HttpResponseBuilder &other);
 	HttpResponseBuilder &operator=(const HttpResponseBuilder &other);
 	HttpResponse *build(HttpRequestDTO &req);
 	void findFileInServer();
 	void findActualFilepath(std::string dir, std::string file);
+	void findActualErrorFilepath(std::string dir, std::string file);
 	void readFile(std::string fullpath);
+	void readErrorFile(std::string fullpath);
 	void buildHeader(HttpRequestDTO &req);
 	void findIndexFilepath(LocationConfig location);
 	std::string buildDate();
@@ -61,8 +68,8 @@ public:
 	void reflectLocationStatus();
 	bool isCGI(std::string file);
 	void doCGI();
-	HttpResponse *buildDefaultErrorPage(int httpstatus);
-	HttpResponse *buildErrorResponse(int httpstatus);
+	HttpResponse *buildDefaultErrorPage(int httpstatus, HttpRequestDTO &req);
+	HttpResponse *buildErrorResponse(int httpstatus, HttpRequestDTO &req);
 	class ResponseException : public std::runtime_error {
 	private:
 		int http_status_;
