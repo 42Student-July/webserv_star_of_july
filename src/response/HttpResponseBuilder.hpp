@@ -30,7 +30,7 @@ private:
 	{
 		std::string path;
 		bool		exists;
-	} filepath;
+	} filepath_;
 	std::stringstream file_str_;
 	std::string dir_;
 	std::string file_;
@@ -52,7 +52,7 @@ public:
 	HttpResponse *build(HttpRequestDTO &req);
 	void findFileInServer();
 	void findActualFilepath(std::string dir, std::string file);
-	void readFile();
+	void readFile(std::string fullpath);
 	void buildHeader(HttpRequestDTO &req);
 	void findIndexFilepath(LocationConfig location);
 	std::string buildDate();
@@ -61,6 +61,7 @@ public:
 	void reflectLocationStatus();
 	bool isCGI(std::string file);
 	void doCGI();
+	HttpResponse *buildDefaultErrorPage(int httpstatus);
 	HttpResponse *buildErrorResponse(int httpstatus);
 	class ResponseException : public std::runtime_error {
 	private:

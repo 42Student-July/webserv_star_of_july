@@ -12,7 +12,7 @@ HttpResponseBuilder::HttpResponseBuilder()
 HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf)
 {
 	conf_ = conf;
-	filepath.exists = false;
+	filepath_.exists = false;
 	is_file_cgi = false;
 	// builder初期化時に現在時刻を更新
 	time(&now_);
@@ -72,8 +72,8 @@ void HttpResponseBuilder::findActualFilepath(std::string dir, std::string file)
 	{
 		if (std::strcmp(ent->d_name, file.c_str()) == 0)
 		{
-			filepath.path = fullpath + file;
-			filepath.exists = true;
+			filepath_.path = fullpath + file;
+			filepath_.exists = true;
 			break;
 		}
 	}
@@ -105,7 +105,7 @@ void HttpResponseBuilder::findIndexFilepath(LocationConfig location)
 	for (; it != ite; it++)
 	{
 		findActualFilepath(location.root + location.location, *it);
-		if (filepath.exists)
+		if (filepath_.exists)
 		{
 			file_ = *it;
 			break;
@@ -124,20 +124,20 @@ void HttpResponseBuilder::findFileInServer()
 				findIndexFilepath(*loc_it_);
 			else
 				findActualFilepath((*loc_it_).root + (*loc_it_).location, file_);
-			if (filepath.exists)
+			if (filepath_.exists)
 			{
 				found_location_ = *loc_it_;
 				break;
 			}
 		}
 	}
-	if (!filepath.exists)
+	if (!filepath_.exists)
 		throw std::runtime_error("file not found");
 }
 
-void HttpResponseBuilder::readFile()
+void HttpResponseBuilder::readFile(std::string fullpath)
 {
-	std::ifstream ifs(filepath.path.c_str());
+	std::ifstream ifs(fullpath.c_str());
 	std::string line;
 	
 	if (ifs.fail())
@@ -164,7 +164,7 @@ std::string HttpResponseBuilder::buildLastModified()
 	struct stat s;
 	time_t time;
 	
-	if(stat(filepath.path.c_str(), &s) == -1)
+	if(stat(filepath_.path.c_str(), &s) == -1)
 	{
 		std::runtime_error("stat");
 	}
@@ -209,7 +209,7 @@ HttpResponse *HttpResponseBuilder::buildErrorResponse(int httpstatus)
 	std::string error_page = conf_.error_pages[httpstatus];
 	if (error_page.empty())
 		return buildDefaultErrorPage(httpstatus);
-	
+	readFile()	
 }
 
 HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
@@ -226,7 +226,7 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 		}
 		else
 		{
-			readFile();
+			readFile(filepath_.path);
 			buildHeader(req);
 		}
 	}
