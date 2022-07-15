@@ -1,27 +1,34 @@
 #ifndef CGIPARSER_HPP
-# define CGIPARSER_HPP
-
-#include "HttpResponseBuilder.hpp"
+#define CGIPARSER_HPP
 
 #include <iostream>
 
-class CGIParser
-{
-    public:
-        CGIParser(std::string cgi_response);
-        virtual ~CGIParser();
-		
-		void run();
-		void parseHeader();
+#include "HttpResponseBuilder.hpp"
 
-        CGIParser(CGIParser const &other);
-        CGIParser &operator=(CGIParser const &other);
+class CGIParser {
+ public:
+  //全体でのtypedefにしたい
+  typedef std::map<std::string, std::string> HeaderFieldMap;
 
-    private:
-		std::string cgi_response_;
+  CGIParser(std::string cgi_response);
+  virtual ~CGIParser();
 
-		//std::map<std::string, std::string> header_;
-		std::stringstream file_str_;
+  void parse();
+  void parseHeader();
+  void parseBody();
+  bool getLine(std::string *line);
+
+ private:
+  static const std::string CRLF;
+  static const std::string WS;
+  CGIParser(CGIParser const &other);
+  CGIParser &operator=(CGIParser const &other);
+
+  std::string offset_;
+  std::string cgi_response_;
+
+  // std::map<std::string, std::string> header_;
+  std::stringstream file_str_;
 };
 
 #endif

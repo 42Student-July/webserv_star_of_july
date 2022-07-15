@@ -83,18 +83,19 @@ TEST(CGITests, CanPOST)
 	cgi.run();
 	std::string cgi_response = cgi.getResponseFromCGI();
 	CGIParser cgi_parser(cgi_response);
-	cgi_parser.run();
 }
 
 
-/* TEST(CGIParserTests, CanParse) */
-/* { */
-/* 	ConfigDTO conf_; */
-/* 	LocationConfig loc_demo; */
-/* 	HttpRequestDTO req; */
-/* 	setGet(conf_, loc_demo, req); */
-/* 	CGI cgi(req, conf_); */
-/* 	cgi.run(); */
-/* 	std::string body = cgi.getBodyFromCGI(); */
-/* 	CGIParser cgi_parser(body); */
-/* } */
+TEST(CGIParserTests, CanParse)
+{
+	ConfigDTO conf_;
+	LocationConfig loc_demo;
+	HttpRequestDTO req;
+	setGet(conf_, loc_demo, req);
+	CGI cgi(req, conf_);
+	cgi.run();
+	std::string cgi_response = cgi.getResponseFromCGI();
+	CGIParser cgi_parser(cgi_response);
+	cgi_parser.parse();
+
+}

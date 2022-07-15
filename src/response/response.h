@@ -1,12 +1,12 @@
 #ifndef RESPONSE_H
-# define RESPONSE_H
+#define RESPONSE_H
 
-#include "HttpResponse.hpp"
 #include "ConfigDTO.hpp"
+#include "HttpRequestDTO.hpp"
+#include "HttpResponse.hpp"
 #include "HttpResponseBuilder.hpp"
-#include "HttpResponseSerializer.hpp"
 #include "HttpResponseHeaderDTO.hpp"
 #include "HttpResponsePlainText.hpp"
-#include "HttpRequestDTO.hpp"
+#include "HttpResponseSerializer.hpp"
 
 #endif
