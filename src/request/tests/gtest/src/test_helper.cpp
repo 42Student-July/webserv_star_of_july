@@ -22,13 +22,13 @@ std::string readFile(const char *filepath) {
 
 ServerConfig initServerCongig() {
   ServerConfig server_config;
-  server_config.port_ = 4242;
-  server_config.host_ = "42tokyo";
-  server_config.names_.push_back("nop");
-  server_config.names_.push_back("cluster");
+  server_config.port = 4242;
+  server_config.host = "42tokyo";
+  server_config.name.push_back("nop");
+  server_config.name.push_back("cluster");
   // error_pages_は省略
-  server_config.root_ = "www/html";
-  server_config.client_body_size_limit_ = 65536;
+  server_config.root = "www/html";
+  server_config.client_body_size_limit = 65536;
   // locations_は省略
   return server_config;
 }

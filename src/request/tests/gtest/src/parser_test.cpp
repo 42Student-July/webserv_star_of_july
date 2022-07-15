@@ -119,11 +119,11 @@ TEST(HttpParserTest, StoreServerConfig) {
   checkRequestline("GET", "/", "HTTP/1.1", request);
   checkBody("", request->body);
   ASSERT_EQ(2, request->name_value_map.size());
-  ASSERT_EQ(4242, request->server_config.port_);
-  compareString("42tokyo", request->server_config.host_);
-  compareString("nop", request->server_config.names_[0]);
-  compareString("cluster", request->server_config.names_[1]);
-  compareString("www/html", request->server_config.root_);
-  ASSERT_EQ(65536, request->server_config.client_body_size_limit_);
+  ASSERT_EQ(4242, request->server_config.port);
+  compareString("42tokyo", request->server_config.host);
+  compareString("nop", request->server_config.name[0]);
+  compareString("cluster", request->server_config.name[1]);
+  compareString("www/html", request->server_config.root);
+  ASSERT_EQ(65536, request->server_config.client_body_size_limit);
   ASSERT_FALSE(request->is_bad_request);
 }

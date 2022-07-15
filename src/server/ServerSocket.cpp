@@ -11,7 +11,7 @@ ServerSocket::ServerSocket(const ServerConfig &serverconfig)
   memset(&server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  server_addr.sin_port = htons(serverconfig.port_);
+  server_addr.sin_port = htons(serverconfig.port);
 
   int opt = 1;
   if (setsockopt(fd_, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<char *>(&opt),

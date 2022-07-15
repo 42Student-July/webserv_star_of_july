@@ -21,12 +21,12 @@ std::string readFile(const char *filepath) {
 
 int main() {
   ServerConfig server_config;
-  server_config.port_ = 4242;
-  server_config.host_ = "42tokyo";
-  server_config.names_.push_back("nop");
+  server_config.port = 4242;
+  server_config.host = "42tokyo";
+  server_config.name.push_back("nop");
   // error_pages_は省略
-  server_config.root_ = "www/html";
-  server_config.client_body_size_limit_ = 65536;
+  server_config.root = "www/html";
+  server_config.client_body_size_limit = 65536;
   // locations_は省略
 
   HttpRequestParser parser;
@@ -35,7 +35,7 @@ int main() {
   HttpRequest *request = parser.parse(file_content.c_str(), server_config);
 
   std::cout << *request;
-  std::cout << request->server_config.port_ << std::endl;
+  std::cout << request->server_config.port << std::endl;
 
   HttpRequestConverter converter;
   HttpRequestDTO *dto = converter.toDTO(request);
