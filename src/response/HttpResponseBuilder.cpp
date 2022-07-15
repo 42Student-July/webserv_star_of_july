@@ -9,7 +9,7 @@ HttpResponseBuilder::HttpResponseBuilder() {}
 
 HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf) {
   conf_ = conf;
-  filepath.exists = false;
+  filepath_.exists = false;
   // builder初期化時に現在時刻を更新
   time(&now_);
   loc_it_ = conf_.locations.begin();
@@ -76,23 +76,6 @@ void HttpResponseBuilder::findActualFilepath(std::string dir, std::string file)
 		}
 	}
 	closedir(dirp);
-}
-
-  cwd = getcwd(NULL, 0);
-  fullpath = std::string(cwd) + dir;
-  std::free(cwd);
-  std::cout << "fullpath: " << fullpath << std::endl;
-
-  dirp = opendir(fullpath.c_str());
-  if (dirp == NULL) throw std::runtime_error("directory not found");
-  while ((ent = readdir(dirp)) != NULL) {
-    if (std::strcmp(ent->d_name, file.c_str()) == 0) {
-      filepath.path = fullpath + file;
-      filepath.exists = true;
-      break;
-    }
-  }
-  closedir(dirp);
 }
 
 void HttpResponseBuilder::findIndexFilepath(LocationConfig location)

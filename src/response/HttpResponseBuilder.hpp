@@ -21,25 +21,6 @@
 #include "HttpResponseHeaderDTO.hpp"
 #include "HttpStatus.hpp"
 
-class HttpResponseBuilder {
- private:
-  ConfigDTO conf_;
-  HttpResponseHeaderDTO header_;
-  struct Filepath {
-    std::string path;
-    bool exists;
-  } filepath;
-  std::stringstream file_str_;
-  std::string dir_;
-  std::string file_;
-
-  std::vector<LocationConfig>::iterator loc_it_;
-  std::vector<LocationConfig>::iterator loc_ite_;
-  static const std::string CRLF;
-  static const std::string ACCEPT_RANGES;
-  static const std::string OCTET_STREAM;
-  time_t now_;
-
 class HttpResponseBuilder
 {
 private:
