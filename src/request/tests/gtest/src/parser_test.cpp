@@ -121,8 +121,8 @@ TEST(HttpParserTest, StoreServerConfig) {
   ASSERT_EQ(2, request->name_value_map.size());
   ASSERT_EQ(4242, request->server_config.port);
   compareString("42tokyo", request->server_config.host);
-  compareString("nop", request->server_config.name[0]);
-  compareString("cluster", request->server_config.name[1]);
+  compareString("nop", request->server_config.server[0]);
+  compareString("cluster", request->server_config.server[1]);
   compareString("www/html", request->server_config.root);
   ASSERT_EQ(65536, request->server_config.client_body_size_limit);
   ASSERT_FALSE(request->is_bad_request);

@@ -64,9 +64,9 @@ void ConfigParser::parseServerName(ServerConfig &server,
   int num = countContents(it);
   for (int i = 0; i < num; ++i, ++it) {
     if (it->find(";") != std::string::npos) {
-      server.name.push_back(it->substr(0, it->find(";")));
+      server.server.push_back(it->substr(0, it->find(";")));
     } else {
-      server.name.push_back(*it);
+      server.server.push_back(*it);
     }
   }
   it--;

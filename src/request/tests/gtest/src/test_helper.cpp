@@ -24,12 +24,33 @@ ServerConfig initServerCongig() {
   ServerConfig server_config;
   server_config.port = 4242;
   server_config.host = "42tokyo";
-  server_config.name.push_back("nop");
-  server_config.name.push_back("cluster");
+  server_config.server.push_back("nop");
+  server_config.server.push_back("cluster");
   // error_pages_は省略
   server_config.root = "www/html";
   server_config.client_body_size_limit = 65536;
   // locations_は省略
+  return server_config;
+}
+
+ServerConfig initServerConfigWithLocation() {
+  ServerConfig server_config;
+  server_config.port = 4242;
+  server_config.host = "42tokyo";
+  server_config.server.push_back("nop");
+  server_config.server.push_back("cluster");
+  server_config.error_pages.insert({0, "error0"});
+  server_config.error_pages.insert({1, "error1"});
+  server_config.root = "www/html";
+  server_config.client_body_size_limit = 65536;
+  LocationConfig locationdemo;
+  locationdemo.location = "location";
+  locationdemo.root = "www/cgi-bin";
+  locationdemo.allowed_methods.push_back("GET");
+  locationdemo.indexes.push_back("index.cgi");
+  locationdemo.autoindex = false;
+  locationdemo.cgi_extensions.push_back(".py");
+  server_config.locations.push_back(locationdemo);
   return server_config;
 }
 
