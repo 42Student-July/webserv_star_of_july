@@ -16,20 +16,19 @@ int main(int argc, char const *argv[])
 	loc_demo.cgi_extensions.push_back(".py");
 	conf_.locations.push_back(loc_demo);
 
-	
-	// http request data
-	HttpRequestDTO req;
-	req.method = "GET";
-	// req.path = "/index.html";
-	req.path = "/";
-	req.file = "index.html";
-	req.connection = "Keep-Alive";
+  // http request data
+  HttpRequestDTO req;
+  req.method = "GET";
+  // req.path = "/index.html";
+  req.path = "/";
+  req.file = "index.html";
+  req.connection = "Keep-Alive";
 
-	//builder
-	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
-	HttpResponse *res = builder.build(req);
-	HttpResponseSerializer serializer = HttpResponseSerializer();
-	HttpResponsePlainText *plain_text = serializer.serialize(*res);
-	std::cout << plain_text->Text() << std::endl;
-	return 0;
+  // builder
+  HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+  HttpResponse *res = builder.build(req);
+  HttpResponseSerializer serializer = HttpResponseSerializer();
+  HttpResponsePlainText *plain_text = serializer.serialize(*res);
+  std::cout << plain_text->Text() << std::endl;
+  return 0;
 }
