@@ -5,9 +5,11 @@
 #include "HttpRequestDTO.hpp"
 #include "HttpRequestParser.hpp"
 #include "ServerConfig.hpp"
+#include "../../../../response/ConfigDTO.hpp"
 
 void compareString(const std::string &expected, const std::string &actual);
 ServerConfig initServerCongig();
+ServerConfig initServerConfigWithLocation();
 std::string readFile(const char *filepath);
 void checkRequestline(const std::string &method, const std::string &uri,
                       const std::string &version, HttpRequest *request);

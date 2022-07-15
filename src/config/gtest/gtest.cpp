@@ -19,9 +19,9 @@ TEST(ConfigParserServersTests, CanParsePort) {
 TEST(ConfigParserServersTests, CanParseServerName) {
   ConfigParser configparser("./TestConfigs/server_name.conf");
   std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
-  ASSERT_EQ("hello", serverconfig[0].name[0]);
-  ASSERT_EQ("hello2", serverconfig[0].name[1]);
-  ASSERT_EQ("hello3", serverconfig[0].name[2]);
+  ASSERT_EQ("hello", serverconfig[0].server[0]);
+  ASSERT_EQ("hello2", serverconfig[0].server[1]);
+  ASSERT_EQ("hello3", serverconfig[0].server[2]);
 }
 
 TEST(ConfigParserServersTests, CanParseRoot) {
@@ -34,9 +34,9 @@ TEST(ConfigParserServersTests, CanParseDualServers) {
   ConfigParser configparser("./TestConfigs/dual_servers.conf");
   std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
   ASSERT_EQ(4242, serverconfig[0].port);
-  ASSERT_EQ("a", serverconfig[0].name[0]);
-  ASSERT_EQ("b", serverconfig[0].name[1]);
-  ASSERT_EQ("c", serverconfig[0].name[2]);
+  ASSERT_EQ("a", serverconfig[0].server[0]);
+  ASSERT_EQ("b", serverconfig[0].server[1]);
+  ASSERT_EQ("c", serverconfig[0].server[2]);
 
   ASSERT_EQ(4343, serverconfig[1].port);
   ASSERT_EQ("/var/www/html", serverconfig[1].root);

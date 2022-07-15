@@ -32,7 +32,7 @@ struct ServerConfig {
   std::string host;
 
   // Setup the server_names or not.
-  std::vector<std::string> name;
+  std::vector<std::string> server;
 
   // Setup default error pages.
   std::map<int, std::string> error_pages;

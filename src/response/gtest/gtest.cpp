@@ -6,7 +6,7 @@
 #include "../CGI.hpp"
 #include "../CGIParser.hpp"
 
-int set(ConfigDTO &conf_, LocationConfig &loc_demo, HttpRequestDTO &req)
+int set(ConfigDTO &conf_, LocationDTO &loc_demo, HttpRequestDTO &req)
 {
 	//conf
 	conf_.root = "html";
@@ -38,7 +38,7 @@ int set(ConfigDTO &conf_, LocationConfig &loc_demo, HttpRequestDTO &req)
 TEST(CGITests, CanRunCGI)
 {
 	ConfigDTO conf_;
-	LocationConfig loc_demo;
+	LocationDTO loc_demo;
 	HttpRequestDTO req;
 	set(conf_, loc_demo, req);
 	CGI cgi(req, conf_);
@@ -48,7 +48,7 @@ TEST(CGITests, CanRunCGI)
 TEST(CGITests, CanGetBodyFromCGI)
 {
 	ConfigDTO conf_;
-	LocationConfig loc_demo;
+	LocationDTO loc_demo;
 	HttpRequestDTO req;
 	set(conf_, loc_demo, req);
 	CGI cgi(req, conf_);
@@ -59,7 +59,7 @@ TEST(CGITests, CanGetBodyFromCGI)
 TEST(CGIParserTests, CanParse)
 {
 	ConfigDTO conf_;
-	LocationConfig loc_demo;
+	LocationDTO loc_demo;
 	HttpRequestDTO req;
 	set(conf_, loc_demo, req);
 	CGI cgi(req, conf_);
