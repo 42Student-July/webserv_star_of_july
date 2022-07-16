@@ -49,8 +49,10 @@ void Server::destroyConnectionSockets() {
       ConnectionSocket::State state =
           dynamic_cast<ConnectionSocket *>(it->second)->getState();
       if (state == ConnectionSocket::CLOSE) {
-        delete it->second;
-        fd2socket_.erase(it);
+        SocketMap::iterator tmp_it = it;
+        it++;
+        delete tmp_it->second;
+        fd2socket_.erase(tmp_it);
       }
     }
   }
