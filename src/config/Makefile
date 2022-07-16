@@ -15,7 +15,7 @@
 NAME = libconfig.a
 
 CXX = c++
-CXXFLAGS = -g -Wall -Werror -Wextra -fsanitize=address
+CXXFLAGS = -g -Wall -Werror -Wextra -std=c++98
 
 HEADERS = . \
 		  ../config \
@@ -61,12 +61,12 @@ $(gtest):
 	python3 googletest-release-1.11.0/googletest/scripts/fuse_gtest_files.py $(gtestdir)
 	mv googletest-release-1.11.0 $(gtestdir)
 
-test_compile = clang++ -std=c++11 ConfigParser.cpp\
+test_compile = clang++ -std=c++11 \
 	$(testdir)/gtest.cpp $(gtestdir)/googletest-release-1.11.0/googletest/src/gtest_main.cc $(gtestdir)/gtest/gtest-all.cc \
-	-I$(gtestdir) -I$(gtestdir)/googletest-release-1.11.0/googletest/include -lpthread -o tester
+	-I$(gtestdir) -I$(gtestdir)/googletest-release-1.11.0/googletest/include -lpthread $(NAME) -o tester 
 
 .PHONY: test
-test: $(gtest)
+test: $(gtest) $(NAME)
 	$(test_compile)
 	./tester # --gtest_filter=Vector.other
 
