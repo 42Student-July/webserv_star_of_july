@@ -73,6 +73,8 @@ void ConnectionSocket::sendResponse() const {
   const char *response = plain_txt->Text().c_str();
   size_t response_len = plain_txt->Size();
 
+  std::cerr << response;
+
   if (send(fd_, response, response_len, 0) !=
       static_cast<ssize_t>(response_len)) {
     throw std::runtime_error("send() failed");

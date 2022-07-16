@@ -4,6 +4,7 @@
 const std::string HttpResponseBuilder::CRLF = "\r\n";
 const std::string HttpResponseBuilder::ACCEPT_RANGES = "none";
 const std::string HttpResponseBuilder::OCTET_STREAM = "application/octet-stream";
+const std::string HttpResponseBuilder::TEXT_HTML = "text/html";
 
 HttpResponseBuilder::HttpResponseBuilder() {}
 
@@ -209,8 +210,9 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 	header_.reason_phrase = HttpStatus::ReasonPhrase::OK;
 	header_.date = buildDate();
 	header_.server = conf_.server;
-	header_.content_type = OCTET_STREAM;
-	// HttpRequestDTO.content_lengthはstring型なので修正しました。とりあえず関数を一つ作ってます
+	// header_.content_type = OCTET_STREAM;
+	// とりあえずブラウザから見れるようにしました。
+	header_.content_type = TEXT_HTML;
 	size_t  content_length = file_str_.str().size();
 	header_.content_length = toString(content_length);
 	header_.last_modified = buildLastModified();

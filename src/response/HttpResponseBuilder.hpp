@@ -48,6 +48,7 @@ private:
 	static const std::string CRLF;
 	static const std::string ACCEPT_RANGES;
 	static const std::string OCTET_STREAM;
+	static const std::string TEXT_HTML;
 	time_t now_;
 
 	CGI cgi_;
