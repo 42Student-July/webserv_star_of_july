@@ -195,6 +195,13 @@ std::string HttpResponseBuilder::buildLastModified()
 	return mod_time;
 }
 
+static std::string toString(size_t val) {
+  std::stringstream ss;
+
+  ss << val;
+  return ss.str();
+}
+
 void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 {
 	header_.version = req.version;
@@ -203,7 +210,9 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 	header_.date = buildDate();
 	header_.server = conf_.server;
 	header_.content_type = OCTET_STREAM;
-	header_.content_length = file_str_.str().size();
+	// HttpRequestDTO.content_lengthはstring型なので修正しました。とりあえず関数を一つ作ってます
+	size_t  content_length = file_str_.str().size();
+	header_.content_length = toString(content_length);
 	header_.last_modified = buildLastModified();
 	header_.connection = req.connection;
 	// 特にこういうふうにしろみたいな指定があるわけでもなさそう RFC7232
