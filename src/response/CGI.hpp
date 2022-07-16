@@ -16,9 +16,9 @@ const size_t BUF_SIZE = 512;
 
 class CGI {
  public:
-  CGI(HttpRequestDTO &req, ConfigDTO &conf);
+  CGI();
   virtual ~CGI();
-  void run();
+  void run(HttpRequestDTO &req, ConfigDTO &conf);
   void createEnvs();
   void createPipe();
   void spawnChild();
@@ -34,9 +34,7 @@ class CGI {
   CGI &operator=(CGI const &other);
 
  private:
-  //どちらかに統一する
   std::string cgi_body_;
-  std::vector<std::string> cgi_response_lines;
 
   HttpRequestDTO req_;
   ConfigDTO conf_;

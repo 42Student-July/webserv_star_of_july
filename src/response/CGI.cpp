@@ -2,11 +2,12 @@
 
 #include <unistd.h>
 
-CGI::CGI(HttpRequestDTO &req, ConfigDTO &conf) : req_(req), conf_(conf) {}
-
+CGI::CGI() {}
 CGI::~CGI() {}
 
-void CGI::run() {
+void CGI::run(HttpRequestDTO &req, ConfigDTO &conf) {
+  req_ = req;
+  conf_ = conf;
   createEnvs();
   // createArgs();
   // createArgsにする

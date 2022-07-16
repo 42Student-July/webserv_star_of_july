@@ -10,10 +10,10 @@ class CGIParser {
   //全体でのtypedefにしたい
   typedef std::map<std::string, std::string> HeaderFieldMap;
 
-  CGIParser(std::string cgi_response);
+  CGIParser();
   virtual ~CGIParser();
 
-  void parse();
+  void parse(std::string cgi_response);
   void parseHeader();
   void parseBody();
   bool getLine(std::string *line);

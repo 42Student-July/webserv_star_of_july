@@ -1,4 +1,5 @@
 #include "HttpResponseBuilder.hpp"
+#include "HttpRequestDTO.hpp"
 
 const std::string HttpResponseBuilder::CRLF = "\r\n";
 const std::string HttpResponseBuilder::ACCEPT_RANGES = "none";
@@ -219,10 +220,14 @@ void HttpResponseBuilder::reflectLocationStatus()
 	//TODO: allowed_methodとかはこっちにおく
 }
 
-void HttpResponseBuilder::doCGI()
+void HttpResponseBuilder::doCGI(HttpRequestDTO req)
 {
 	//TODO: ここにCGIの処理を追加
+	cgi_.run(req, conf_);
+	std::string cgi_response = cgi_.getResponseFromCGI();
+	std::cout << cgi_response << std::endl;
 }
+
 HttpResponse *HttpResponseBuilder::buildDefaultErrorPage(int httpstatus, HttpRequestDTO &req)
 {
 	//TODO: nginxのデフォルトの文字列を配置する
@@ -269,7 +274,7 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 		reflectLocationStatus();
 		if (is_file_cgi)
 		{
-			doCGI();
+			doCGI(req);
 			// ここにcgi用のbuidlerとかを配置
 		}
 		else

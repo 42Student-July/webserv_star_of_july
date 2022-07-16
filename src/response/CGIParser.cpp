@@ -3,11 +3,12 @@
 const std::string CGIParser::CRLF = "\r\n";
 const std::string CGIParser::WS = " \t";
 
-CGIParser::CGIParser(std::string cgi_response) : cgi_response_(cgi_response) {}
+CGIParser::CGIParser() {}
 
 CGIParser::~CGIParser() {}
 
-void CGIParser::parse() {
+void CGIParser::parse(std::string cgi_response) {
+  cgi_response_ = cgi_response;
   offset_ = cgi_response_;
 
   parseHeader();

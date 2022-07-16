@@ -20,6 +20,7 @@
 #include "HttpResponse.hpp"
 #include "HttpResponseHeaderDTO.hpp"
 #include "HttpStatus.hpp"
+#include "CGI.hpp"
 
 class HttpResponseBuilder
 {
@@ -48,6 +49,8 @@ private:
 	static const std::string ACCEPT_RANGES;
 	static const std::string OCTET_STREAM;
 	time_t now_;
+
+	CGI cgi_;
 public:
 	HttpResponseBuilder();
 	HttpResponseBuilder(ConfigDTO conf);
@@ -67,7 +70,7 @@ public:
 	void parseRequestPath(std::string req_path);
 	void reflectLocationStatus();
 	bool isCGI(std::string file);
-	void doCGI();
+	void doCGI(HttpRequestDTO req);
 	HttpResponse *buildDefaultErrorPage(int httpstatus, HttpRequestDTO &req);
 	HttpResponse *buildErrorResponse(int httpstatus, HttpRequestDTO &req);
 	class ResponseException : public std::runtime_error {
