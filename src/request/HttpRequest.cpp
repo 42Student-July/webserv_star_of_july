@@ -2,8 +2,8 @@
 
 static std::ostream &operator<<(std::ostream &stream,
                                 const HttpRequest::HeaderFieldMap &rhs) {
-  HttpRequest::HeaderFieldMap::const_iterator it = rhs.cbegin();
-  HttpRequest::HeaderFieldMap::const_iterator ite = rhs.cend();
+  HttpRequest::HeaderFieldMap::const_iterator it = rhs.begin();
+  HttpRequest::HeaderFieldMap::const_iterator ite = rhs.end();
   for (; it != ite; ++it) {
     stream << it->first << ": " << it->second << std::endl;
   }

@@ -1,7 +1,7 @@
 NAME = webserv
 
 CXX = c++
-CXXFLAGS = -g -Wall -Werror -Wextra -fsanitize=address
+CXXFLAGS = -Wall -Werror -Wextra -std=c++98
 
 SRCS_DIR = ./src
 CONFIG_DIR = $(SRCS_DIR)/config

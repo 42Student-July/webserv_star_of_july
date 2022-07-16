@@ -52,10 +52,10 @@ void ConfigParser::parseListen(ServerConfig &server,
                                std::vector<std::string>::iterator &it) {
   if (it->find(":") != std::string::npos) {
     server.host = it->substr(0, it->find(":"));
-    server.port = stoi(it->substr(it->find(":") + 1, it->find(";")));
+    server.port = ft_stoi(it->substr(it->find(":") + 1, it->find(";")));
   } else {
     server.host = it->substr(0, it->find(":"));
-    server.port = stoi(it->substr(it->find(":") + 1, it->find(";")));
+    server.port = ft_stoi(it->substr(it->find(":") + 1, it->find(";")));
   }
 }
 
@@ -80,12 +80,12 @@ void ConfigParser::parseRoot(ServerConfig &server,
 void ConfigParser::parseErrorPages(ServerConfig &server,
                                    std::vector<std::string>::iterator &it) {
   server.error_pages.insert(std::pair<int, std::string>(
-      stoi(*it), (*(++it)).substr(0, it->find(";"))));
+      ft_stoi(*it), (*(++it)).substr(0, it->find(";"))));
 }
 
 void ConfigParser::parseClientBodySizeLimit(
     ServerConfig &server, std::vector<std::string>::iterator &it) {
-  server.client_body_size_limit = stoi(*it);
+  server.client_body_size_limit = ft_stoi(*it);
 }
 
 void ConfigParser::parseLocationRoot(LocationConfig &location,
@@ -199,7 +199,7 @@ void ConfigParser::parseServer(ServerConfig &server,
 std::string ConfigParser::readFile(std::string const file) {
   std::stringstream ss;
   std::string buf;
-  std::ifstream ifs(file);
+  std::ifstream ifs(file.c_str());
   if (ifs.fail()) {
     throw std::runtime_error("Error: Config: Cannot read config file");
   }
@@ -230,4 +230,8 @@ std::vector<std::string> ConfigParser::isspaceSplit(std::string const str) {
     tokens.push_back(std::string(str, j, i - j));
   }
   return tokens;
+}
+
+int ConfigParser::ft_stoi(std::string const &str){
+  return atoi(str.c_str());
 }

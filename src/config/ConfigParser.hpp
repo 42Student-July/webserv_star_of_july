@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include <cctype>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -64,6 +65,8 @@ class ConfigParser {
   // token化のためのutils
   std::string readFile(std::string const file);
   std::vector<std::string> isspaceSplit(std::string const str);
+
+  static int ft_stoi(std::string const &str);
 
   // 使わない関数
   ConfigParser(ConfigParser const &other);

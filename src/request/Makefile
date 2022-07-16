@@ -15,7 +15,7 @@
 NAME = librequest.a
 
 CXX = c++
-CXXFLAGS = -Wall -Werror -Wextra
+CXXFLAGS = -Wall -Werror -Wextra -std=c++98
 
 HEADERS = . \
 		  ../config \

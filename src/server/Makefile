@@ -15,7 +15,7 @@
 NAME = libserver.a
 
 CXX = c++
-CXXFLAGS = -g -Wall -Werror -Wextra -fsanitize=address
+CXXFLAGS = -Wall -Werror -Wextra -std=c++98
 
 HEADERS = . \
 		  ../config \
