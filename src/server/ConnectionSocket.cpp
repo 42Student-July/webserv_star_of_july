@@ -28,7 +28,7 @@ void ConnectionSocket::handleReadEvent() {
     return;
   }
   generateRequest(recv_size);
-  generateResponse(recv_size);
+  generateResponse();
   state_ = WRITE;
 }
 
@@ -58,22 +58,21 @@ void ConnectionSocket::generateRequest(ssize_t recv_size) {
 }
 
 // // GETメソッドのファイル決め打ち
-void ConnectionSocket::generateResponse(ssize_t recv_size) {
-  recv_buffer_[recv_size] = '\0';
-
-  current_response_ = new HttpResponse();
-  std::ifstream ifs("./www/html/index.html");
-  std::string str((std::istreambuf_iterator<char>(ifs)),
-                  std::istreambuf_iterator<char>());
-  current_response_->setBody(str);
-  response_ = current_response_->toString();
+void ConnectionSocket::generateResponse() {
+  ConfigConverter conf_converter;
+  ConfigDTO *conf_dto = conf_converter.toDTO(serverconfig_);
+  HttpRequestConverter req_converter;
+  HttpRequestDTO *req_dto = req_converter.toDTO(current_request_);
+  HttpResponseBuilder builder = HttpResponseBuilder(*conf_dto);
+  current_response_ = builder.build(*req_dto);
 }
 
 void ConnectionSocket::sendResponse() const {
-  const char *response = response_.c_str();
-  size_t response_len = response_.size();
+  HttpResponseSerializer  serializer = HttpResponseSerializer();
+  HttpResponsePlainText  *plain_txt = serializer.serialize(*current_response_);
+  const char *response = plain_txt->Text().c_str();
+  size_t response_len = plain_txt->Size();
 
-  // std::cerr << response << std::endl;
   if (send(fd_, response, response_len, 0) !=
       static_cast<ssize_t>(response_len)) {
     throw std::runtime_error("send() failed");

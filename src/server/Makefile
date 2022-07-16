@@ -20,7 +20,7 @@ CXXFLAGS = -g -Wall -Werror -Wextra -fsanitize=address
 HEADERS = . \
 		  ../config \
 		  ../request \
-		  ../response_hyoshie \
+		  ../response \
 		  $(NULL)
 
 INCLUDES = $(addprefix -I, $(HEADERS))

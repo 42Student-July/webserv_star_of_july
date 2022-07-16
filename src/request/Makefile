@@ -19,6 +19,7 @@ CXXFLAGS = -Wall -Werror -Wextra
 
 HEADERS = . \
 		  ../config \
+		  ../response \
 		  $(NULL)
 
 INCLUDES = $(addprefix -I, $(HEADERS))
@@ -45,7 +46,7 @@ run: $(OBJS) main.o
 
 .PHONY: clean
 clean:
-	@$(RM) $(OBJS) $(DEPS) main.o
+	@$(RM) $(OBJS) $(DEPS) main.o main.d
 
 .PHONY: fclean
 fclean: clean

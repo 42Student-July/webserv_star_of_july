@@ -1,5 +1,5 @@
-#ifndef CONFIG_HPP
-#define CONFIG_HPP
+#ifndef CONFIGDTO_HPP
+#define CONFIGDTO_HPP
 
 #include <map>
 #include <string>

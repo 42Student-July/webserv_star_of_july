@@ -52,6 +52,7 @@ TEST(HttpConverterTest, StoreAllHeaderField) {
   HttpRequestDTO *dto = converter.toDTO(request);
 
   checkRequestline("POST", "/", "HTTP/1.1", dto);
+  checkHeaderField("keep-alive", dto->connection);
   checkHeaderField("Basic fugafuga==", dto->authorization);
   checkHeaderField("21", dto->content_length);
   checkHeaderField("text/html", dto->content_type);
@@ -74,6 +75,7 @@ TEST(HttpConverterTest, StoreAllHeaderFieldShuffled) {
   HttpRequestDTO *dto = converter.toDTO(request);
 
   checkRequestline("POST", "/", "HTTP/1.1", dto);
+  checkHeaderField("keep-alive", dto->connection);
   checkHeaderField("Basic fugafuga==", dto->authorization);
   checkHeaderField("21", dto->content_length);
   checkHeaderField("text/html", dto->content_type);

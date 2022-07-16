@@ -8,6 +8,7 @@ GTEST_LIB_DIR = $(GTEST_DIR)/lib
 INCLUDE_DIR = $(GTEST_DIR)/googletest/include \
  			  $(SRC_DIR) \
  			   ../../../config \
+ 			   ../../../response \
  			   $(NULL)
 
 TEST_SRCS = $(shell find $(TEST_SRC_DIR) -name '*.cpp')

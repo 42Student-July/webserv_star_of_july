@@ -12,7 +12,9 @@
 #include "ASocket.hpp"
 #include "HttpRequestDTO.hpp"
 #include "HttpRequestParser.hpp"
-#include "HttpResponse.hpp"
+#include "HttpRequestConverter.hpp"
+#include "response.h"
+#include "ConfigConverter.hpp"
 
 class ConnectionSocket : public ASocket {
  public:
@@ -40,7 +42,7 @@ class ConnectionSocket : public ASocket {
   void handleWriteEvent();
   ssize_t recvFromClient();
   void generateRequest(ssize_t recv_size);
-  void generateResponse(ssize_t recv_size);
+  void generateResponse();
   void sendResponse() const;
 
   // int socket_fd_;

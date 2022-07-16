@@ -24,7 +24,10 @@ HttpRequestDTO* HttpRequestConverter::toDTO(HttpRequest* request) {
   dto->method = request->method;
   dto->path = request->uri;
   dto->version = request->version;
+  dto->body = request->body;
 
+  dto->connection =
+      searchRequestHeaderField(request->name_value_map, "Connection");
   dto->authorization =
       searchRequestHeaderField(request->name_value_map, "Authorization");
   dto->content_length =
@@ -39,11 +42,11 @@ HttpRequestDTO* HttpRequestConverter::toDTO(HttpRequest* request) {
       searchRequestHeaderField(request->name_value_map, "User_Agent");
   dto->x_forwarded_for =
       searchRequestHeaderField(request->name_value_map, "X_Forwarded_For");
-  dto->body = request->body;
-  dto->is_bad_request = request->is_bad_request;
 
   dto->host = request->server_config.host;
   dto->port = request->server_config.port;
   dto->servernames = request->server_config.server;
+
+  dto->is_bad_request = request->is_bad_request;
   return dto;
 }

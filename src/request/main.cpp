@@ -23,7 +23,7 @@ int main() {
   ServerConfig server_config;
   server_config.port = 4242;
   server_config.host = "42tokyo";
-  server_config.name.push_back("nop");
+  server_config.server.push_back("nop");
   // error_pages_は省略
   server_config.root = "www/html";
   server_config.client_body_size_limit = 65536;
@@ -36,9 +36,4 @@ int main() {
 
   std::cout << *request;
   std::cout << request->server_config.port << std::endl;
-
-  HttpRequestConverter converter;
-  HttpRequestDTO *dto = converter.toDTO(request);
-
-  std::cout << *dto;
 }

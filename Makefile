@@ -7,7 +7,7 @@ SRCS_DIR = ./src
 CONFIG_DIR = $(SRCS_DIR)/config
 SERVER_DIR = $(SRCS_DIR)/server
 REQUEST_DIR = $(SRCS_DIR)/request
-RESPONSE_DIR = $(SRCS_DIR)/response_hyoshie
+RESPONSE_DIR = $(SRCS_DIR)/response
 MODULE_DIRS = $(CONFIG_DIR) \
 			  $(SERVER_DIR) \
 			  $(REQUEST_DIR) \
