@@ -29,6 +29,9 @@ void CGI::readCGI() {
   char buf[BUF_SIZE];
   memset(buf, 0, sizeof(buf));
   size = read(pipe_c2p_[READ], buf, BUF_SIZE - 1);
+	(void)size;
+	// unused parameterでコンパイルできなかったので
+	// error処理した方がよさそうです
 }
 
 void print_char(char **c) {

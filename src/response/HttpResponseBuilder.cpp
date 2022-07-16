@@ -283,7 +283,7 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 			buildHeader(req);
 		}
 	}
-	catch(const ResponseException re)
+	catch(const ResponseException &re)
 	{
 		std::cout << "re.GetHttpStatus: " << re.GetHttpStatus() << std::endl;
 		return buildErrorResponse(re.GetHttpStatus(), req);

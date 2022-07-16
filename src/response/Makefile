@@ -6,7 +6,7 @@
 #    By: mhirabay <mhirabay@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/13 18:47:47 by mhirabay          #+#    #+#              #
-#    Updated: 2022/07/07 18:04:32 by mhirabay         ###   ########.fr        #
+#    Updated: 2022/07/16 12:04:37 by user42           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,6 +17,7 @@ SRCS			:=	main.cpp \
 					HttpResponseBuilder.cpp \
 					HttpResponseSerializer.cpp \
 					HttpResponsePlainText.cpp \
+					CGI.cpp
 
 CXX				:= c++
 RM				:= rm -rf
