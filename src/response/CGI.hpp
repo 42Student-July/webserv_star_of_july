@@ -5,6 +5,9 @@
 #include <unistd.h>
 
 #include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <sstream>
 
 #include "ConfigDTO.hpp"
