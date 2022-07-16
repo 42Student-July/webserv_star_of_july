@@ -6,14 +6,13 @@
 #    By: mhirabay <mhirabay@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/13 18:47:47 by mhirabay          #+#    #+#              #
-#    Updated: 2022/07/16 12:04:37 by user42           ###   ########.fr        #
+#    Updated: 2022/07/16 12:27:13 by user42           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME			:= a.out
+NAME			:= libresponse.a
 
-SRCS			:=	main.cpp \
-					HttpResponse.cpp \
+SRCS			:=	HttpResponse.cpp \
 					HttpResponseBuilder.cpp \
 					HttpResponseSerializer.cpp \
 					HttpResponsePlainText.cpp \
@@ -35,7 +34,7 @@ SRCSDIR := ./
 all:			$(NAME)
 
 $(NAME) : $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^ 
+	ar -rc $(NAME) $(OBJS)
 
 $(OBJS) : $(OBJSDIR)
 
@@ -45,6 +44,12 @@ $(OBJSDIR)%.o : ./%.cpp
 
 $(OBJSDIR):
 	mkdir -p $(OBJSDIR)
+
+# mainを実行できるコマンド。allでアーカイブを作るようにしたので
+run : main.o $(NAME)
+	$(CXX) $(CXXFLAGS) $^ -o a.out
+	./a.out
+	$(RM) a.out
 
 clean:
 				$(RM) $(OBJS)
@@ -59,7 +64,7 @@ re:				fclean $(NAME)
 debug:			CXXFLAGS += $(DEBUG)
 debug:			re
 
-.PHONY:			all clean fclean re
+.PHONY:			all clean fclean re run
 
 #cgiをgoogleテストで追加
 gtestdir	=	./cgitest
