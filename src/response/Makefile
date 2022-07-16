@@ -6,7 +6,7 @@
 #    By: mhirabay <mhirabay@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/13 18:47:47 by mhirabay          #+#    #+#              #
-#    Updated: 2022/07/16 12:27:13 by user42           ###   ########.fr        #
+#    Updated: 2022/07/16 20:23:10 by user42           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,19 +28,19 @@ DEBUG			:= -fsanitize=address
 
 OBJSDIR	:= ./obj/
 OBJS 	:= $(addprefix $(OBJSDIR), $(SRCS:%.cpp=%.o))
+DEPS	:= $(OBJS:.o=.d)
 
 SRCSDIR := ./
 
 all:			$(NAME)
 
-$(NAME) : $(OBJS)
+$(NAME) : $(OBJSDIR) $(OBJS)
 	ar -rc $(NAME) $(OBJS)
 
-$(OBJS) : $(OBJSDIR)
+-include $(DEPS)
 
 $(OBJSDIR)%.o : ./%.cpp
-	${CXX} ${CXXFLAGS} -c $< -o $@
-
+	${CXX} ${CXXFLAGS} -MMD -MP -c $< -o $@
 
 $(OBJSDIR):
 	mkdir -p $(OBJSDIR)
@@ -52,7 +52,7 @@ run : main.o $(NAME)
 	$(RM) a.out
 
 clean:
-				$(RM) $(OBJS)
+				$(RM) $(OBJS) $(DEPS)
 				$(RM) $(OBJSDIR)
 
 fclean:			clean

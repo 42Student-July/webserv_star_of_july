@@ -32,6 +32,8 @@ DEPS = $(OBJS:.o=.d)
 .PHONY: all
 all: $(NAME)
 
+-include $(DEPS)
+
 $(NAME):$(OBJS)
 	@ar rc $(NAME) $(OBJS)
 
