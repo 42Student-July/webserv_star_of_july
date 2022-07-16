@@ -1,0 +1,16 @@
+
+ compile_mac:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: test
+      run: |
+        make
+
+  compile_ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: test
+      run: |
+        make
