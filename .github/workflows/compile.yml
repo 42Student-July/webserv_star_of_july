@@ -8,12 +8,11 @@ on:
     branches:
       - main
 
-jobs:
-  googletest:
+ compile_mac:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
     - name: test
       run: |
-        cd src/config
-        make test
+        make
+
