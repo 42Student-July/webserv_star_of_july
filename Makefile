@@ -38,13 +38,24 @@ all: $(NAME)
 
 -include $(DEPS)
 
-$(NAME): $(OBJS) create_libs
+$(NAME): $(OBJS) $(LIBS)
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) $(LIBS) -o $@
 	@printf "$(GREEN)Compile done:)\n$(END)"
 
-.PHONY: create_libs
-create_libs:
-	@for dir in $(MODULE_DIRS); do make -C $$dir; done
+$(LIB_SERVER): dummy
+	@make -C $(SERVER_DIR)
+
+$(LIB_CONFIG): dummy
+	@make -C $(CONFIG_DIR)
+
+$(LIB_REQUEST): dummy
+	@make -C $(REQUEST_DIR)
+
+$(LIB_RESPONSE): dummy
+	@make -C $(RESPONSE_DIR)
+
+.PHONY: dummy
+dummy:
 
 .PHONY: clean
 clean:
