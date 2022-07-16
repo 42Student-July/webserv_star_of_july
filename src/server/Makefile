@@ -15,7 +15,7 @@
 NAME = libserver.a
 
 CXX = c++
-CXXFLAGS = -Wall -Werror -Wextra -std=c++98
+CXXFLAGS = -Wall -Werror -Wextra -Wshadow -std=c++98 -pedantic
 
 HEADERS = . \
 		  ../config \

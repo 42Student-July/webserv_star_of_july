@@ -21,7 +21,7 @@ class ConnectionSocket : public ASocket {
   enum State {
     READ,
     WRITE,
-    CLOSE,
+    CLOSE
   };
 
   ConnectionSocket(int accepted_fd, const ServerConfig &serverconfig);
