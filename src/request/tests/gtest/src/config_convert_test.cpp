@@ -10,7 +10,6 @@
 #include "../../../../response/ConfigDTO.hpp"
 
 TEST(ConfigConverterTest, StoreEverything) {
-  HttpRequestParser parser;
   ServerConfig config = initServerConfigWithLocation();
   ConfigConverter converter;
   ConfigDTO *dto = converter.toDTO(config);
