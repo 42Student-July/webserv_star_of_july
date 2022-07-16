@@ -18,3 +18,19 @@ jobs:
         cd src/config
         make test
 
+jobs:
+ compile_mac:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: test
+      run: |
+        make
+jobs:
+  compile_ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: test
+      run: |
+        make
