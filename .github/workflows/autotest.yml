@@ -18,7 +18,7 @@ jobs:
         cd src/config
         make test
 
-  compile_mac:
+ compile_mac:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
@@ -26,7 +26,7 @@ jobs:
       run: |
         make
 
-  compile_mac:
+  compile_ubuntu:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
