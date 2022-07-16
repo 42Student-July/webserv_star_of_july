@@ -1,8 +1,8 @@
 #include "Server.hpp"
 
 Server::Server(const std::vector<ServerConfig> &serverconfigs) {
-  for (std::vector<ServerConfig>::const_iterator it = serverconfigs.cbegin();
-       it != serverconfigs.cend(); it++) {
+  for (std::vector<ServerConfig>::const_iterator it = serverconfigs.begin();
+       it != serverconfigs.end(); it++) {
     ServerSocket *serv_sock = new ServerSocket(*it);
     fd2socket_[serv_sock->getFd()] = serv_sock;
   }
@@ -43,14 +43,16 @@ void Server::handleConnectionSocket(ConnectionSocket *socket) {
 
 // 通信を終えたConnectionSocketSocketを破棄する
 void Server::destroyConnectionSockets() {
-  for (SocketMap::const_iterator it = fd2socket_.begin();
-       it != fd2socket_.cend(); it++) {
+  for (SocketMap::iterator it = fd2socket_.begin();
+       it != fd2socket_.end(); it++) {
     if (!utils::isServerSocket(it->second)) {
       ConnectionSocket::State state =
           dynamic_cast<ConnectionSocket *>(it->second)->getState();
       if (state == ConnectionSocket::CLOSE) {
-        delete it->second;
-        fd2socket_.erase(it);
+        SocketMap::iterator tmp_it = it;
+        it++;
+        delete tmp_it->second;
+        fd2socket_.erase(tmp_it);
       }
     }
   }

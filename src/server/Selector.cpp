@@ -19,7 +19,7 @@ void Selector::clear() {
 }
 
 void Selector::init(const SocketMap &target) {
-  for (SocketMap::const_iterator it = target.begin(); it != target.cend();
+  for (SocketMap::const_iterator it = target.begin(); it != target.end();
        it++) {
     if (utils::isServerSocket(it->second)) {
       target_read_[it->first] = it->second;
@@ -60,13 +60,13 @@ int Selector::select(const SocketMap &fd2socket) {
 void Selector::showTarget() {
   std::cerr << "###Read Target  : ";
   for (SocketMap::const_iterator it = target_read_.begin();
-       it != target_read_.cend(); it++) {
+       it != target_read_.end(); it++) {
     std::cerr << it->first << ", ";
   }
   std::cerr << std::endl;
   std::cerr << "###Write Target : ";
   for (SocketMap::const_iterator it = target_write_.begin();
-       it != target_write_.cend(); it++) {
+       it != target_write_.end(); it++) {
     std::cerr << it->first << ", ";
   }
   std::cerr << std::endl << std::endl;
@@ -92,7 +92,7 @@ fd_set Selector::toFdset(const SocketMap &sockets) {
   fd_set ret;
 
   FD_ZERO(&ret);
-  for (SocketMap::const_iterator it = sockets.cbegin(); it != sockets.cend();
+  for (SocketMap::const_iterator it = sockets.begin(); it != sockets.end();
        it++) {
     FD_SET(it->first, &ret);
   }
@@ -103,8 +103,8 @@ Selector::SocketMap Selector::toSocketMap(const fd_set &fdset,
                                           const SocketMap &target_fds) {
   SocketMap fd2set;
 
-  for (SocketMap::const_iterator it = target_fds.cbegin();
-       it != target_fds.cend(); it++) {
+  for (SocketMap::const_iterator it = target_fds.begin();
+       it != target_fds.end(); it++) {
     if (FD_ISSET(it->first, &fdset)) {
       fd2set[it->first] = it->second;
     }

@@ -4,6 +4,7 @@
 const std::string HttpResponseBuilder::CRLF = "\r\n";
 const std::string HttpResponseBuilder::ACCEPT_RANGES = "none";
 const std::string HttpResponseBuilder::OCTET_STREAM = "application/octet-stream";
+const std::string HttpResponseBuilder::TEXT_HTML = "text/html";
 
 HttpResponseBuilder::HttpResponseBuilder() {}
 
@@ -195,6 +196,13 @@ std::string HttpResponseBuilder::buildLastModified()
 	return mod_time;
 }
 
+static std::string toString(size_t val) {
+  std::stringstream ss;
+
+  ss << val;
+  return ss.str();
+}
+
 void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 {
 	header_.version = req.version;
@@ -202,8 +210,11 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 	header_.reason_phrase = HttpStatus::ReasonPhrase::OK;
 	header_.date = buildDate();
 	header_.server = conf_.server;
-	header_.content_type = OCTET_STREAM;
-	header_.content_length = file_str_.str().size();
+	// header_.content_type = OCTET_STREAM;
+	// とりあえずブラウザから見れるようにしました。
+	header_.content_type = TEXT_HTML;
+	size_t  content_length = file_str_.str().size();
+	header_.content_length = toString(content_length);
 	header_.last_modified = buildLastModified();
 	header_.connection = req.connection;
 	// 特にこういうふうにしろみたいな指定があるわけでもなさそう RFC7232

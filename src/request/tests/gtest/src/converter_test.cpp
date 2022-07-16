@@ -16,7 +16,7 @@ TEST(HttpConverterTest, StoreOneHeaderField) {
   HttpRequestConverter converter;
   HttpRequestDTO *dto = converter.toDTO(request);
 
-  checkRequestline("POST", "/", "HTTP/1.1", dto);
+  checkRequestline("POST", "/", "1.1", dto);
   checkHeaderField("Basic fugafuga==", dto->authorization);
   ASSERT_FALSE(dto->is_bad_request);
 }
@@ -30,7 +30,7 @@ TEST(HttpConverterTest, StoreNoHeaderField) {
   HttpRequestConverter converter;
   HttpRequestDTO *dto = converter.toDTO(request);
 
-  checkRequestline("POST", "/", "HTTP/1.1", dto);
+  checkRequestline("POST", "/", "1.1", dto);
   checkHeaderField("", dto->authorization);
   checkHeaderField("", dto->content_length);
   checkHeaderField("", dto->content_type);
@@ -51,7 +51,8 @@ TEST(HttpConverterTest, StoreAllHeaderField) {
   HttpRequestConverter converter;
   HttpRequestDTO *dto = converter.toDTO(request);
 
-  checkRequestline("POST", "/", "HTTP/1.1", dto);
+  checkRequestline("POST", "/", "1.1", dto);
+  checkHeaderField("keep-alive", dto->connection);
   checkHeaderField("Basic fugafuga==", dto->authorization);
   checkHeaderField("21", dto->content_length);
   checkHeaderField("text/html", dto->content_type);
@@ -73,7 +74,8 @@ TEST(HttpConverterTest, StoreAllHeaderFieldShuffled) {
   HttpRequestConverter converter;
   HttpRequestDTO *dto = converter.toDTO(request);
 
-  checkRequestline("POST", "/", "HTTP/1.1", dto);
+  checkRequestline("POST", "/", "1.1", dto);
+  checkHeaderField("keep-alive", dto->connection);
   checkHeaderField("Basic fugafuga==", dto->authorization);
   checkHeaderField("21", dto->content_length);
   checkHeaderField("text/html", dto->content_type);
@@ -94,7 +96,7 @@ TEST(HttpConverterTest, StoreBodyMultiLinesToBody) {
   HttpRequestConverter converter;
   HttpRequestDTO *dto = converter.toDTO(request);
 
-  checkRequestline("POST", "/", "HTTP/1.1", dto);
+  checkRequestline("POST", "/", "1.1", dto);
   checkBody("1stline\n2ndline\n3rdline\n", dto->body);
   ASSERT_FALSE(dto->is_bad_request);
 }
@@ -108,7 +110,7 @@ TEST(HttpConverterTest, StoreServerConfig) {
   HttpRequestConverter converter;
   HttpRequestDTO *dto = converter.toDTO(request);
 
-  checkRequestline("GET", "/", "HTTP/1.1", dto);
+  checkRequestline("GET", "/", "1.1", dto);
   checkBody("", dto->body);
   ASSERT_FALSE(dto->is_bad_request);
   ASSERT_EQ(4242, dto->port);

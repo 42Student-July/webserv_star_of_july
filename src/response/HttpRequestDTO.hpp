@@ -20,6 +20,14 @@ struct HttpRequestDTO {
   std::string x_forwarded_for;
   // TODO: 後で消す
   std::string file;
+
+  // Serverの情報
+  std::string host;
+  size_t port;
+  std::vector<std::string> servernames;
+
+  // Parser時点でのbadrequestの判定
+  bool is_bad_request;
 };
 
 #endif

@@ -138,3 +138,15 @@ TEST(Error, NoCurlyBracketsLocationThrowsException) {
     ASSERT_STREQ("Error: Config: Wrong syntax", e.what());
   }
 }
+
+TEST(ConfigParserLocationsTests, CanParseSaishoConf) {
+  ConfigParser configparser("./TestConfigs/saisho_example.conf");
+  std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
+  ASSERT_EQ("127.0.0.1", serverconfig[0].host);
+  ASSERT_EQ(4242, serverconfig[0].port);
+  ASSERT_EQ("/var/www/html", serverconfig[0].root);
+  ASSERT_EQ("/404.html", serverconfig[0].error_pages[404]);
+  ASSERT_EQ(1024, serverconfig[0].client_body_size_limit);
+  ASSERT_EQ("/", serverconfig[0].locations[0].location);
+  ASSERT_EQ("www/html", serverconfig[0].locations[0].root);
+}

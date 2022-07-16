@@ -3,6 +3,7 @@
 #include "ConfigParser.hpp"
 #include "Server.hpp"
 #include "color.hpp"
+#include "response.h"
 
 int main(int argc, const char **argv) {
   if (argc != 2) {

@@ -8,6 +8,7 @@ GTEST_LIB_DIR = $(GTEST_DIR)/lib
 INCLUDE_DIR = $(GTEST_DIR)/googletest/include \
  			  $(SRC_DIR) \
  			   ../../../config \
+ 			   ../../../response \
  			   $(NULL)
 
 TEST_SRCS = $(shell find $(TEST_SRC_DIR) -name '*.cpp')
@@ -22,7 +23,7 @@ GTEST_LIBS = -lgtest \
 TEST_LIB = $(SRC_DIR)/librequest.a
 
 .PHONY: test
-test: $(GTEST_DIR) $(TEST_LIB)
+test: $(GTEST_DIR) create_lib
 	@$(CXX) $(CXXFLAGS) $(GTEST_INCLUDES) $(TEST_SRCS) $(TEST_LIB) -L$(GTEST_LIB_DIR) $(GTEST_LIBS) -o test
 	@./test
 	@$(RM) test
@@ -35,7 +36,8 @@ $(GTEST_DIR):
 	cmake . && \
 	make)
 
-$(TEST_LIB):
+.PHONY: create_lib
+create_lib:
 	@make -C $(SRC_DIR)
 
 .PHONY: clean

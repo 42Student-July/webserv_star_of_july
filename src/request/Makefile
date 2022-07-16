@@ -15,10 +15,11 @@
 NAME = librequest.a
 
 CXX = c++
-CXXFLAGS = -Wall -Werror -Wextra
+CXXFLAGS = -Wall -Werror -Wextra -Wshadow -std=c++98 -pedantic
 
 HEADERS = . \
 		  ../config \
+		  ../response \
 		  $(NULL)
 
 INCLUDES = $(addprefix -I, $(HEADERS))
@@ -31,6 +32,8 @@ DEPS = $(OBJS:.o=.d)
 
 .PHONY: all
 all: $(NAME)
+
+-include $(DEPS)
 
 $(NAME):$(OBJS)
 	@ar rc $(NAME) $(OBJS)
@@ -45,7 +48,7 @@ run: $(OBJS) main.o
 
 .PHONY: clean
 clean:
-	@$(RM) $(OBJS) $(DEPS) main.o
+	@$(RM) $(OBJS) $(DEPS) main.o main.d
 
 .PHONY: fclean
 fclean: clean

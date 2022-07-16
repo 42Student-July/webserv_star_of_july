@@ -15,12 +15,12 @@
 NAME = libserver.a
 
 CXX = c++
-CXXFLAGS = -g -Wall -Werror -Wextra -fsanitize=address
+CXXFLAGS = -Wall -Werror -Wextra -Wshadow -std=c++98 -pedantic
 
 HEADERS = . \
 		  ../config \
 		  ../request \
-		  ../response_hyoshie \
+		  ../response \
 		  $(NULL)
 
 INCLUDES = $(addprefix -I, $(HEADERS))
@@ -33,6 +33,8 @@ DEPS = $(OBJS:.o=.d)
 
 .PHONY: all
 all: $(NAME)
+
+-include $(DEPS)
 
 $(NAME):$(OBJS)
 	@ar rc $(NAME) $(OBJS)
