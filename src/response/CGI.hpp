@@ -13,10 +13,6 @@
 #include "ConfigDTO.hpp"
 #include "HttpRequestDTO.hpp"
 
-const int READ = 0;
-const int WRITE = 1;
-const size_t BUF_SIZE = 512;
-
 class CGI {
  public:
   CGI();
