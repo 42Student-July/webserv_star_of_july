@@ -6,22 +6,22 @@
 #include <string>
 
 #include "HttpRequest.hpp"
+#include "HttpStatus.hpp"
 #include "ServerConfig.hpp"
 
 class HttpRequestParser {
  public:
-  // privateにするかも
-  typedef std::map<std::string, std::string> HeaderFieldMap;
-
   HttpRequestParser();
   ~HttpRequestParser();
-
+  // 2つの引数はコンストラクタで渡した方が読みやすいかも。
   HttpRequest* parse(const char* request_str,
                      const ServerConfig& server_config);
 
  private:
   // 型
+  typedef HttpRequest::HeaderFieldPair HeaderFieldPair;
   typedef std::string::size_type StringPos;
+
   class ParseErrorExeption : public std::runtime_error {
    public:
     ParseErrorExeption(const std::string& error_status,
@@ -40,9 +40,7 @@ class HttpRequestParser {
   // メソッド
   HttpRequestParser(const HttpRequestParser& other);
   HttpRequestParser& operator=(const HttpRequestParser& other);
-
   void parseRequestLine(HttpRequest* request);
-  void validateRequestLine(HttpRequest* request);
   void parseHeaderField(HttpRequest* request);
   void parseBody(HttpRequest* request);
   StringPos parseMethod(const std::string& request_line, HttpRequest* request);
@@ -50,10 +48,13 @@ class HttpRequestParser {
                      StringPos offset);
   StringPos parseHttpVersion(const std::string& request_line,
                              HttpRequest* request, StringPos offset);
-  bool getLine(std::string* line);
+  void validateRequestLine(HttpRequest* request);
+  static HeaderFieldPair makeHeaderFieldPair(const std::string& line);
+  std::string getLine();
 
   // メンバ変数
-  std::string offset_;
+  std::string raw_buffer_;
+  StringPos offset_;
 };
 
 #endif  // SRC_HTTPREQUESTPARSER_HPP_

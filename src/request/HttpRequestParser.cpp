@@ -1,6 +1,9 @@
 #include "HttpRequestParser.hpp"
 
-HttpRequestParser::HttpRequestParser() {}
+const std::string HttpRequestParser::CRLF = "\r\n";
+const std::string HttpRequestParser::WS = " \t";
+
+HttpRequestParser::HttpRequestParser() : raw_buffer_(""), offset_(0) {}
 
 HttpRequestParser::~HttpRequestParser() {}
 
@@ -15,13 +18,11 @@ const std::string& HttpRequestParser::ParseErrorExeption::getErrorStatus()
   return error_status_;
 }
 
+// 2つの引数はコンストラクタで渡した方が読みやすいかも。
 HttpRequest* HttpRequestParser::parse(const char* request_str,
                                       const ServerConfig& server_config) {
-  HttpRequest* request = new HttpRequest;
-  request->is_bad_request = false;
-  request->status = HttpStatus::OK;
-  request->server_config = server_config;
-  offset_ = request_str;
+  raw_buffer_ = request_str;
+  HttpRequest* request = new HttpRequest(server_config);
 
   try {
     parseRequestLine(request);
@@ -34,10 +35,9 @@ HttpRequest* HttpRequestParser::parse(const char* request_str,
 }
 
 void HttpRequestParser::parseRequestLine(HttpRequest* request) {
-  std::string line;
   StringPos offset = 0;
+  std::string line = getLine();
 
-  getLine(&line);
   offset = parseMethod(line, request);
   offset = parseUri(line, request, offset);
   offset = parseHttpVersion(line, request, offset);
@@ -64,7 +64,6 @@ HttpRequestParser::StringPos HttpRequestParser::parseUri(
 HttpRequestParser::StringPos HttpRequestParser::parseHttpVersion(
     const std::string& request_line, HttpRequest* request, StringPos offset) {
   request->version = request_line.substr(offset + 1);
-
   return std::string::npos;
 }
 
@@ -77,43 +76,39 @@ void HttpRequestParser::validateRequestLine(HttpRequest* request) {
 }
 
 void HttpRequestParser::parseHeaderField(HttpRequest* request) {
-  HttpRequest::HeaderFieldMap name_value_map;
-  std::string line;
+  for (std::string line = getLine(); line.size() != 0; line = getLine()) {
+    HeaderFieldPair name_value_pair = makeHeaderFieldPair(line);
 
-  while (getLine(&line) && line.size() != 0) {
-    StringPos name_end = line.find_first_of(":");
-    std::string name = line.substr(0, name_end);
-    StringPos value_begin = line.find_first_not_of(WS, name_end + 1);
-    std::string value = line.substr(value_begin);
-
-    name_value_map[name] = value;
+    request->name_value_map.insert(name_value_pair);
   }
-  request->name_value_map = name_value_map;
+}
+
+// 変数宣言と初期化を同時にするとなんか読みにくい。
+HttpRequestParser::HeaderFieldPair HttpRequestParser::makeHeaderFieldPair(
+    const std::string& line) {
+  StringPos name_end = line.find_first_of(":");
+  StringPos value_begin = line.find_first_not_of(WS, name_end + 1);
+  std::string name = line.substr(0, name_end);
+  std::string value = line.substr(value_begin);
+
+  return HeaderFieldPair(name, value);
 }
 
 void HttpRequestParser::parseBody(HttpRequest* request) {
-  std::string line;
-  std::string body;
-
-  while (getLine(&line) && line.size() != 0) {
-    body += line;
-    body += "\n";
+  for (std::string line = getLine(); line.size() != 0; line = getLine()) {
+    request->body += line;
+    request->body += "\n";
   }
-  request->body = body;
 }
 
-// 現在のオフセットから一行読み取る関数。読み取ったら改行の次の文字にoffsetを進める
-bool HttpRequestParser::getLine(std::string* line) {
-  StringPos n = offset_.find(CRLF);
-
-  if (n == std::string::npos) {
+// 変数宣言と初期化を同時にするとなんか読みにくい。
+// 現在のオフセットから一行読み取る関数。読み取ったら次の行頭にoffsetを進める
+std::string HttpRequestParser::getLine() {
+  StringPos crlf_pos = raw_buffer_.find(CRLF, offset_);
+  if (crlf_pos == std::string::npos) {
     throw ParseErrorExeption("404", "getLine() error");
-    return false;
   }
-  *line = offset_.substr(0, n);
-  offset_ = offset_.substr(n + 2);
-  return true;
+  std::string line = raw_buffer_.substr(offset_, crlf_pos - offset_);
+  offset_ = crlf_pos + 2;
+  return line;
 }
-
-const std::string HttpRequestParser::CRLF = "\r\n";
-const std::string HttpRequestParser::WS = " \t";

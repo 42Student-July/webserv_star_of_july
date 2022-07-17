@@ -10,6 +10,13 @@ static std::ostream &operator<<(std::ostream &stream,
   return stream;
 }
 
+HttpRequest::HttpRequest(const ServerConfig &server_conf)
+    : is_bad_request(false),
+      server_config(server_conf),
+      status(HttpStatus::OK) {}
+
+HttpRequest::~HttpRequest() {}
+
 std::ostream &operator<<(std::ostream &stream, const HttpRequest &rhs) {
   stream << "###Parsed Request###" << std::endl
          << "#RequestLine" << std::endl
