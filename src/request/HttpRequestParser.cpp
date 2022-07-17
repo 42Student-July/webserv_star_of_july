@@ -4,33 +4,76 @@ HttpRequestParser::HttpRequestParser() {}
 
 HttpRequestParser::~HttpRequestParser() {}
 
+HttpRequestParser::ParseErrorExeption::ParseErrorExeption(
+    const std::string& error_status, const std::string& reason)
+    : std::runtime_error(reason), error_status_(error_status) {}
+
+HttpRequestParser::ParseErrorExeption::~ParseErrorExeption() throw() {}
+
+const std::string& HttpRequestParser::ParseErrorExeption::getErrorStatus()
+    const {
+  return error_status_;
+}
+
 HttpRequest* HttpRequestParser::parse(const char* request_str,
                                       const ServerConfig& server_config) {
   HttpRequest* request = new HttpRequest;
   request->is_bad_request = false;
+  request->status = HttpStatus::OK;
   request->server_config = server_config;
   offset_ = request_str;
 
-  parseRequestLine(request);
-  parseHeaderField(request);
-  parseBody(request);
+  try {
+    parseRequestLine(request);
+    parseHeaderField(request);
+    parseBody(request);
+  } catch (const ParseErrorExeption& e) {
+    request->status = e.getErrorStatus();
+  }
   return request;
 }
 
 void HttpRequestParser::parseRequestLine(HttpRequest* request) {
   std::string line;
+  StringPos offset = 0;
 
-  if (!getLine(&line)) {
-    return;
+  getLine(&line);
+  offset = parseMethod(line, request);
+  offset = parseUri(line, request, offset);
+  offset = parseHttpVersion(line, request, offset);
+  validateRequestLine(request);
+}
+
+HttpRequestParser::StringPos HttpRequestParser::parseMethod(
+    const std::string& request_line, HttpRequest* request) {
+  StringPos method_end = request_line.find_first_of(" ");
+
+  request->method = request_line.substr(0, method_end);
+  return method_end;
+}
+
+HttpRequestParser::StringPos HttpRequestParser::parseUri(
+    const std::string& request_line, HttpRequest* request, StringPos offset) {
+  StringPos uri_begin = request_line.find_first_not_of(" ", offset);
+  StringPos uri_end = request_line.find_last_of(" ");
+
+  request->uri = request_line.substr(uri_begin, uri_end - uri_begin);
+  return uri_end;
+}
+
+HttpRequestParser::StringPos HttpRequestParser::parseHttpVersion(
+    const std::string& request_line, HttpRequest* request, StringPos offset) {
+  request->version = request_line.substr(offset + 1);
+
+  return std::string::npos;
+}
+
+void HttpRequestParser::validateRequestLine(HttpRequest* request) {
+  if (request->version != "HTTP/1.1") {
+    request->is_bad_request = true;
+    request->status = HttpStatus::BAD_REQUEST;
+    throw ParseErrorExeption("404", "HttpVersion error");
   }
-
-  std::string::size_type method_end = line.find_first_of(" ");
-  request->method = line.substr(0, method_end);
-
-  std::string::size_type uri_begin = line.find_first_not_of(" ", method_end);
-  std::string::size_type uri_end = line.find_last_of(" ");
-  request->uri = line.substr(uri_begin, uri_end - uri_begin);
-  request->version = line.substr(uri_end + 1);
 }
 
 void HttpRequestParser::parseHeaderField(HttpRequest* request) {
@@ -38,10 +81,9 @@ void HttpRequestParser::parseHeaderField(HttpRequest* request) {
   std::string line;
 
   while (getLine(&line) && line.size() != 0) {
-    std::string::size_type name_end = line.find_first_of(":");
+    StringPos name_end = line.find_first_of(":");
     std::string name = line.substr(0, name_end);
-    std::string::size_type value_begin =
-        line.find_first_not_of(WS, name_end + 1);
+    StringPos value_begin = line.find_first_not_of(WS, name_end + 1);
     std::string value = line.substr(value_begin);
 
     name_value_map[name] = value;
@@ -60,21 +102,12 @@ void HttpRequestParser::parseBody(HttpRequest* request) {
   request->body = body;
 }
 
-// responseモジュールに渡す項目をDTOにいれる
-// void HttpRequestParser::setHeaderField(HttpRequest* request) {
-//   if (name_value_map_.find("Host") != name_value_map_.end()) {
-//     request->host = name_value_map_["Host"];
-//   }
-//   if (name_value_map_.find("Connection") != name_value_map_.end()) {
-//     request->connection = name_value_map_["Connection"];
-//   }
-// }
-
 // 現在のオフセットから一行読み取る関数。読み取ったら改行の次の文字にoffsetを進める
 bool HttpRequestParser::getLine(std::string* line) {
-  std::string::size_type n = offset_.find(CRLF);
+  StringPos n = offset_.find(CRLF);
 
   if (n == std::string::npos) {
+    throw ParseErrorExeption("404", "getLine() error");
     return false;
   }
   *line = offset_.substr(0, n);

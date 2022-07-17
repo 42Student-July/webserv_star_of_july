@@ -6,6 +6,7 @@
 #include <string>
 
 #include "ServerConfig.hpp"
+#include "HttpStatus.hpp"
 
 struct HttpRequest {
   typedef std::map<std::string, std::string> HeaderFieldMap;
@@ -17,6 +18,7 @@ struct HttpRequest {
   std::string body;
   bool is_bad_request;
   ServerConfig server_config;
+  std::string status; //responseのHttpStatus.hppにある文字列が入る
 };
 
 std::ostream& operator<<(std::ostream& stream, const HttpRequest& rhs);
