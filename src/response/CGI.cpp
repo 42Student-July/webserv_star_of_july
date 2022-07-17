@@ -25,6 +25,10 @@ void CGI::run(HttpRequestDTO &req, ConfigDTO &conf) {
 std::string CGI::getResponseFromCGI() const { return cgi_body_; }
 
 void CGI::readCGI() {
+  //headerで宣言する
+  const int READ = 0;
+  const size_t BUF_SIZE = 512;
+
   size_t size = 0;
   char buf[BUF_SIZE];
   memset(buf, 0, sizeof(buf));
@@ -111,6 +115,11 @@ void CGI::createPipe() {
 }
 
 void CGI::spawnChild() {
+  //headerで宣言する
+  const int READ = 0;
+  const int WRITE = 1;
+  const size_t BUF_SIZE = 512;
+
   pid_t pid = fork();
   if (pid < 0) {
     throw(-1);
@@ -142,6 +151,9 @@ void CGI::spawnChild() {
 }
 
 void CGI::dupIO() {
+
+  const int READ = 0;
+  const int WRITE = 1;
   if (req_.method == "POST") {
     dupFd(pipe_p2c_[READ], STDIN_FILENO);
     close(pipe_p2c_[WRITE]);
