@@ -9,15 +9,7 @@ void CGI::run(HttpRequestDTO &req, ConfigDTO &conf) {
   req_ = req;
   conf_ = conf;
   createEnvs();
-  // createArgs();
-  // createArgsにする
-  std::string command = "/usr/bin/python3";
-  std::string command2 = "cgi-bin/test.py";
-  exec_args_ = new char *[3];
-  // const外しはしないようにする
-  exec_args_[0] = const_cast<char *>(command.c_str());
-  exec_args_[1] = const_cast<char *>(command2.c_str());
-  exec_args_[2] = NULL;
+  createArgs();
   createPipe();
   spawnChild();
 }
@@ -36,6 +28,15 @@ void CGI::readCGI() {
 	(void)size;
 	// unused parameterでコンパイルできなかったので
 	// error処理した方がよさそうです
+}
+
+char *CGI::allocString(const std::string &str)
+{
+	char *ret = strdup(str.c_str());
+	if (ret == NULL) {
+		throw -1;
+	}
+	return ret;
 }
 
 void print_char(char **c) {
@@ -61,8 +62,8 @@ void CGI::createArgs() {
   std::string command2 = "cgi-bin/test.py";
   exec_args_ = new char *[3];
   // const外しはしないようにする
-  exec_args_[0] = const_cast<char *>(command.c_str());
-  exec_args_[1] = const_cast<char *>(command2.c_str());
+  exec_args_[0] = allocString(command);
+  exec_args_[1] = allocString(command2);
   exec_args_[2] = NULL;
 }
 
