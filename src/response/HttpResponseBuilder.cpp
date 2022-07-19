@@ -80,6 +80,7 @@ void HttpResponseBuilder::findActualErrorFilepath(std::string dir, std::string f
 	char			*cwd;
 	std::string		fullpath;
 	
+	//TODO: default rootを使う
 	cwd = getcwd(NULL, 0);
 	fullpath = std::string(cwd) + dir;
 	std::free(cwd);
@@ -351,12 +352,16 @@ HttpResponse *HttpResponseBuilder::buildErrorResponse(int httpstatus, HttpReques
 
 std::string HttpResponseBuilder::getCurrentPath()
 {
+	std::string current_path;
 	char *cwd;
 	
 	cwd = getcwd(NULL, 0);
 	if (cwd == NULL)
 		throw ResponseException("getcwd", 500);
-	return std::string(cwd);
+	
+	current_path = std::string(cwd);
+	std::free(cwd);
+	return current_path;
 }
 
 void HttpResponseBuilder::setDefaultRoot()
