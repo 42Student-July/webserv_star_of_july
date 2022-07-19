@@ -30,6 +30,7 @@ static std::string FORBIDDEN = "403";
 static std::string NOT_FOUND = "404";
 static std::string INTERNAL_SERVER_ERROR = "500";
 static std::string SERVICE_UNAVAILABLE = "503";
+static std::string HTTP_VERSION_NOT_SUPPORTED = "505";
 namespace ReasonPhrase {
 static std::string OK = "OK";
 static std::string CREATED = "Created";

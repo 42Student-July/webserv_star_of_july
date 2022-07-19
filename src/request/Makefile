@@ -60,8 +60,8 @@ re: fclean all
 # テスト
 TEST_DIR = tests
 
-.PHONY: gtest
-gtest:
+.PHONY: test
+test:
 	make -C $(TEST_DIR) googletest
 
 

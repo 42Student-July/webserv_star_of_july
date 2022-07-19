@@ -127,3 +127,125 @@ TEST(HttpParserTest, StoreServerConfig) {
   ASSERT_EQ(65536, request->server_config.client_body_size_limit);
   ASSERT_FALSE(request->is_bad_request);
 }
+
+TEST(HttpParserTest, InvalidHttpVersion) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/invalid_http_version.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_TRUE(request->is_bad_request);
+}
+
+TEST(HttpParserTest, NoRequestLine) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/no_request_line.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_TRUE(request->is_bad_request);
+  compareString("400", request->status);
+}
+
+// parserでは200:OK
+TEST(HttpParserTest, NoMethod) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/no_method.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_TRUE(request->is_bad_request);
+  compareString("400", request->status);
+}
+
+// parserでは200:OK
+TEST(HttpParserTest, NoUri) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/no_uri.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_TRUE(request->is_bad_request);
+  compareString("400", request->status);
+}
+
+TEST(HttpParserTest, NoHttpVersion) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/no_http_version.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_TRUE(request->is_bad_request);
+  compareString("400", request->status);
+}
+
+TEST(HttpParserTest, InvalidProtocol) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/invalid_protocol.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_TRUE(request->is_bad_request);
+  compareString("400", request->status);
+}
+
+TEST(HttpParserTest, VersionHasNoSlash) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/version_has_no_slash.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_TRUE(request->is_bad_request);
+  compareString("400", request->status);
+}
+
+TEST(HttpParserTest, VersionHasNoPeriod) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/version_has_no_period.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_TRUE(request->is_bad_request);
+  compareString("400", request->status);
+}
+
+TEST(HttpParserTest, VersionHasOtherThanDigit) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content =
+      readFile("request/version_has_other_than_digit.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_TRUE(request->is_bad_request);
+  compareString("400", request->status);
+}
+
+TEST(HttpParserTest, VersionIsNotSupported) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/version_is_not_supported.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_TRUE(request->is_bad_request);
+  compareString("505", request->status);
+}

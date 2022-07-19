@@ -1,0 +1,4 @@
+GET / HTTP/1.a
+Host: admin
+user-agent: send_response.sh
+
