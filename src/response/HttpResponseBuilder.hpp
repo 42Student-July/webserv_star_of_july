@@ -38,8 +38,8 @@ private:
 		bool		exists;
 	} errorFilepath_;
 	std::stringstream res_body_str_;
-	std::string dir_;
-	std::string file_;
+	std::string path_dir_;
+	std::string path_file_;
 	std::string default_root_;
 	
 	std::vector<LocationConfig>::iterator loc_it_;
@@ -56,6 +56,8 @@ private:
 
 	CGI cgi_;
 	void setDefaultRoot();
+	std::string getActualRoot(LocationConfig location);
+	std::string getCurrentPath();
 public:
 	HttpResponseBuilder();
 	HttpResponseBuilder(ConfigDTO conf);
@@ -70,7 +72,7 @@ public:
 	void readErrorFile(std::string fullpath);
 	void buildHeader(HttpRequestDTO &req);
 	void buildErrorHeader(HttpRequestDTO &req, int httpStatus, std::string body_str);
-	void findIndexFilepath(LocationConfig location);
+	void findIndexFilepath(std::string dir, LocationConfig location);
 	std::string buildDate();
 	std::string buildLastModified();
 	void parseRequestPath(std::string req_path);

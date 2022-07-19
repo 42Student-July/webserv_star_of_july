@@ -135,6 +135,14 @@ std::string ReadIndexHtml()
 	return res.str();
 }
 
+std::string getCurrentPath()
+{
+	char *cwd;
+	
+	cwd = getcwd(NULL, 0);
+	return std::string(cwd);
+}
+
 TEST(ConfTest, rootがlocation_directiveに絶対パスで存在)
 {
 	ConfigDTO conf_;
@@ -142,7 +150,7 @@ TEST(ConfTest, rootがlocation_directiveに絶対パスで存在)
 	HttpRequestDTO req;
 	setReqForConfTest(req);
 	
-	loc.root = "/html";
+	loc.root = getCurrentPath() + "/html";
 	loc.location = "/";
 	conf_.locations.push_back(loc);
 
