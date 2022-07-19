@@ -260,9 +260,11 @@ std::string HttpResponseBuilder::getReasonPhrase(std::string httpStatus)
 void HttpResponseBuilder::doCGI(HttpRequestDTO req)
 {
 	//TODO: ここにCGIの処理を追加
-	cgi_.run(req, conf_);
-	std::string cgi_response = cgi_.getResponseFromCGI();
-	std::cout << cgi_response << std::endl;
+	(void)req;
+	/* Path path(req.path); */
+	/* cgi_.run(req, conf_, path); */
+	/* std::string cgi_response = cgi_.getResponseFromCGI(); */
+	/* std::cout << cgi_response << std::endl; */
 }
 
 void HttpResponseBuilder::buildErrorHeader(HttpRequestDTO &req, int httpStatus, std::string body_str)
