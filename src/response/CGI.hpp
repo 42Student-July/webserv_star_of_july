@@ -26,7 +26,7 @@ class CGI {
   void dupIO();
   void dupFd(int oldfd, int newfd);
   void readCGI();
-  char *allocString(const std::string &str);
+  char *allocStr(const std::string &str);
 
   void makeCGIResponseLines(std::string cgi_body_);
   std::string getResponseFromCGI() const;

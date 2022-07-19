@@ -1,18 +1,24 @@
 #include "Path.hpp"
 
-Path::Path(const std::string &pathquery)
-	:pathquery_(pathquery)
+Path::Path(const std::string &pathquery, const ConfigDTO &conf)
+	:pathquery_(pathquery), conf_(conf)
 {
-	splitPath();
+	splitPathQuery();
 	createArgs();
+	vec_path_ = splitStr(raw_path_, "/");
+	//とりあえずここで一つ消してる
+	vec_path_.erase(vec_path_.begin());
+
+	setExtension();
 }
 
 Path::~Path()
 {
 }
 
+// いるかどうか検討
 Path::Path(Path const &other)
-	:pathquery_(other.pathquery_)
+	:pathquery_(other.pathquery_), conf_(other.conf_)
 {
     *this = other;
 }
@@ -40,7 +46,16 @@ std::vector<std::string> Path::getArgs() const
 	return args_;
 }
 
-void Path::splitPath()
+std::vector<std::string> Path::getVecPath() const
+{
+	return vec_path_;
+}
+
+std::string Path::getExtension() const {
+	return extension_;
+}
+
+void Path::splitPathQuery()
 {
 	size_t query_pos = pathquery_.find('?');
 	if (query_pos == std::string::npos) {
@@ -52,21 +67,38 @@ void Path::splitPath()
 	query_ = pathquery_.substr(query_pos + 1);
 }
 
+//utilsに入れる
+//1から入るようになってしまってる 
+std::vector<std::string> Path::splitStr(std::string str, std::string sep) {
+	std::vector<std::string> ret;
+	size_t start_pos = 0;
+	size_t split_pos = str.find(sep);
+	for (; split_pos != std::string::npos;) {
+		ret.push_back(str.substr(start_pos, split_pos - start_pos));
+		start_pos = split_pos + sep.size();
+		split_pos = str.find(sep, start_pos);
+	}
+	ret.push_back(str.substr(start_pos));
+
+	return ret;
+}
+
 void Path::createArgs()
 {
 	if (query_.find('=') != std::string::npos) {
 		return ;
 	}
+	args_ = splitStr(query_, "+");
+}
 
-	size_t start_pos = 0;
-	size_t split_pos = query_.find('+');
-	for (; split_pos != std::string::npos;) {
-		args_.push_back(query_.substr(start_pos, split_pos - start_pos));
-		start_pos = split_pos + 1;
-		split_pos = query_.find('+', start_pos);
-	}
-	args_.push_back(query_.substr(start_pos));
+void Path::setExtension()
+{
+	/* std::vector<std::string>::iterator it = vec_path_.begin(); */
+	/* for (;it != vec_path_.end(); ++it) { */
+	/* } */
 
+	//修正する
+	extension_ = ".py";
 }
 
 //todo: localhost/test.cgi/arg1/arg2の時の対処検討

@@ -30,7 +30,7 @@ void CGI::readCGI() {
 	// error処理した方がよさそうです
 }
 
-char *CGI::allocString(const std::string &str)
+char *CGI::allocStr(const std::string &str)
 {
 	char *ret = strdup(str.c_str());
 	if (ret == NULL) {
@@ -58,14 +58,31 @@ char **map2Array(std::map<std::string, std::string> map_env,
 }
 
 void CGI::createArgs(Path &path) {
-	(void)path;
-  std::string command = "/usr/bin/python3";
-  std::string command2 = "cgi-bin/test.py";
-  exec_args_ = new char *[3];
-  // const外しはしないようにする
-  exec_args_[0] = allocString(command);
-  exec_args_[1] = allocString(command2);
-  exec_args_[2] = NULL;
+	//もっと良いやり方に変える
+  std::string command;
+  if (path.getExtension() == ".py") {
+	command = "/usr/bin/python3";
+  } else if (path.getExtension() == ".pl") {
+    command = "/usr/bin/perl";
+  } else {
+	  throw -1;
+  }
+
+  //ToDo: ここをgetRawPathではなくlocal_path的なものに変える
+  std::string exec_path = path.getRawPath().substr(1);
+  std::vector<std::string> path_args = path.getArgs();
+  int args_size = path_args.size() + 3;
+
+  exec_args_ = new char *[args_size];
+  int i = 0;
+  exec_args_[i++] = allocStr(command);
+  exec_args_[i++] = allocStr(exec_path);
+
+  std::vector<std::string>::iterator it_arg = path_args.begin();
+  for (; it_arg != path_args.end(); ++it_arg) {
+	  exec_args_[i++] = allocStr(*it_arg);
+  }
+  exec_args_[i] = NULL;
 }
 
 void CGI::createEnvs(Path &path) {
@@ -84,7 +101,7 @@ void CGI::createEnvs(Path &path) {
   //ここわからないので後ほど調べる
   map_env["PATH_TRANSLATED"] = "";
   //一旦空白
-  map_env["QUERY_STRING"] = "";
+  map_env["QUERY_STRING"] = path.getQuery();
   map_env["REMOTE_ADDR"] = "127.0.0.1";
   //要修正
   map_env["REMOTE_HOST"] = "webserv.com";
