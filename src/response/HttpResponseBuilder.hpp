@@ -21,6 +21,7 @@
 #include "HttpResponseHeaderDTO.hpp"
 #include "HttpStatus.hpp"
 #include "CGI.hpp"
+#include "Path.hpp"
 
 class HttpResponseBuilder
 {

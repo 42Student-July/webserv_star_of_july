@@ -5,11 +5,11 @@
 CGI::CGI() {}
 CGI::~CGI() {}
 
-void CGI::run(HttpRequestDTO &req, ConfigDTO &conf) {
+void CGI::run(HttpRequestDTO &req, ConfigDTO &conf, Path &path) {
   req_ = req;
   conf_ = conf;
-  createEnvs();
-  createArgs();
+  createEnvs(path);
+  createArgs(path);
   createPipe();
   spawnChild();
 }
@@ -57,7 +57,8 @@ char **map2Array(std::map<std::string, std::string> map_env,
   return array_env;
 }
 
-void CGI::createArgs() {
+void CGI::createArgs(Path &path) {
+	(void)path;
   std::string command = "/usr/bin/python3";
   std::string command2 = "cgi-bin/test.py";
   exec_args_ = new char *[3];
@@ -67,7 +68,8 @@ void CGI::createArgs() {
   exec_args_[2] = NULL;
 }
 
-void CGI::createEnvs() {
+void CGI::createEnvs(Path &path) {
+	(void)path;
   std::map<std::string, std::string> map_env;
   map_env["AUTH_TYPE"] = req_.authorization;
   map_env["CONTENT_LENGTH"] = req_.content_length;

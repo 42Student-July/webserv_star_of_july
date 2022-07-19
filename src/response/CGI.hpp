@@ -12,18 +12,19 @@
 
 #include "ConfigDTO.hpp"
 #include "HttpRequestDTO.hpp"
+#include "Path.hpp"
 
 class CGI {
  public:
   CGI();
   virtual ~CGI();
-  void run(HttpRequestDTO &req, ConfigDTO &conf);
-  void createEnvs();
+  void run(HttpRequestDTO &req, ConfigDTO &conf, Path &path);
+  void createEnvs(Path &path);
+  void createArgs(Path &path);
   void createPipe();
   void spawnChild();
   void dupIO();
   void dupFd(int oldfd, int newfd);
-  void createArgs();
   void readCGI();
   char *allocString(const std::string &str);
 
