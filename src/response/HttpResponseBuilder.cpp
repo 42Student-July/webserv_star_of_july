@@ -5,6 +5,7 @@ const std::string HttpResponseBuilder::CRLF = "\r\n";
 const std::string HttpResponseBuilder::ACCEPT_RANGES = "none";
 const std::string HttpResponseBuilder::OCTET_STREAM = "application/octet-stream";
 const std::string HttpResponseBuilder::TEXT_HTML = "text/html";
+const std::string HttpResponseBuilder::SP = " ";
 
 HttpResponseBuilder::HttpResponseBuilder() {}
 
@@ -150,7 +151,7 @@ void HttpResponseBuilder::readFile(std::string fullpath)
 	if (ifs.fail())
 		throw ResponseException("file input error", 500);
     while (std::getline(ifs, line)){
-        file_str_ << line << CRLF;
+        res_body_str_ << line << CRLF;
     }
 }
 
@@ -162,7 +163,7 @@ void HttpResponseBuilder::readErrorFile(std::string fullpath)
 	if (ifs.fail())
 		throw std::runtime_error("read error");
     while (std::getline(ifs, line)){
-        file_str_ << line << CRLF;
+        res_body_str_ << line << CRLF;
     }
 }
 
@@ -213,7 +214,7 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 	// header_.content_type = OCTET_STREAM;
 	// とりあえずブラウザから見れるようにしました。
 	header_.content_type = TEXT_HTML;
-	size_t  content_length = file_str_.str().size();
+	size_t  content_length = res_body_str_.str().size();
 	header_.content_length = toString(content_length);
 	header_.last_modified = buildLastModified();
 	header_.connection = req.connection;
@@ -231,6 +232,31 @@ void HttpResponseBuilder::reflectLocationStatus()
 	//TODO: allowed_methodとかはこっちにおく
 }
 
+std::string HttpResponseBuilder::getReasonPhrase(std::string httpStatus)
+{
+	if (httpStatus == HttpStatus::OK)
+		return HttpStatus::ReasonPhrase::OK;
+	else if (httpStatus == HttpStatus::CREATED)
+		return HttpStatus::ReasonPhrase::CREATED;
+	else if (httpStatus == HttpStatus::NO_CONTENT)
+		return HttpStatus::ReasonPhrase::NO_CONTENT;
+	else if (httpStatus == HttpStatus::PARTIAL_CONTENT)
+		return HttpStatus::ReasonPhrase::PARTIAL_CONTENT;
+	else if (httpStatus == HttpStatus::BAD_REQUEST)
+		return HttpStatus::ReasonPhrase::BAD_REQUEST;
+	else if (httpStatus == HttpStatus::UNAUTHORIZED)
+		return HttpStatus::ReasonPhrase::UNAUTHORIZED;
+	else if (httpStatus == HttpStatus::FORBIDDEN)
+		return HttpStatus::ReasonPhrase::FORBIDDEN;
+	else if (httpStatus == HttpStatus::INTERNAL_SERVER_ERROR)
+		return HttpStatus::ReasonPhrase::INTERNAL_SERVER_ERROR;
+	else if (httpStatus == HttpStatus::SERVICE_UNAVAILABLE)
+		return HttpStatus::ReasonPhrase::SERVICE_UNAVAILABLE;
+	else
+		return "";
+}
+
+
 void HttpResponseBuilder::doCGI(HttpRequestDTO req)
 {
 	//TODO: ここにCGIの処理を追加
@@ -239,12 +265,40 @@ void HttpResponseBuilder::doCGI(HttpRequestDTO req)
 	std::cout << cgi_response << std::endl;
 }
 
-HttpResponse *HttpResponseBuilder::buildDefaultErrorPage(int httpstatus, HttpRequestDTO &req)
+void HttpResponseBuilder::buildErrorHeader(HttpRequestDTO &req, int httpStatus, std::string body_str)
 {
-	//TODO: nginxのデフォルトの文字列を配置する
-	(void)httpstatus;
-	buildHeader(req);
-	return new HttpResponse(header_, file_str_.str());
+	// 発生しないはずの例外
+	if (body_str.empty())
+		throw std::runtime_error("body uncreated");
+	header_.version = req.version;
+	header_.status_code = toString(httpStatus);
+	header_.reason_phrase = getReasonPhrase(header_.status_code);
+	header_.date = buildDate();
+	header_.content_length = body_str.size();
+	header_.content_type = TEXT_HTML;
+	header_.connection = "keep-alive";
+}
+
+void HttpResponseBuilder::buildDefaultErrorBody(int httpStatus)
+{
+	std::string status_code = toString(httpStatus);
+	
+	res_body_str_	<< "<html>" << CRLF
+					<< "<head><title>" << status_code << SP << getReasonPhrase(status_code) << "</title><head>" << CRLF
+					<< "<body>" << CRLF
+					<< "<center><h1>" << status_code << SP << getReasonPhrase(status_code) << "</h1></center>" << CRLF
+					<< "</body>" << CRLF
+					<< "<hr><center>" << conf_.server << "</center>" << CRLF
+					<< "</body>" << CRLF
+					<< "</html>" << CRLF
+					<< CRLF;
+}
+
+HttpResponse *HttpResponseBuilder::buildDefaultErrorPage(int httpStatus, HttpRequestDTO &req)
+{
+	buildDefaultErrorBody(httpStatus);
+	buildErrorHeader(req, httpStatus, res_body_str_.str());
+	return new HttpResponse(header_, res_body_str_.str());
 }
 
 // http requestのpathをdirの部分とfileの部分に分解
@@ -273,7 +327,7 @@ HttpResponse *HttpResponseBuilder::buildErrorResponse(int httpstatus, HttpReques
 		return buildDefaultErrorPage(httpstatus, req);
 	}
 	
-	return new HttpResponse(header_, file_str_.str());
+	return new HttpResponse(header_, res_body_str_.str());
 }
 
 HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
@@ -305,7 +359,7 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 		// TODO:直す
 		std::exit(1);
 	}
-	return new HttpResponse(header_, file_str_.str());
+	return new HttpResponse(header_, res_body_str_.str());
 }
 
 HttpResponseBuilder::ResponseException::ResponseException(const char *_msg, int http_status) : runtime_error(_msg)

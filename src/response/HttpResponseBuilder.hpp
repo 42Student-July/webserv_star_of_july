@@ -37,7 +37,7 @@ private:
 		std::string path;
 		bool		exists;
 	} errorFilepath_;
-	std::stringstream file_str_;
+	std::stringstream res_body_str_;
 	std::string dir_;
 	std::string file_;
 	
@@ -49,6 +49,7 @@ private:
 	static const std::string ACCEPT_RANGES;
 	static const std::string OCTET_STREAM;
 	static const std::string TEXT_HTML;
+	static const std::string SP;
 	time_t now_;
 
 	CGI cgi_;
@@ -65,6 +66,7 @@ public:
 	void readFile(std::string fullpath);
 	void readErrorFile(std::string fullpath);
 	void buildHeader(HttpRequestDTO &req);
+	void buildErrorHeader(HttpRequestDTO &req, int httpStatus, std::string body_str);
 	void findIndexFilepath(LocationConfig location);
 	std::string buildDate();
 	std::string buildLastModified();
@@ -72,7 +74,9 @@ public:
 	void reflectLocationStatus();
 	bool isCGI(std::string file);
 	void doCGI(HttpRequestDTO req);
+	std::string getReasonPhrase(std::string httpStatus);
 	HttpResponse *buildDefaultErrorPage(int httpstatus, HttpRequestDTO &req);
+	void buildDefaultErrorBody(int httpStatus);
 	HttpResponse *buildErrorResponse(int httpstatus, HttpRequestDTO &req);
 	class ResponseException : public std::runtime_error {
 	private:
