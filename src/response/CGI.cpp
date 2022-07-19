@@ -19,13 +19,13 @@ std::string CGI::getResponseFromCGI() const { return cgi_body_; }
 void CGI::readCGI() {
   //headerで宣言する
   const int READ = 0;
-  const size_t BUF_SIZE = 512;
+  const size_t BUF_SIZE = 6000;
 
   size_t size = 0;
   char buf[BUF_SIZE];
   memset(buf, 0, sizeof(buf));
   size = read(pipe_c2p_[READ], buf, BUF_SIZE - 1);
-	(void)size;
+  (void)size;
 	// unused parameterでコンパイルできなかったので
 	// error処理した方がよさそうです
 }
@@ -58,7 +58,7 @@ char **map2Array(std::map<std::string, std::string> map_env,
 }
 
 void CGI::createArgs(Path &path) {
-	//もっと良いやり方に変える
+  //もっと良いやり方に変える
   std::string command;
   if (path.getExtension() == ".py") {
 	command = "/usr/bin/python3";

@@ -31,7 +31,7 @@ void CGIParser::parseHeaderField() {
   for (std::string line = getLine(); line.size() != 0; line = getLine()) {
 	  std::pair<std::string, std::string> name_value_pair = makeHeaderFieldPair(line);
 
-    cgi_header_.insert(name_value_pair);
+      cgi_header_.insert(name_value_pair);
   }
 }
 

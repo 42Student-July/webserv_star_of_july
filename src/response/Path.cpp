@@ -98,7 +98,7 @@ void Path::setExtension()
 	/* } */
 
 	//修正する
-	extension_ = ".py";
+	extension_ = ".pl";
 }
 
 //todo: localhost/test.cgi/arg1/arg2の時の対処検討
