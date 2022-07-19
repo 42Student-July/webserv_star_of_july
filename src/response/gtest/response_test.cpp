@@ -37,7 +37,7 @@ std::string getCurrentPath()
 	return std::string(cwd);
 }
 
-TEST(ConfTest, rootがlocation_directiveに絶対パスで存在)
+TEST(RootTest, locationに絶対パス)
 {
 	ConfigDTO conf_;
 	LocationConfig loc;
@@ -55,7 +55,7 @@ TEST(ConfTest, rootがlocation_directiveに絶対パスで存在)
 	EXPECT_EQ(res->Body(), ReadIndexHtml());
 }
 
-TEST(ConfTest, rootがlocation_directiveに相対パスで存在)
+TEST(RootTest, locationeに相対パス)
 {
 	ConfigDTO conf_;
 	LocationConfig loc;
@@ -73,7 +73,7 @@ TEST(ConfTest, rootがlocation_directiveに相対パスで存在)
 	EXPECT_EQ(res->Body(), ReadIndexHtml());
 }
 
-TEST(ConfTest, rootがserver_directiveに絶対パスで存在)
+TEST(RootTest, servereに絶対パス)
 {
 	ConfigDTO conf_;
 	LocationConfig loc;
@@ -91,7 +91,7 @@ TEST(ConfTest, rootがserver_directiveに絶対パスで存在)
 	EXPECT_EQ(res->Body(), ReadIndexHtml());
 }
 
-TEST(ConfTest, rootがserver_directiveに相対パスで存在)
+TEST(RootTest, serverに相対パス)
 {
 	ConfigDTO conf_;
 	LocationConfig loc;
@@ -108,3 +108,42 @@ TEST(ConfTest, rootがserver_directiveに相対パスで存在)
 	
 	EXPECT_EQ(res->Body(), ReadIndexHtml());
 }
+
+TEST(RootTest, serverとlocation_locationは絶対パス)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqForConfTest(req);
+	
+	conf_.root = "tekitou";
+	loc.root = getCurrentPath() + "/html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), ReadIndexHtml());
+}
+
+TEST(RootTest, serverとlocation_locationは相対パス)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqForConfTest(req);
+	
+	conf_.root = "tekitou";
+	loc.root = "html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), ReadIndexHtml());
+}
+
