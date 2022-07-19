@@ -161,7 +161,33 @@ std::string ReadIndexHtml()
 	return res.str();
 }
 
-TEST(ConfTest, rootがlocation_directiveに先頭スラッシュで存在)
+std::string getCurrentPath()
+{
+	char *cwd;
+	
+	cwd = getcwd(NULL, 0);
+	return std::string(cwd);
+}
+
+TEST(ConfTest, rootがlocation_directiveに絶対パスで存在)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqForConfTest(req);
+	
+	loc.root = getCurrentPath() + "/html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), ReadIndexHtml());
+}
+
+TEST(ConfTest, rootがlocation_directiveに相対パスで存在)
 {
 	ConfigDTO conf_;
 	LocationConfig loc;
