@@ -47,6 +47,8 @@ class ConfigParser {
                          std::vector<std::string>::iterator &it);
   void parseLocationAllowedMethods(LocationConfig &location,
                                    std::vector<std::string>::iterator &it);
+  void parseLocationRedirect(LocationConfig &location,
+								std::vector<std::string>::iterator &it);
 
   // serverのparse
   void parseServer(ServerConfig &server, std::vector<std::string>::iterator &it,

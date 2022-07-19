@@ -10,6 +10,8 @@ struct LocationConfig {
   std::string location;
 
   // Define a HTTP redirection.
+  std::map<int, std::string> redirect;
+
   std::string root;
 
   // Define a list of accepted HTTP methods for the route
