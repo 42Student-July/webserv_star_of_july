@@ -136,6 +136,12 @@ void ConfigParser::parseLocationCGIPath(
   location.cgi_extensions.push_back(it->substr(0, it->find(";")));
 }
 
+void ConfigParser::parseLocationRedirect(
+    LocationConfig &location, std::vector<std::string>::iterator &it) {
+  location.redirect.insert(std::pair<int, std::string>(
+      ft_stoi(*it), (*(++it)).substr(0, it->find(";"))));
+}
+ 
 // ToDo:それぞれ1回ずつしか入力できないようにする
 void ConfigParser::parseLocation(LocationConfig &location,
                                  std::vector<std::string>::iterator &it,
@@ -153,6 +159,8 @@ void ConfigParser::parseLocation(LocationConfig &location,
         parseLocationAutoindexes(location, ++it);
       } else if (*it == "cgi_path") {
         parseLocationCGIPath(location, ++it);
+	  } else if (*it == "return") {
+		parseLocationRedirect(location, ++it);
       } else if (*it == "}") {
         break;
       }

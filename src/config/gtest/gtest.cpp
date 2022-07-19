@@ -102,6 +102,13 @@ TEST(ConfigParserLocationsTests, CanParseLocationCGIPath) {
   ASSERT_EQ(".py", serverconfig[0].locations[0].cgi_extensions[0]);
 }
 
+TEST(ConfigParserLocationsTests, CanParseLocationRedirection)
+{
+  ConfigParser configparser("./TestConfigs/location_redirect.conf");
+  std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
+  ASSERT_EQ("http://example.com/", serverconfig[0].locations[0].redirect[301]);
+}
+
 TEST(Error, NoCurlyBracketsThrowsException) {
   try {
     ASSERT_THROW(ConfigParser configparser(
