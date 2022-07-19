@@ -43,32 +43,38 @@ $(NAME): $(OBJS) $(LIBS)
 	@printf "$(GREEN)Compile done:)\n$(END)"
 
 $(LIB_SERVER): dummy
-	@make -C $(SERVER_DIR)
+	@$(MAKE) -C $(SERVER_DIR)
 
 $(LIB_CONFIG): dummy
-	@make -C $(CONFIG_DIR)
+	@$(MAKE) -C $(CONFIG_DIR)
 
 $(LIB_REQUEST): dummy
-	@make -C $(REQUEST_DIR)
+	@$(MAKE) -C $(REQUEST_DIR)
 
 $(LIB_RESPONSE): dummy
-	@make -C $(RESPONSE_DIR)
+	@$(MAKE) -C $(RESPONSE_DIR)
 
 .PHONY: dummy
 dummy:
 
 .PHONY: clean
 clean:
-	@for dir in $(MODULE_DIRS); do make -C $$dir clean; done
+	@for dir in $(MODULE_DIRS); do $(MAKE) -C $$dir clean; done
 	@$(RM) $(OBJS) $(DEPS)
 
 .PHONY: fclean
 fclean: clean
-	@for dir in $(MODULE_DIRS); do make -C $$dir fclean; done
+	@for dir in $(MODULE_DIRS); do $(MAKE) -C $$dir fclean; done
 	@$(RM) $(NAME)
 
 .PHONY: re
 re: fclean all
+
+.PHONY: unit_test
+unit_test:
+	@$(MAKE) -C $(CONFIG_DIR) test
+	@$(MAKE) -C $(REQUEST_DIR) test
+
 
 ## Color
 END		= \e[0m
