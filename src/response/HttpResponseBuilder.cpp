@@ -50,12 +50,6 @@ void HttpResponseBuilder::findActualFilepath(std::string dir, std::string file)
 {
 	DIR				*dirp;
 	struct dirent	*ent;
-	// char			*cwd;
-	// std::string		fullpath;
-	
-	// cwd = getcwd(NULL, 0);
-	// fullpath = std::string(cwd) + dir;
-	// std::free(cwd);
 	std::cout << "fullpath: " << dir << std::endl;
 	
 	dirp = opendir(dir.c_str());
