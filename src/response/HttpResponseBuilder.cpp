@@ -273,7 +273,7 @@ void HttpResponseBuilder::buildErrorHeader(HttpRequestDTO &req, int httpStatus, 
 	if (body_str.empty())
 		throw std::runtime_error("body uncreated");
 	header_.version = req.version;
-	header_.status_code = std::to_string(httpStatus);
+	header_.status_code = toString(httpStatus);
 	header_.reason_phrase = getReasonPhrase(header_.status_code);
 	header_.date = buildDate();
 	header_.content_length = body_str.size();
@@ -283,7 +283,7 @@ void HttpResponseBuilder::buildErrorHeader(HttpRequestDTO &req, int httpStatus, 
 
 void HttpResponseBuilder::buildDefaultErrorBody(int httpStatus)
 {
-	std::string status_code = std::to_string(httpStatus);
+	std::string status_code = toString(httpStatus);
 	
 	res_body_str_	<< "<html>" << CRLF
 					<< "<head><title>" << status_code << SP << getReasonPhrase(status_code) << "</title><head>" << CRLF
