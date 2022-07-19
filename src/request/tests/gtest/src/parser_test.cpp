@@ -12,7 +12,7 @@ TEST(HttpParserTest, StoreRequestline) {
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
-  ASSERT_FALSE(request->is_bad_request);
+  compareString(HttpStatus::OK, request->response_status_code);
 }
 
 TEST(HttpParserTest, StoreHeaderFieldWithCurl) {
@@ -26,7 +26,7 @@ TEST(HttpParserTest, StoreHeaderFieldWithCurl) {
   checkHeaderField("User-Agent", "curl/7.68.0", request->name_value_map);
   checkHeaderField("Accept", "*/*", request->name_value_map);
   ASSERT_EQ(3, request->name_value_map.size());
-  ASSERT_FALSE(request->is_bad_request);
+  compareString(HttpStatus::OK, request->response_status_code);
 }
 
 TEST(HttpParserTest, StoreHeaderFieldWithChrome) {
@@ -65,7 +65,7 @@ TEST(HttpParserTest, StoreHeaderFieldWithChrome) {
   checkHeaderField("Accept-Language", "ja,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
                    request->name_value_map);
   ASSERT_EQ(15, request->name_value_map.size());
-  ASSERT_FALSE(request->is_bad_request);
+  compareString(HttpStatus::OK, request->response_status_code);
 }
 
 TEST(HttpParserTest, StoreOneLineToBody) {
@@ -78,7 +78,7 @@ TEST(HttpParserTest, StoreOneLineToBody) {
   checkHeaderField("Host", "localhost:80", request->name_value_map);
   checkBody("name=hoge&comment=hoge\n", request->body);
   ASSERT_EQ(1, request->name_value_map.size());
-  ASSERT_FALSE(request->is_bad_request);
+  compareString(HttpStatus::OK, request->response_status_code);
 }
 
 TEST(HttpParserTest, StoreBodyMultiLinesToBody) {
@@ -91,7 +91,7 @@ TEST(HttpParserTest, StoreBodyMultiLinesToBody) {
   checkHeaderField("Host", "localhost:80", request->name_value_map);
   checkBody("1stline\n2ndline\n3rdline\n", request->body);
   ASSERT_EQ(1, request->name_value_map.size());
-  ASSERT_FALSE(request->is_bad_request);
+  compareString(HttpStatus::OK, request->response_status_code);
 }
 
 TEST(HttpParserTest, StoreJsonToBody) {
@@ -107,7 +107,7 @@ TEST(HttpParserTest, StoreJsonToBody) {
   checkBody("{\n\t\"asa-gohan\":\"misosiru\",\n\t\"oyatsu\":\"karl\"\n}\n",
             request->body);
   ASSERT_EQ(3, request->name_value_map.size());
-  ASSERT_FALSE(request->is_bad_request);
+  compareString(HttpStatus::OK, request->response_status_code);
 }
 
 TEST(HttpParserTest, StoreServerConfig) {
@@ -125,7 +125,7 @@ TEST(HttpParserTest, StoreServerConfig) {
   compareString("cluster", request->server_config.server[1]);
   compareString("www/html", request->server_config.root);
   ASSERT_EQ(65536, request->server_config.client_body_size_limit);
-  ASSERT_FALSE(request->is_bad_request);
+  compareString(HttpStatus::OK, request->response_status_code);
 }
 
 TEST(HttpParserTest, InvalidHttpVersion) {
@@ -136,7 +136,7 @@ TEST(HttpParserTest, InvalidHttpVersion) {
 
   checkBody("", request->body);
   ASSERT_EQ(0, request->name_value_map.size());
-  ASSERT_TRUE(request->is_bad_request);
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
 
 TEST(HttpParserTest, NoRequestLine) {
@@ -147,11 +147,9 @@ TEST(HttpParserTest, NoRequestLine) {
 
   checkBody("", request->body);
   ASSERT_EQ(0, request->name_value_map.size());
-  ASSERT_TRUE(request->is_bad_request);
-  compareString("400", request->status);
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
 
-// parserでは200:OK
 TEST(HttpParserTest, NoMethod) {
   HttpRequestParser parser;
   ServerConfig config = initServerCongig();
@@ -160,11 +158,9 @@ TEST(HttpParserTest, NoMethod) {
 
   checkBody("", request->body);
   ASSERT_EQ(0, request->name_value_map.size());
-  ASSERT_TRUE(request->is_bad_request);
-  compareString("400", request->status);
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
 
-// parserでは200:OK
 TEST(HttpParserTest, NoUri) {
   HttpRequestParser parser;
   ServerConfig config = initServerCongig();
@@ -173,8 +169,7 @@ TEST(HttpParserTest, NoUri) {
 
   checkBody("", request->body);
   ASSERT_EQ(0, request->name_value_map.size());
-  ASSERT_TRUE(request->is_bad_request);
-  compareString("400", request->status);
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
 
 TEST(HttpParserTest, NoHttpVersion) {
@@ -185,8 +180,7 @@ TEST(HttpParserTest, NoHttpVersion) {
 
   checkBody("", request->body);
   ASSERT_EQ(0, request->name_value_map.size());
-  ASSERT_TRUE(request->is_bad_request);
-  compareString("400", request->status);
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
 
 TEST(HttpParserTest, InvalidProtocol) {
@@ -197,8 +191,7 @@ TEST(HttpParserTest, InvalidProtocol) {
 
   checkBody("", request->body);
   ASSERT_EQ(0, request->name_value_map.size());
-  ASSERT_TRUE(request->is_bad_request);
-  compareString("400", request->status);
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
 
 TEST(HttpParserTest, VersionHasNoSlash) {
@@ -209,8 +202,7 @@ TEST(HttpParserTest, VersionHasNoSlash) {
 
   checkBody("", request->body);
   ASSERT_EQ(0, request->name_value_map.size());
-  ASSERT_TRUE(request->is_bad_request);
-  compareString("400", request->status);
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
 
 TEST(HttpParserTest, VersionHasNoPeriod) {
@@ -221,8 +213,7 @@ TEST(HttpParserTest, VersionHasNoPeriod) {
 
   checkBody("", request->body);
   ASSERT_EQ(0, request->name_value_map.size());
-  ASSERT_TRUE(request->is_bad_request);
-  compareString("400", request->status);
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
 
 TEST(HttpParserTest, VersionHasOtherThanDigit) {
@@ -234,8 +225,7 @@ TEST(HttpParserTest, VersionHasOtherThanDigit) {
 
   checkBody("", request->body);
   ASSERT_EQ(0, request->name_value_map.size());
-  ASSERT_TRUE(request->is_bad_request);
-  compareString("400", request->status);
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
 
 TEST(HttpParserTest, VersionIsNotSupported) {
@@ -246,6 +236,6 @@ TEST(HttpParserTest, VersionIsNotSupported) {
 
   checkBody("", request->body);
   ASSERT_EQ(0, request->name_value_map.size());
-  ASSERT_TRUE(request->is_bad_request);
-  compareString("505", request->status);
+  compareString(HttpStatus::HTTP_VERSION_NOT_SUPPORTED,
+                request->response_status_code);
 }

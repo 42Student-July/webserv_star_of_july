@@ -20,9 +20,8 @@ struct HttpRequest {
   std::string version;
   HeaderFieldMap name_value_map;
   std::string body;
-  bool is_bad_request;
   ServerConfig server_config;
-  std::string status;  // responseのHttpStatus.hppにある文字列が入る
+  std::string response_status_code;
 };
 
 std::ostream& operator<<(std::ostream& stream, const HttpRequest& rhs);

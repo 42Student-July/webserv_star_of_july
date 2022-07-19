@@ -29,8 +29,7 @@ HttpRequest* HttpRequestParser::parse(const char* request_str,
     parseHeaderField(request);
     parseBody(request);
   } catch (const ParseErrorExeption& e) {
-    request->is_bad_request = true;
-    request->status = e.getErrorStatus();
+    request->response_status_code = e.getErrorStatus();
     // std::cerr << e.what() << std::endl;
   }
   return request;

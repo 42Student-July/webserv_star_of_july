@@ -11,9 +11,7 @@ static std::ostream &operator<<(std::ostream &stream,
 }
 
 HttpRequest::HttpRequest(const ServerConfig &server_conf)
-    : is_bad_request(false),
-      server_config(server_conf),
-      status(HttpStatus::OK) {}
+    : server_config(server_conf), response_status_code(HttpStatus::OK) {}
 
 HttpRequest::~HttpRequest() {}
 
@@ -27,8 +25,7 @@ std::ostream &operator<<(std::ostream &stream, const HttpRequest &rhs) {
          << "#HeaderFields" << std::endl
          << rhs.name_value_map << std::endl
          << "#Status" << std::endl
-         << "is_bad_request: " << std::boolalpha << rhs.is_bad_request
-         << std::endl
+         << "status_code: " << rhs.response_status_code << std::endl
          << "##################" << std::endl
          << std::endl;
   return stream;

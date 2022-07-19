@@ -18,7 +18,7 @@ TEST(HttpConverterTest, StoreOneHeaderField) {
 
   checkRequestline("POST", "/", "1.1", dto);
   checkHeaderField("Basic fugafuga==", dto->authorization);
-  ASSERT_FALSE(dto->is_bad_request);
+  compareString(HttpStatus::OK, dto->response_status_code);
 }
 
 TEST(HttpConverterTest, StoreNoHeaderField) {
@@ -39,7 +39,7 @@ TEST(HttpConverterTest, StoreNoHeaderField) {
   checkHeaderField("", dto->referer);
   checkHeaderField("", dto->user_agent);
   checkHeaderField("", dto->x_forwarded_for);
-  ASSERT_FALSE(dto->is_bad_request);
+  compareString(HttpStatus::OK, dto->response_status_code);
 }
 
 TEST(HttpConverterTest, StoreAllHeaderField) {
@@ -61,7 +61,7 @@ TEST(HttpConverterTest, StoreAllHeaderField) {
   checkHeaderField("??", dto->referer);
   checkHeaderField("gtest", dto->user_agent);
   checkHeaderField("???", dto->x_forwarded_for);
-  ASSERT_FALSE(dto->is_bad_request);
+  compareString(HttpStatus::OK, dto->response_status_code);
 }
 
 TEST(HttpConverterTest, StoreAllHeaderFieldShuffled) {
@@ -84,7 +84,7 @@ TEST(HttpConverterTest, StoreAllHeaderFieldShuffled) {
   checkHeaderField("??", dto->referer);
   checkHeaderField("gtest", dto->user_agent);
   checkHeaderField("???", dto->x_forwarded_for);
-  ASSERT_FALSE(dto->is_bad_request);
+  compareString(HttpStatus::OK, dto->response_status_code);
 }
 
 TEST(HttpConverterTest, StoreBodyMultiLinesToBody) {
@@ -98,7 +98,7 @@ TEST(HttpConverterTest, StoreBodyMultiLinesToBody) {
 
   checkRequestline("POST", "/", "1.1", dto);
   checkBody("1stline\n2ndline\n3rdline\n", dto->body);
-  ASSERT_FALSE(dto->is_bad_request);
+  compareString(HttpStatus::OK, dto->response_status_code);
 }
 
 TEST(HttpConverterTest, StoreServerConfig) {
@@ -112,7 +112,7 @@ TEST(HttpConverterTest, StoreServerConfig) {
 
   checkRequestline("GET", "/", "1.1", dto);
   checkBody("", dto->body);
-  ASSERT_FALSE(dto->is_bad_request);
+  compareString(HttpStatus::OK, dto->response_status_code);
   ASSERT_EQ(4242, dto->port);
   compareString("42tokyo", dto->host);
   compareString("nop", dto->servernames[0]);
