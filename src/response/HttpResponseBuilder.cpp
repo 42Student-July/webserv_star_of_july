@@ -6,6 +6,7 @@ const std::string HttpResponseBuilder::ACCEPT_RANGES = "none";
 const std::string HttpResponseBuilder::OCTET_STREAM = "application/octet-stream";
 const std::string HttpResponseBuilder::TEXT_HTML = "text/html";
 const std::string HttpResponseBuilder::SP = " ";
+const std::string HttpResponseBuilder::SLASH = "/";
 
 HttpResponseBuilder::HttpResponseBuilder() {}
 
@@ -330,10 +331,34 @@ HttpResponse *HttpResponseBuilder::buildErrorResponse(int httpstatus, HttpReques
 	return new HttpResponse(header_, res_body_str_.str());
 }
 
+void HttpResponseBuilder::setDefaultRoot()
+{
+	std::string current_path;
+	char *cwd;
+	
+	cwd = getcwd(NULL, 0);
+	if (cwd == NULL)
+		throw ResponseException("getcwd", 500);
+	current_path = std::string(cwd);
+	
+	if (conf_.root.empty())
+	{
+		default_root_ = current_path;
+		return;
+	}	
+
+	// configのrootが絶対パスの場合はそのまま入れる
+	if (conf_.root.at(0) == '/')
+		default_root_ = conf_.root;
+	else
+		default_root_ = current_path + SLASH + conf_.root;
+}
+
 HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 {
 	try
 	{
+		setDefaultRoot();
 		parseRequestPath(req.path);
 		findFileInServer();
 		reflectLocationStatus();
@@ -355,6 +380,7 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 	}
 	catch(const std::exception& e)
 	{
+		// 500を返すようにする
 		std::cerr << e.what() << '\n';
 		// TODO:直す
 		std::exit(1);

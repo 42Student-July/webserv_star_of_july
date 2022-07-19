@@ -40,6 +40,7 @@ private:
 	std::stringstream res_body_str_;
 	std::string dir_;
 	std::string file_;
+	std::string default_root_;
 	
 	std::vector<LocationConfig>::iterator loc_it_;
 	std::vector<LocationConfig>::iterator loc_ite_;
@@ -50,9 +51,11 @@ private:
 	static const std::string OCTET_STREAM;
 	static const std::string TEXT_HTML;
 	static const std::string SP;
+	static const std::string SLASH;
 	time_t now_;
 
 	CGI cgi_;
+	void setDefaultRoot();
 public:
 	HttpResponseBuilder();
 	HttpResponseBuilder(ConfigDTO conf);
