@@ -9,11 +9,9 @@ on:
       - main
 
 jobs:
-  googletest:
+  unit_test:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
-    - name: test
-      run: |
-        cd src/config
-        make test
+    - name: unit_test
+    - run: make unit_test

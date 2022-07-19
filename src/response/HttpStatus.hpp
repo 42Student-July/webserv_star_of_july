@@ -20,27 +20,28 @@
 //     HTTP_SERVICE_UNAVAILABLE = 503,
 // };
 namespace HttpStatus {
-static std::string OK = "200";
-static std::string CREATED = "201";
-static std::string NO_CONTENT = "204";
-static std::string PARTIAL_CONTENT = "206";
-static std::string BAD_REQUEST = "400";
-static std::string UNAUTHORIZED = "401";
-static std::string FORBIDDEN = "403";
-static std::string NOT_FOUND = "404";
-static std::string INTERNAL_SERVER_ERROR = "500";
-static std::string SERVICE_UNAVAILABLE = "503";
+static const std::string OK = "200";
+static const std::string CREATED = "201";
+static const std::string NO_CONTENT = "204";
+static const std::string PARTIAL_CONTENT = "206";
+static const std::string BAD_REQUEST = "400";
+static const std::string UNAUTHORIZED = "401";
+static const std::string FORBIDDEN = "403";
+static const std::string NOT_FOUND = "404";
+static const std::string INTERNAL_SERVER_ERROR = "500";
+static const std::string SERVICE_UNAVAILABLE = "503";
+static const std::string HTTP_VERSION_NOT_SUPPORTED = "505";
 namespace ReasonPhrase {
-static std::string OK = "OK";
-static std::string CREATED = "Created";
-static std::string NO_CONTENT = "No Content";
-static std::string PARTIAL_CONTENT = "Partial Content";
-static std::string BAD_REQUEST = "Bad Request";
-static std::string UNAUTHORIZED = "Unauthorized";
-static std::string FORBIDDEN = "Forbidden";
-static std::string NOT_FOUND = "Not Found";
-static std::string INTERNAL_SERVER_ERROR = "Internal Server Error";
-static std::string SERVICE_UNAVAILABLE = "Service Unavailable";
+static const std::string OK = "OK";
+static const std::string CREATED = "Created";
+static const std::string NO_CONTENT = "No Content";
+static const std::string PARTIAL_CONTENT = "Partial Content";
+static const std::string BAD_REQUEST = "Bad Request";
+static const std::string UNAUTHORIZED = "Unauthorized";
+static const std::string FORBIDDEN = "Forbidden";
+static const std::string NOT_FOUND = "Not Found";
+static const std::string INTERNAL_SERVER_ERROR = "Internal Server Error";
+static const std::string SERVICE_UNAVAILABLE = "Service Unavailable";
 }  // namespace ReasonPhrase
 }  // namespace HttpStatus
 

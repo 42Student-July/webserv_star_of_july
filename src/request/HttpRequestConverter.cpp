@@ -47,6 +47,6 @@ HttpRequestDTO* HttpRequestConverter::toDTO(HttpRequest* request) {
   dto->port = request->server_config.port;
   dto->servernames = request->server_config.server;
 
-  dto->is_bad_request = request->is_bad_request;
+  dto->response_status_code = request->response_status_code;
   return dto;
 }

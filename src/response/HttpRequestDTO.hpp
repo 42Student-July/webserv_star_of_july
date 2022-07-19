@@ -26,8 +26,8 @@ struct HttpRequestDTO {
   size_t port;
   std::vector<std::string> servernames;
 
-  // Parser時点でのbadrequestの判定
-  bool is_bad_request;
+  // Parse時点でのHttpStatus
+  std::string response_status_code;
 };
 
 #endif

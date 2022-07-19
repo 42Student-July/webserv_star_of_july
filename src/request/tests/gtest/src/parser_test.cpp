@@ -12,7 +12,7 @@ TEST(HttpParserTest, StoreRequestline) {
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
-  ASSERT_FALSE(request->is_bad_request);
+  compareString(HttpStatus::OK, request->response_status_code);
 }
 
 TEST(HttpParserTest, StoreHeaderFieldWithCurl) {
@@ -26,7 +26,7 @@ TEST(HttpParserTest, StoreHeaderFieldWithCurl) {
   checkHeaderField("User-Agent", "curl/7.68.0", request->name_value_map);
   checkHeaderField("Accept", "*/*", request->name_value_map);
   ASSERT_EQ(3, request->name_value_map.size());
-  ASSERT_FALSE(request->is_bad_request);
+  compareString(HttpStatus::OK, request->response_status_code);
 }
 
 TEST(HttpParserTest, StoreHeaderFieldWithChrome) {
@@ -65,7 +65,7 @@ TEST(HttpParserTest, StoreHeaderFieldWithChrome) {
   checkHeaderField("Accept-Language", "ja,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
                    request->name_value_map);
   ASSERT_EQ(15, request->name_value_map.size());
-  ASSERT_FALSE(request->is_bad_request);
+  compareString(HttpStatus::OK, request->response_status_code);
 }
 
 TEST(HttpParserTest, StoreOneLineToBody) {
@@ -78,7 +78,7 @@ TEST(HttpParserTest, StoreOneLineToBody) {
   checkHeaderField("Host", "localhost:80", request->name_value_map);
   checkBody("name=hoge&comment=hoge\n", request->body);
   ASSERT_EQ(1, request->name_value_map.size());
-  ASSERT_FALSE(request->is_bad_request);
+  compareString(HttpStatus::OK, request->response_status_code);
 }
 
 TEST(HttpParserTest, StoreBodyMultiLinesToBody) {
@@ -91,7 +91,7 @@ TEST(HttpParserTest, StoreBodyMultiLinesToBody) {
   checkHeaderField("Host", "localhost:80", request->name_value_map);
   checkBody("1stline\n2ndline\n3rdline\n", request->body);
   ASSERT_EQ(1, request->name_value_map.size());
-  ASSERT_FALSE(request->is_bad_request);
+  compareString(HttpStatus::OK, request->response_status_code);
 }
 
 TEST(HttpParserTest, StoreJsonToBody) {
@@ -107,7 +107,7 @@ TEST(HttpParserTest, StoreJsonToBody) {
   checkBody("{\n\t\"asa-gohan\":\"misosiru\",\n\t\"oyatsu\":\"karl\"\n}\n",
             request->body);
   ASSERT_EQ(3, request->name_value_map.size());
-  ASSERT_FALSE(request->is_bad_request);
+  compareString(HttpStatus::OK, request->response_status_code);
 }
 
 TEST(HttpParserTest, StoreServerConfig) {
@@ -125,5 +125,117 @@ TEST(HttpParserTest, StoreServerConfig) {
   compareString("cluster", request->server_config.server[1]);
   compareString("www/html", request->server_config.root);
   ASSERT_EQ(65536, request->server_config.client_body_size_limit);
-  ASSERT_FALSE(request->is_bad_request);
+  compareString(HttpStatus::OK, request->response_status_code);
+}
+
+TEST(HttpParserTest, InvalidHttpVersion) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/invalid_http_version.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
+TEST(HttpParserTest, NoRequestLine) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/no_request_line.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
+TEST(HttpParserTest, NoMethod) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/no_method.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
+TEST(HttpParserTest, NoUri) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/no_uri.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
+TEST(HttpParserTest, NoHttpVersion) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/no_http_version.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
+TEST(HttpParserTest, InvalidProtocol) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/invalid_protocol.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
+TEST(HttpParserTest, VersionHasNoSlash) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/version_has_no_slash.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
+TEST(HttpParserTest, VersionHasNoPeriod) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/version_has_no_period.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
+TEST(HttpParserTest, VersionHasOtherThanDigit) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content =
+      readFile("request/version_has_other_than_digit.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  compareString(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
+TEST(HttpParserTest, VersionIsNotSupported) {
+  HttpRequestParser parser;
+  ServerConfig config = initServerCongig();
+  std::string file_content = readFile("request/version_is_not_supported.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  compareString(HttpStatus::HTTP_VERSION_NOT_SUPPORTED,
+                request->response_status_code);
 }
