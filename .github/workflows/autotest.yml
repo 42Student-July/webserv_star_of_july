@@ -14,6 +14,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: test
-      run: |
+    - run: |
         cd src/config
+        make test
+    - run: |
+        cd src/request
         make test
