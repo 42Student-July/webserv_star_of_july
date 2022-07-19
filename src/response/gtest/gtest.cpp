@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 
 #include <stdexcept>
+#include <fstream>
+#include <iostream>
+
 
 #include "../response.h"
 #include "../CGI.hpp"
@@ -110,4 +113,42 @@ TEST(ConnectToBuilder, CanRunCGI)
   HttpResponse *res = builder.build(req);
   
 
+}
+
+void setReqForConfTest(HttpRequestDTO &req)
+{
+	req.method = "GET";
+	req.version = "1.1";
+	req.path = "/index.html";
+	req.connection = "Keep-Alive";
+}
+
+std::string ReadIndexHtml()
+{
+	std::ifstream ifs("./html/index.html");
+	std::string line;
+	std::stringstream res;
+	
+	while (std::getline(ifs, line)){
+        res << line << "\r\n";
+    }
+	return res.str();
+}
+
+TEST(ConfTest, rootがlocation_directiveに先頭スラッシュで存在)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqForConfTest(req);
+	
+	loc.root = "html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), ReadIndexHtml());
 }
