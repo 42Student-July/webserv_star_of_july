@@ -7,6 +7,8 @@ const std::string HttpResponseBuilder::OCTET_STREAM = "application/octet-stream"
 const std::string HttpResponseBuilder::TEXT_HTML = "text/html";
 const std::string HttpResponseBuilder::SP = " ";
 const std::string HttpResponseBuilder::SLASH = "/";
+const int HttpResponseBuilder::DOT_SIZE = 1;
+
 
 HttpResponseBuilder::HttpResponseBuilder() {}
 
@@ -95,6 +97,7 @@ void HttpResponseBuilder::findActualErrorFilepath(std::string dir, std::string f
 	closedir(dirp);
 }
 
+// TODO: path_fileはreqなので後入れしない
 void HttpResponseBuilder::findIndexFilepath(std::string dir, LocationConfig location)
 {
 	if (location.indexes.size() == 0)
@@ -216,6 +219,28 @@ static std::string toString(size_t val) {
   return ss.str();
 }
 
+std::string HttpResponseBuilder::getContentTypeByExtension()
+{
+	MIMEType mime;
+	std::string extension;
+	
+	size_t last_dot_pos = path_file_.find_last_of('.');
+	// もし拡張子が存在しない場合には、application/octet-streamを返す
+	if (last_dot_pos == std::string::npos) {
+		return std::string(mime.Default());
+    }
+	extension = path_file_.substr(last_dot_pos + 1);
+	// ファイル名 = dot + 拡張子 → octet-stream
+	if ((DOT_SIZE + extension.size()) == path_file_.size())
+		return std::string(mime.Default());
+	
+	std::map<std::string, std::string>::const_iterator mime_itr;
+	mime_itr = mime.GetMap().find(extension);
+	if (mime_itr == mime.GetMap().end())
+		return std::string(mime.Default());
+	return mime_itr->second;
+}
+
 void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 {
 	header_.version = req.version;
@@ -225,7 +250,7 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 	header_.server = conf_.server;
 	// header_.content_type = OCTET_STREAM;
 	// とりあえずブラウザから見れるようにしました。
-	header_.content_type = TEXT_HTML;
+	header_.content_type = getContentTypeByExtension();
 	size_t  content_length = res_body_str_.str().size();
 	header_.content_length = toString(content_length);
 	header_.last_modified = buildLastModified();

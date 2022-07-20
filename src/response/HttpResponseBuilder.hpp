@@ -22,6 +22,7 @@
 #include "HttpStatus.hpp"
 #include "CGI.hpp"
 #include "Path.hpp"
+#include "MIMEType.hpp"
 
 class HttpResponseBuilder
 {
@@ -53,12 +54,15 @@ private:
 	static const std::string TEXT_HTML;
 	static const std::string SP;
 	static const std::string SLASH;
+	static const int DOT_SIZE;
+
 	time_t now_;
 
 	CGI cgi_;
 	void setDefaultRoot();
 	std::string getActualRoot(LocationConfig location);
 	std::string getCurrentPath();
+	std::string getContentTypeByExtension();
 public:
 	HttpResponseBuilder();
 	HttpResponseBuilder(ConfigDTO conf);
