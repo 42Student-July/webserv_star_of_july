@@ -6,7 +6,7 @@
 #    By: mhirabay <mhirabay@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/13 18:47:47 by mhirabay          #+#    #+#              #
-#    Updated: 2022/07/19 21:38:23 by mhirabay         ###   ########.fr        #
+#    Updated: 2022/07/20 17:06:57 by mhirabay         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,6 +16,7 @@ SRCS			:=	HttpResponse.cpp \
 					HttpResponseBuilder.cpp \
 					HttpResponseSerializer.cpp \
 					HttpResponsePlainText.cpp \
+					MIMEType.cpp \
 					CGI.cpp \
 					Path.cpp
 
@@ -81,18 +82,34 @@ $(gtest):
 	mv googletest-release-1.11.0 $(gtestdir)
 
 test_compile = clang++ -std=c++11 HttpResponse.cpp \
+					CGI.cpp \
+					CGIParser.cpp\
 					HttpResponseBuilder.cpp \
 					HttpResponseSerializer.cpp \
 					HttpResponsePlainText.cpp \
-					CGI.cpp \
-					CGIParser.cpp\
-					Path.cpp\
+					Path.cpp \
 	$(testdir)/gtest.cpp \
-	$(testdir)/response_test.cpp \
 	$(gtestdir)/googletest-release-1.11.0/googletest/src/gtest_main.cc $(gtestdir)/gtest/gtest-all.cc \
 	-I$(gtestdir) -I$(includes) -lpthread -o tester
+	
+res_test_compile = clang++ -std=c++11 HttpResponse.cpp \
+					CGI.cpp \
+					CGIParser.cpp\
+					HttpResponseBuilder.cpp \
+					HttpResponseSerializer.cpp \
+					HttpResponsePlainText.cpp \
+					MIMEType.cpp \
+					Path.cpp \
+	$(testdir)/response_test.cpp \
+	$(gtestdir)/googletest-release-1.11.0/googletest/src/gtest_main.cc $(gtestdir)/gtest/gtest-all.cc \
+	-I$(gtestdir) -I$(includes) -lpthread -o res_tester
 
 .PHONY: cgitest
 cgitest: $(gtest)
 	$(test_compile)
 	./tester # --gtest_filter=Vector.other
+
+.PHONY: restest
+restest: $(gtest)
+	$(res_test_compile)
+	./res_tester # --gtest_filter=Vector.other
