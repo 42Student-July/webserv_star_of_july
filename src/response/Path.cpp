@@ -1,7 +1,7 @@
 #include "Path.hpp"
 
 Path::Path(const std::string &pathquery, const ConfigDTO &conf)
-	:pathquery_(pathquery), conf_(conf)
+	: conf_(conf), pathquery_(pathquery)
 {
 	splitPathQuery();
 	createArgs();
@@ -18,7 +18,7 @@ Path::~Path()
 
 // いるかどうか検討
 Path::Path(Path const &other)
-	:pathquery_(other.pathquery_), conf_(other.conf_)
+	:conf_(other.conf_), pathquery_(other.pathquery_) 
 {
     *this = other;
 }

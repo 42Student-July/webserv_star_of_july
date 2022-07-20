@@ -16,7 +16,8 @@ SRCS			:=	HttpResponse.cpp \
 					HttpResponseBuilder.cpp \
 					HttpResponseSerializer.cpp \
 					HttpResponsePlainText.cpp \
-					CGI.cpp
+					CGI.cpp \
+					Path.cpp
 
 CXX				:= c++
 RM				:= rm -rf
