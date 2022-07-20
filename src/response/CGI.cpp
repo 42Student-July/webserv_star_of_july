@@ -168,11 +168,11 @@ void CGI::spawnChild() {
     close(pipe_p2c_[0]);
     close(pipe_c2p_[1]);
 
-	int wstatus = 0;
+	//int wstatus = 0;
 	/* std::cout << "req: " << req_.body.c_str() << std::endl; */
     write(pipe_p2c_[1], req_.body.c_str(), req_.body.length());
 	close(pipe_p2c_[1]);
-	int wait_pid = wait(&wstatus);
+	//int wait_pid = wait(&wstatus);
 
     char buf[BUF_SIZE];
     memset(buf, 0, sizeof(buf));
