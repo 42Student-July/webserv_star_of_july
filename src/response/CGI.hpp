@@ -9,6 +9,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "ConfigDTO.hpp"
 #include "HttpRequestDTO.hpp"
