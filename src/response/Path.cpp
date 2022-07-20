@@ -9,6 +9,7 @@ Path::Path(const std::string &pathquery, const ConfigDTO &conf)
 	//とりあえずここで一つ消してる
 	vec_path_.erase(vec_path_.begin());
 
+	parseRequestPath(raw_path_);
 	setExtension();
 }
 
@@ -36,6 +37,16 @@ const std::string & Path::getRawPath() const
 	return raw_path_;
 }
 
+const std::string & Path::getPathDir() const
+{
+	return path_dir_;
+}
+
+const std::string & Path::getPathFile() const
+{
+	return path_file_;
+}
+
 std::string Path::getQuery() const
 {
 	return query_;
@@ -54,6 +65,18 @@ std::vector<std::string> Path::getVecPath() const
 std::string Path::getExtension() const {
 	return extension_;
 }
+
+
+void Path::parseRequestPath(std::string req_path)
+{
+	size_t last_slash_pos = req_path.find_last_of('/');
+	if (last_slash_pos == std::string::npos) {
+		throw std::runtime_error("no slash found in request path");
+    }
+	path_dir_ = req_path.substr(0, last_slash_pos + 1);
+	path_file_ = req_path.substr(last_slash_pos + 1);
+}
+
 
 void Path::splitPathQuery()
 {

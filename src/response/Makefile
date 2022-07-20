@@ -88,6 +88,7 @@ test_compile = clang++ -std=c++11 HttpResponse.cpp \
 					HttpResponseSerializer.cpp \
 					HttpResponsePlainText.cpp \
 					Path.cpp \
+					MIMEType.cpp \
 	$(testdir)/gtest.cpp \
 	$(gtestdir)/googletest-release-1.11.0/googletest/src/gtest_main.cc $(gtestdir)/gtest/gtest-all.cc \
 	-I$(gtestdir) -I$(includes) -lpthread -o tester
