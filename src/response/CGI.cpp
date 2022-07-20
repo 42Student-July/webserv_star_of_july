@@ -1,6 +1,7 @@
 #include "CGI.hpp"
 
 #include <unistd.h>
+#include <iostream>
 
 CGI::CGI() {}
 CGI::~CGI() {}
@@ -14,23 +15,20 @@ void CGI::run(HttpRequestDTO &req, ConfigDTO &conf, Path &path) {
   spawnChild();
 }
 
-std::string CGI::getResponseFromCGI() const { return cgi_body_; }
+std::string CGI::getResponseFromCGI() const { return cgi_response_; }
 
 void CGI::readCGI() {
-  //headerで宣言する
-  const int READ = 0;
-  const size_t BUF_SIZE = 512;
 
   size_t size = 0;
   char buf[BUF_SIZE];
   memset(buf, 0, sizeof(buf));
-  size = read(pipe_c2p_[READ], buf, BUF_SIZE - 1);
-	(void)size;
+  size = read(pipe_c2p_[0], buf, BUF_SIZE - 1);
+  (void)size;
 	// unused parameterでコンパイルできなかったので
 	// error処理した方がよさそうです
 }
 
-char *CGI::allocString(const std::string &str)
+char *CGI::allocStr(const std::string &str)
 {
 	char *ret = strdup(str.c_str());
 	if (ret == NULL) {
@@ -58,14 +56,31 @@ char **map2Array(std::map<std::string, std::string> map_env,
 }
 
 void CGI::createArgs(Path &path) {
-	(void)path;
-  std::string command = "/usr/bin/python3";
-  std::string command2 = "cgi-bin/test.py";
-  exec_args_ = new char *[3];
-  // const外しはしないようにする
-  exec_args_[0] = allocString(command);
-  exec_args_[1] = allocString(command2);
-  exec_args_[2] = NULL;
+  //もっと良いやり方に変える
+  std::string command;
+  if (path.getExtension() == ".py") {
+	command = "/usr/bin/python3";
+  } else if (path.getExtension() == ".pl") {
+    command = "/usr/bin/perl";
+  } else {
+	  throw -1;
+  }
+
+  //ToDo: ここをgetRawPathではなくlocal_path的なものに変える
+  std::string exec_path = path.getRawPath().substr(1);
+  std::vector<std::string> path_args = path.getArgs();
+  int args_size = path_args.size() + 3;
+
+  exec_args_ = new char *[args_size];
+  int i = 0;
+  exec_args_[i++] = allocStr(command);
+  exec_args_[i++] = allocStr(exec_path);
+
+  std::vector<std::string>::iterator it_arg = path_args.begin();
+  for (; it_arg != path_args.end(); ++it_arg) {
+	  exec_args_[i++] = allocStr(*it_arg);
+  }
+  exec_args_[i] = NULL;
 }
 
 void CGI::createEnvs(Path &path) {
@@ -84,7 +99,7 @@ void CGI::createEnvs(Path &path) {
   //ここわからないので後ほど調べる
   map_env["PATH_TRANSLATED"] = "";
   //一旦空白
-  map_env["QUERY_STRING"] = "";
+  map_env["QUERY_STRING"] = path.getQuery();
   map_env["REMOTE_ADDR"] = "127.0.0.1";
   //要修正
   map_env["REMOTE_HOST"] = "webserv.com";
@@ -119,55 +134,63 @@ void CGI::createPipe() {
 
 void CGI::spawnChild() {
   //headerで宣言する
-  const int READ = 0;
-  const int WRITE = 1;
-  const size_t BUF_SIZE = 512;
 
   pid_t pid = fork();
   if (pid < 0) {
+	std::cerr << "fork" << std::endl;
     throw(-1);
   }
   if (pid == 0) {
     // child process
-    dupIO();
-    int a = execve(exec_args_[0], exec_args_, cgi_envs_);
+    //dupIO();
+	//常にやるべき
+	
+	dupFd(pipe_p2c_[0], STDIN_FILENO);
+	close(pipe_p2c_[0]);
+	close(pipe_p2c_[1]);
+
+	dupFd(pipe_c2p_[1], STDOUT_FILENO);
+	close(pipe_c2p_[1]);
+	close(pipe_c2p_[0]);
+
+	int a = execve(exec_args_[0], exec_args_, cgi_envs_);
     if (a < 0) {
       std::cerr << "error: a = " << a << std::endl;
     }
-    exit(1);
   } else {
+	//deleteEnviron
     // parent_process
-    if (req_.method == "POST") {
-      close(pipe_p2c_[READ]);
-    }
-    close(pipe_c2p_[WRITE]);
+    close(pipe_p2c_[0]);
+    close(pipe_c2p_[1]);
 
-    write(pipe_p2c_[WRITE], req_.body.c_str(), req_.body.length());
+    write(pipe_p2c_[1], req_.body.c_str(), req_.body.length());
+	close(pipe_p2c_[1]);
 
     char buf[BUF_SIZE];
     memset(buf, 0, sizeof(buf));
     ssize_t read_size = 0;
-    read_size = read(pipe_c2p_[READ], buf, BUF_SIZE);
+    read_size = read(pipe_c2p_[0], buf, BUF_SIZE);
+	close(pipe_c2p_[0]);
     buf[read_size] = '\0';
-    cgi_body_ = buf;
+    cgi_response_ = buf;
   }
 }
 
-void CGI::dupIO() {
+/* void CGI::dupIO() { */
 
-  const int READ = 0;
-  const int WRITE = 1;
-  if (req_.method == "POST") {
-    dupFd(pipe_p2c_[READ], STDIN_FILENO);
-    close(pipe_p2c_[WRITE]);
-    //ここ要検討
-    // close(STDIN_FILENO);
-  }
-  dupFd(pipe_c2p_[WRITE], STDOUT_FILENO);
-  close(pipe_c2p_[READ]);
-  //ここ要検討
-  // close(STDOUT_FILENO);
-}
+/*   if (req_.method == "POST") { */
+/*     dupFd(pipe_p2c_[0], STDIN_FILENO); */
+/* 	close(pipe_p2c_[0]); */
+/*     close(pipe_p2c_[1]); */
+/*     //ここ要検討 */
+/*     // close(STDIN_FILENO); */
+/*   } */
+/*   dupFd(pipe_c2p_[1], STDOUT_FILENO); */
+/*   close(pipe_c2p_[1]); */
+/*   close(pipe_c2p_[0]); */
+/*   //ここ要検討 */
+/*   // close(STDOUT_FILENO); */
+/* } */
 
 void CGI::dupFd(int oldfd, int newfd) {
   if (dup2(oldfd, newfd) < 0) {

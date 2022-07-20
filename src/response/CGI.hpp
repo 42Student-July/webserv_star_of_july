@@ -9,6 +9,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "ConfigDTO.hpp"
 #include "HttpRequestDTO.hpp"
@@ -26,7 +28,7 @@ class CGI {
   void dupIO();
   void dupFd(int oldfd, int newfd);
   void readCGI();
-  char *allocString(const std::string &str);
+  char *allocStr(const std::string &str);
 
   void makeCGIResponseLines(std::string cgi_body_);
   std::string getResponseFromCGI() const;
@@ -35,7 +37,8 @@ class CGI {
   CGI &operator=(CGI const &other);
 
  private:
-  std::string cgi_body_;
+  static const int BUF_SIZE = 8192;
+  std::string cgi_response_;
 
   HttpRequestDTO req_;
   ConfigDTO conf_;

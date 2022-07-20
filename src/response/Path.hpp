@@ -4,10 +4,12 @@
 #include <iostream>
 #include <vector>
 
+#include "ConfigDTO.hpp"
+
 class Path
 {
     public:
-        Path(const std::string &pathquery);
+        Path(const std::string &pathquery, const ConfigDTO &config);
         virtual ~Path();
 		//使わない
         Path(Path const &other);
@@ -16,15 +18,26 @@ class Path
 		const std::string & getRawPath() const;
 		std::string getQuery() const;
 		std::vector<std::string> getArgs() const;
+		std::string getExtension() const;
+		std::vector<std::string> getVecPath() const;
 		
-		void splitPath();
+		void splitPathQuery();
 		void createArgs();
+		void findLocalPath();
+		void setExtension();
+
+		//utilsに入れる
+		std::vector<std::string> splitStr(std::string str, std::string sep);
 
     private:
+		const ConfigDTO &conf_;
 		const std::string &pathquery_;
+
 		std::string raw_path_;
+		std::vector<std::string> vec_path_;
 		std::string query_;
 		std::vector<std::string> args_;
+		std::string extension_;
 
 };
 
