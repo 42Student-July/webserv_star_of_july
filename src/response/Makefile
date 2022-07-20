@@ -6,7 +6,7 @@
 #    By: mhirabay <mhirabay@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/13 18:47:47 by mhirabay          #+#    #+#              #
-#    Updated: 2022/07/19 21:38:23 by mhirabay         ###   ########.fr        #
+#    Updated: 2022/07/20 10:20:47 by mhirabay         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,6 +16,7 @@ SRCS			:=	HttpResponse.cpp \
 					HttpResponseBuilder.cpp \
 					HttpResponseSerializer.cpp \
 					HttpResponsePlainText.cpp \
+					MIMEType.cpp \
 					CGI.cpp
 
 CXX				:= c++
@@ -85,7 +86,8 @@ test_compile = clang++ -std=c++11 HttpResponse.cpp \
 					HttpResponseBuilder.cpp \
 					HttpResponseSerializer.cpp \
 					HttpResponsePlainText.cpp \
-					Path.cpp\
+					Path.cpp \
+					MIMEType.cpp \
 	$(testdir)/gtest.cpp \
 	$(testdir)/response_test.cpp \
 	$(gtestdir)/googletest-release-1.11.0/googletest/src/gtest_main.cc $(gtestdir)/gtest/gtest-all.cc \
