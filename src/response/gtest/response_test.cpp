@@ -147,3 +147,22 @@ TEST(RootTest, serverとlocation_locationは相対パス)
 	EXPECT_EQ(res->Body(), ReadIndexHtml());
 }
 
+TEST(MIMETest, html)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqForConfTest(req);
+	
+	conf_.root = "tekitou";
+	loc.root = "html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->ContentType(), "text/html");
+}
+
