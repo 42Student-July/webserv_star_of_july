@@ -311,3 +311,15 @@ TEST_F(HttpRequestParserTest, FieldNameLastIsInvalidChar) {
   ASSERT_EQ(1, request->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
+
+TEST_F(HttpRequestParserTest, NoHost) {
+  std::string file_content =
+      readFile("request/no_host.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkRequestline("GET", "/", "HTTP/1.1", request);
+  checkBody("", request->body);
+  checkHeaderField("user-agent", "send_response.sh", request->name_value_map);
+  ASSERT_EQ(1, request->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
+}

@@ -113,9 +113,19 @@ void HttpRequestParser::parseHeaderField(HttpRequest* request) {
     validateHeaderField(name_value_pair);
     request->name_value_map.insert(name_value_pair);
   }
+  validateHeaderFields(request->name_value_map);
+}
+
+void HttpRequestParser::validateHeaderFields(const HeaderFieldMap& headers) {
+  HeaderFieldMap::const_iterator it = headers.find("Host");
+  if (it == headers.end()){
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
+                             "no host");
+  }
 }
 
 bool isWS(int c) { return (c == ' ' || c == '\t'); }
+
 bool HttpRequestParser::isHeaderDelimiter(int c) {
   return Delimiters.find(c) != std::string::npos;
 }
