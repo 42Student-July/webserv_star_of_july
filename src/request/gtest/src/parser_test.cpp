@@ -261,6 +261,53 @@ TEST_F(HttpRequestParserTest, CheckFieldValueIsTrimmedByWS) {
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
   checkBody("", request->body);
+  checkHeaderField("Host", "admin", request->name_value_map);
+  ASSERT_EQ(2, request->name_value_map.size());
+  ASSERT_EQ(HttpStatus::OK, request->response_status_code);
+}
+
+TEST_F(HttpRequestParserTest, FieldValueHasOnlyWS) {
+  std::string file_content = readFile("request/field_value_has_only_WS.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkRequestline("GET", "/", "HTTP/1.1", request);
+  checkBody("", request->body);
+  checkHeaderField("Host", "admin", request->name_value_map);
+  ASSERT_EQ(2, request->name_value_map.size());
+  ASSERT_EQ(HttpStatus::OK, request->response_status_code);
+}
+
+TEST_F(HttpRequestParserTest, FieldNameHasOnlyWS) {
+  std::string file_content = readFile("request/field_name_has_only_WS.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkRequestline("GET", "/", "HTTP/1.1", request);
+  checkBody("", request->body);
+  checkHeaderField("Host", "admin", request->name_value_map);
+  ASSERT_EQ(1, request->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
+TEST_F(HttpRequestParserTest, FieldNameHasInvalidChar) {
+  std::string file_content =
+      readFile("request/field_name_has_invalid_char.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkRequestline("GET", "/", "HTTP/1.1", request);
+  checkBody("", request->body);
+  checkHeaderField("Host", "admin", request->name_value_map);
+  ASSERT_EQ(1, request->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
+TEST_F(HttpRequestParserTest, FieldNameLastIsInvalidChar) {
+  std::string file_content =
+      readFile("request/field_name_last_is_invalid_char.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkRequestline("GET", "/", "HTTP/1.1", request);
+  checkBody("", request->body);
+  checkHeaderField("Host", "admin", request->name_value_map);
   ASSERT_EQ(1, request->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
 }

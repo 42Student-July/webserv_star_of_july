@@ -2,6 +2,7 @@
 
 const std::string HttpRequestParser::CRLF = "\r\n";
 const std::string HttpRequestParser::WS = " \t";
+const std::string HttpRequestParser::Delimiters = "\"(),/:;<=>?@[\\]{}";
 
 HttpRequestParser::HttpRequestParser() : raw_buffer_(""), offset_(0) {}
 
@@ -30,7 +31,7 @@ HttpRequest* HttpRequestParser::parse(const char* request_str,
     parseBody(request);
   } catch (const ParseErrorExeption& e) {
     request->response_status_code = e.getErrorStatus();
-    // std::cerr << e.what() << std::endl;
+    std::cerr << e.what() << std::endl;
   }
   return request;
 }
@@ -92,7 +93,6 @@ void HttpRequestParser::validateRequestLine(HttpRequest* request) {
   }
 
   std::string version_num = request->version.substr(5);
-  std::cerr << version_num << std::endl;
   if (version_num[1] != '.') {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, ". is not found");
   }
@@ -110,7 +110,65 @@ void HttpRequestParser::parseHeaderField(HttpRequest* request) {
   for (std::string line = getLine(); line.size() != 0; line = getLine()) {
     HeaderFieldPair name_value_pair = makeHeaderFieldPair(line);
 
+    validateHeaderField(name_value_pair);
     request->name_value_map.insert(name_value_pair);
+  }
+}
+
+bool isWS(int c) { return (c == ' ' || c == '\t'); }
+bool HttpRequestParser::isHeaderDelimiter(int c) {
+  return Delimiters.find(c) != std::string::npos;
+}
+
+bool HttpRequestParser::isHeaderTokenChar(int c) {
+  if (isHeaderDelimiter(c) || c == ' ') {
+    return false;
+  }
+  return isprint(c);
+}
+
+bool HttpRequestParser::isHeaderToken(const std::string& str) {
+  if (str.empty()) {
+    return false;
+  }
+  for (StringPos pos = 0; pos <= str.size() - 1; ++pos) {
+    if (!isHeaderTokenChar(str[pos])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+std::string HttpRequestParser::trimCopyIf(const std::string& str,
+                                          const std::string& set) {
+  if (str.empty() || set.empty()) {
+    return str;
+  }
+  StringPos begin = str.find_first_not_of(set);
+  StringPos end = str.find_last_not_of(set);
+  size_t len = end - begin + 1;
+  if (begin == std::string::npos) {
+    return "";
+  }
+
+  return str.substr(begin, len);
+}
+
+void HttpRequestParser::validateHeaderField(HeaderFieldPair headerfield_pair) {
+  std::string field_name = headerfield_pair.first;
+  std::string field_value = headerfield_pair.second;
+
+  if (field_name.empty()) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
+                             "header has no field name");
+  }
+  if (isWS(field_name[field_name.size() - 1])) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
+                             "header has space before colon");
+  }
+  if (!isHeaderToken(field_name)) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
+                             "field_name is not header token");
   }
 }
 
@@ -118,9 +176,11 @@ void HttpRequestParser::parseHeaderField(HttpRequest* request) {
 HttpRequestParser::HeaderFieldPair HttpRequestParser::makeHeaderFieldPair(
     const std::string& line) {
   StringPos name_end = line.find_first_of(":");
-  StringPos value_begin = line.find_first_not_of(WS, name_end + 1);
+  if (name_end == std::string::npos) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "header has no colon");
+  }
   std::string name = line.substr(0, name_end);
-  std::string value = line.substr(value_begin);
+  std::string value = trimCopyIf(line.substr(name_end + 1), WS);
 
   return HeaderFieldPair(name, value);
 }
@@ -141,7 +201,7 @@ void HttpRequestParser::parseBody(HttpRequest* request) {
 std::string HttpRequestParser::getLine() {
   StringPos crlf_pos = raw_buffer_.find(CRLF, offset_);
   if (crlf_pos == std::string::npos) {
-    throw ParseErrorExeption("400", "getLine() error");
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "getLine() error");
   }
   std::string line = raw_buffer_.substr(offset_, crlf_pos - offset_);
   offset_ = crlf_pos + 2;
