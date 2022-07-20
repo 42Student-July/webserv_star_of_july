@@ -20,8 +20,13 @@ class Path
 		std::vector<std::string> getArgs() const;
 		std::string getExtension() const;
 		std::vector<std::string> getVecPath() const;
+
+		const std::string & getPathDir() const;
+		const std::string & getPathFile() const;
+
 		
 		void splitPathQuery();
+		void parseRequestPath(std::string req_path);
 		void createArgs();
 		void findLocalPath();
 		void setExtension();
@@ -33,6 +38,8 @@ class Path
 		const ConfigDTO &conf_;
 		const std::string &pathquery_;
 
+		std::string path_dir_;
+		std::string path_file_;
 		std::string raw_path_;
 		std::vector<std::string> vec_path_;
 		std::string query_;

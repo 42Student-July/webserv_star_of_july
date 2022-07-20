@@ -132,6 +132,12 @@ void CGI::createPipe() {
   }
 }
 
+void throwclose(int fd) {
+	if (close(fd) == -1) {
+		throw -1;
+	}
+}
+
 void CGI::spawnChild() {
   //headerで宣言する
 
@@ -146,12 +152,12 @@ void CGI::spawnChild() {
 	//常にやるべき
 	
 	dupFd(pipe_p2c_[0], STDIN_FILENO);
-	close(pipe_p2c_[0]);
-	close(pipe_p2c_[1]);
+	throwclose(pipe_p2c_[0]);
+	throwclose(pipe_p2c_[1]);
 
 	dupFd(pipe_c2p_[1], STDOUT_FILENO);
-	close(pipe_c2p_[1]);
-	close(pipe_c2p_[0]);
+	throwclose(pipe_c2p_[1]);
+	throwclose(pipe_c2p_[0]);
 
 	int a = execve(exec_args_[0], exec_args_, cgi_envs_);
     if (a < 0) {
@@ -160,21 +166,22 @@ void CGI::spawnChild() {
   } else {
 	//deleteEnviron
     // parent_process
-    close(pipe_p2c_[0]);
-    close(pipe_c2p_[1]);
+    throwclose(pipe_p2c_[0]);
+    throwclose(pipe_c2p_[1]);
 
     write(pipe_p2c_[1], req_.body.c_str(), req_.body.length());
-	close(pipe_p2c_[1]);
+	throwclose(pipe_p2c_[1]);
 
     char buf[BUF_SIZE];
     memset(buf, 0, sizeof(buf));
     ssize_t read_size = 0;
     read_size = read(pipe_c2p_[0], buf, BUF_SIZE);
-	close(pipe_c2p_[0]);
+	throwclose(pipe_c2p_[0]);
     buf[read_size] = '\0';
     cgi_response_ = buf;
   }
 }
+
 
 /* void CGI::dupIO() { */
 

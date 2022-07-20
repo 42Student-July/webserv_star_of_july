@@ -24,7 +24,7 @@ int setGet(ConfigDTO &conf_, LocationConfig &loc_demo, HttpRequestDTO &req)
 
 	// http request data
 	req.method = "GET";
-	req.path = "/cgi-bin/test.py";
+	req.path = "/cgi-bin/tohoho.pl";
 	req.body = "";
 
 	return 0;
@@ -142,28 +142,50 @@ TEST(PathTests, CanSplitPath)
 	ASSERT_EQ("arg2", path.getVecPath()[2]);
 }
 
-/* TEST(PathTests, CanGetExtension) */
-/* { */
-/* 	ConfigDTO conf; */
-/* 	LocationConfig loc_demo; */
-/* 	HttpRequestDTO req; */
-/* 	setGet(conf, loc_demo, req); */
-
-/* 	Path path("/cgi-bin/test.py/arg1/arg2", conf); */
-/* 	ASSERT_EQ(".py", path.getExtension()); */
-/* } */
-
-TEST(CGITests, CanRunCGI)
+TEST(PathTests, CanGetExtension)
 {
 	ConfigDTO conf;
 	LocationConfig loc_demo;
 	HttpRequestDTO req;
 	setGet(conf, loc_demo, req);
 
-	Path path(req.path, conf);
-	CGI cgi;
-	cgi.run(req, conf, path);
+	Path path("/cgi-bin/tohoho.pl/arg1/arg2", conf);
+	ASSERT_EQ(".pl", path.getExtension());
 }
+
+TEST(PathTests, CanGetPathDir)
+{
+	ConfigDTO conf;
+	LocationConfig loc_demo;
+	HttpRequestDTO req;
+	setGet(conf, loc_demo, req);
+
+	Path path("/cgi-bin/tohoho.pl", conf);
+	ASSERT_EQ("/cgi-bin/", path.getPathDir());
+}
+
+TEST(PathTests, CanGetPathFile)
+{
+	ConfigDTO conf;
+	LocationConfig loc_demo;
+	HttpRequestDTO req;
+	setGet(conf, loc_demo, req);
+
+	Path path("/cgi-bin/tohoho.pl", conf);
+	ASSERT_EQ("tohoho.pl", path.getPathFile());
+}
+
+/* TEST(CGITests, CanRunCGI) */
+/* { */
+/* 	ConfigDTO conf; */
+/* 	LocationConfig loc_demo; */
+/* 	HttpRequestDTO req; */
+/* 	setGet(conf, loc_demo, req); */
+
+/* 	Path path(req.path, conf); */
+/* 	CGI cgi; */
+/* 	cgi.run(req, conf, path); */
+/* } */
 
 //plにしたので一旦コメントアウト
 /* TEST(CGITests, CanGetResponseFromCGI) */
@@ -194,7 +216,7 @@ TEST(CGITests, CanPostResponseFromCGI)
 
 	cgi.run(req, conf, path);
 	std::string res_cgi = cgi.getResponseFromCGI();
-	std::cout << res_cgi << std::endl;
+	//std::cout << res_cgi << std::endl;
 }
 
 TEST(CGITests, CanPostResponseFromCGIArgs)
