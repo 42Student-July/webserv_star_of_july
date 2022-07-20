@@ -6,6 +6,7 @@ const std::string HttpResponseBuilder::ACCEPT_RANGES = "none";
 const std::string HttpResponseBuilder::OCTET_STREAM = "application/octet-stream";
 const std::string HttpResponseBuilder::TEXT_HTML = "text/html";
 const std::string HttpResponseBuilder::SP = " ";
+const std::string HttpResponseBuilder::SLASH = "/";
 
 HttpResponseBuilder::HttpResponseBuilder() {}
 
@@ -49,22 +50,22 @@ void HttpResponseBuilder::findActualFilepath(std::string dir, std::string file)
 {
 	DIR				*dirp;
 	struct dirent	*ent;
-	char			*cwd;
-	std::string		fullpath;
+	// char			*cwd;
+	// std::string		fullpath;
 	
-	cwd = getcwd(NULL, 0);
-	fullpath = std::string(cwd) + dir;
-	std::free(cwd);
-	std::cout << "fullpath: " << fullpath << std::endl;
+	// cwd = getcwd(NULL, 0);
+	// fullpath = std::string(cwd) + dir;
+	// std::free(cwd);
+	std::cout << "fullpath: " << dir << std::endl;
 	
-	dirp = opendir(fullpath.c_str());
+	dirp = opendir(dir.c_str());
 	if (dirp == NULL)
 		throw ResponseException("directory not found", 404);
 	while ((ent = readdir(dirp)) != NULL)
 	{
 		if (std::strcmp(ent->d_name, file.c_str()) == 0)
 		{
-			filepath_.path = fullpath + file;
+			filepath_.path = dir + file;
 			filepath_.exists = true;
 			break;
 		}
@@ -99,39 +100,55 @@ void HttpResponseBuilder::findActualErrorFilepath(std::string dir, std::string f
 	closedir(dirp);
 }
 
-void HttpResponseBuilder::findIndexFilepath(LocationConfig location)
+void HttpResponseBuilder::findIndexFilepath(std::string dir, LocationConfig location)
 {
 	if (location.indexes.size() == 0)
 	{
 		// indexが存在しない場合はindex.htmlがデフォルトで入る
-		file_ = "index.html";
-		findActualFilepath(location.root + location.location, file_);
+		path_file_ = "index.html";
+		findActualFilepath(dir, path_file_);
 		return;
 	}
 	std::vector<std::string>::iterator it = location.indexes.begin();
 	std::vector<std::string>::iterator ite = location.indexes.end();
 	for (; it != ite; it++)
 	{
-		findActualFilepath(location.root + location.location, *it);
+		findActualFilepath(dir, *it);
 		if (filepath_.exists)
 		{
-			file_ = *it;
+			path_file_ = *it;
 			break;
 		}
 	}
 }
 
+std::string HttpResponseBuilder::getActualRoot(LocationConfig location)
+{
+	std::string current_path;
+	current_path = getCurrentPath();
+	
+	if (location.root.empty())
+		return default_root_;
+	if (location.root.at(0) == '/')
+		return location.root;
+	return (current_path + SLASH + location.root);
+}
+
 void HttpResponseBuilder::findFileInServer()
 {
-	// TODO: 定義が重複しているときのアルゴリズム作成
+	std::string root;
+	std::string dir;
+	
 	for (; loc_it_ != loc_ite_; loc_it_++)
 	{
-		if ((*loc_it_).location == dir_)
+		if ((*loc_it_).location == path_dir_)
 		{
-			if (file_.empty())
-				findIndexFilepath(*loc_it_);
+			root = getActualRoot(*loc_it_);
+			dir = root + (*loc_it_).location;
+			if (path_file_.empty())
+				findIndexFilepath(dir, *loc_it_);
 			else
-				findActualFilepath((*loc_it_).root + (*loc_it_).location, file_);
+				findActualFilepath(dir, path_file_);
 			if (filepath_.exists)
 			{
 				found_location_ = *loc_it_;
@@ -227,7 +244,7 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 
 void HttpResponseBuilder::reflectLocationStatus()
 {
-	if (isCGI(file_))
+	if (isCGI(path_file_))
 		is_file_cgi = true;
 	//TODO: allowed_methodとかはこっちにおく
 }
@@ -310,8 +327,8 @@ void HttpResponseBuilder::parseRequestPath(std::string req_path)
 	if (last_slash_pos == std::string::npos) {
 		throw std::runtime_error("no slash found in request path");
     }
-	dir_ = req_path.substr(0, last_slash_pos + 1);
-	file_ = req_path.substr(last_slash_pos + 1);
+	path_dir_ = req_path.substr(0, last_slash_pos + 1);
+	path_file_ = req_path.substr(last_slash_pos + 1);
 }
 
 HttpResponse *HttpResponseBuilder::buildErrorResponse(int httpstatus, HttpRequestDTO &req)
@@ -332,10 +349,39 @@ HttpResponse *HttpResponseBuilder::buildErrorResponse(int httpstatus, HttpReques
 	return new HttpResponse(header_, res_body_str_.str());
 }
 
+std::string HttpResponseBuilder::getCurrentPath()
+{
+	char *cwd;
+	
+	cwd = getcwd(NULL, 0);
+	if (cwd == NULL)
+		throw ResponseException("getcwd", 500);
+	return std::string(cwd);
+}
+
+void HttpResponseBuilder::setDefaultRoot()
+{
+	std::string current_path;
+	current_path = getCurrentPath();
+
+	if (conf_.root.empty())
+	{
+		default_root_ = current_path;
+		return;
+	}	
+
+	// configのrootが絶対パスの場合はそのまま入れる
+	if (conf_.root.at(0) == '/')
+		default_root_ = conf_.root;
+	else
+		default_root_ = current_path + SLASH + conf_.root;
+}
+
 HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 {
 	try
 	{
+		setDefaultRoot();
 		parseRequestPath(req.path);
 		findFileInServer();
 		reflectLocationStatus();
@@ -357,6 +403,7 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 	}
 	catch(const std::exception& e)
 	{
+		// 500を返すようにする
 		std::cerr << e.what() << '\n';
 		// TODO:直す
 		std::exit(1);
