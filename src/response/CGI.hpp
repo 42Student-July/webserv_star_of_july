@@ -35,7 +35,8 @@ class CGI {
   CGI &operator=(CGI const &other);
 
  private:
-  std::string cgi_body_;
+  static const int BUF_SIZE = 8192;
+  std::string cgi_response_;
 
   HttpRequestDTO req_;
   ConfigDTO conf_;

@@ -145,20 +145,21 @@ void CGI::spawnChild() {
     //dupIO();
 	if (req_.method == "POST") {
 	
+		//dupFd(pipe_p2c_[0], STDIN_FILENO);
 		dup2(pipe_p2c_[0], STDIN_FILENO);
-		close(pipe_p2c_[0]);
-		close(pipe_p2c_[1]);
+		char tmp[BUF_SIZE]; 
+		read(STDIN_FILENO, tmp, BUF_SIZE);
+		std::cerr << "tmp: " << tmp << std::endl;
+  
 
+		//close(pipe_p2c_[0]);
+		//close(pipe_p2c_[1]);
 	}
 	dupFd(pipe_c2p_[1], STDOUT_FILENO);
 	close(pipe_c2p_[1]);
 	close(pipe_c2p_[0]);
 
-	/* char tmp[BUF_SIZE]; */ 
-	/* read(STDIN_FILENO, tmp, BUF_SIZE); */
-	/* std::cerr << "tmp: " << tmp << std::endl; */
-
-	int a = execve(exec_args_[0], exec_args_, cgi_envs_);
+	    int a = execve(exec_args_[0], exec_args_, cgi_envs_);
     if (a < 0) {
       std::cerr << "error: a = " << a << std::endl;
     }
