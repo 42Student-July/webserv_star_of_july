@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "HttpResponseBuilder.hpp"
+#include "HttpResponseHeaderDTO.hpp"
 
 class CGIParser {
  public:
@@ -14,21 +15,31 @@ class CGIParser {
   virtual ~CGIParser();
 
   void parse(std::string cgi_response);
-  void parseHeader();
+  void parseHeaderField();
   void parseBody();
-  bool getLine(std::string *line);
+  
+  std::string getBodyStr() const;
+  HttpResponseHeaderDTO getHeader() const;
+  std::map<std::string, std::string> getCGIHeader() const;
+  std::pair<std::string, std::string> makeHeaderFieldPair(const std::string& line);
+
+  std::string getLine();
 
  private:
+  typedef std::string::size_type StringPos;
   static const std::string CRLF;
   static const std::string WS;
+
   CGIParser(CGIParser const &other);
   CGIParser &operator=(CGIParser const &other);
 
-  std::string offset_;
+  StringPos offset_;
+  std::string raw_buffer_;
   std::string cgi_response_;
 
-  // std::map<std::string, std::string> header_;
-  std::stringstream file_str_;
+  std::map<std::string, std::string> cgi_header_;
+  std::string res_body_str_;
+  HttpResponseHeaderDTO header_;
 };
 
 #endif

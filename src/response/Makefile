@@ -17,7 +17,8 @@ SRCS			:=	HttpResponse.cpp \
 					HttpResponseSerializer.cpp \
 					HttpResponsePlainText.cpp \
 					MIMEType.cpp \
-					CGI.cpp 
+					CGI.cpp \
+					Path.cpp
 
 CXX				:= c++
 RM				:= rm -rf
@@ -83,11 +84,10 @@ $(gtest):
 test_compile = clang++ -std=c++11 HttpResponse.cpp \
 					CGI.cpp \
 					CGIParser.cpp\
-					MIMEType.cpp \
 					HttpResponseBuilder.cpp \
 					HttpResponseSerializer.cpp \
 					HttpResponsePlainText.cpp \
-					Path.cpp \
+					Path.cpp 
 	$(testdir)/gtest.cpp \
 	$(gtestdir)/googletest-release-1.11.0/googletest/src/gtest_main.cc $(gtestdir)/gtest/gtest-all.cc \
 	-I$(gtestdir) -I$(includes) -lpthread -o tester
