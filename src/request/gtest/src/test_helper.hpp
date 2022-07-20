@@ -1,11 +1,11 @@
 #ifndef TEST_HELPER_HPP
 #define TEST_HELPER_HPP
 
+#include "ConfigDTO.hpp"
 #include "HttpRequest.hpp"
 #include "HttpRequestDTO.hpp"
 #include "HttpRequestParser.hpp"
 #include "ServerConfig.hpp"
-#include "../../../../response/ConfigDTO.hpp"
 
 void compareString(const std::string &expected, const std::string &actual);
 ServerConfig initServerCongig();

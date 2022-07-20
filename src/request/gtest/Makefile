@@ -1,14 +1,14 @@
 CXX = c++
 CXXFLAGS = -std=c++11
 
-SRC_DIR = ../../
+SRC_DIR = ../
 GTEST_DIR = googletest-release-1.12.1
 TEST_SRC_DIR = src
 GTEST_LIB_DIR = $(GTEST_DIR)/lib
 INCLUDE_DIR = $(GTEST_DIR)/googletest/include \
  			  $(SRC_DIR) \
- 			   ../../../config \
- 			   ../../../response \
+ 			   ../../config \
+ 			   ../../response \
  			   $(NULL)
 
 TEST_SRCS = $(shell find $(TEST_SRC_DIR) -name '*.cpp')
@@ -25,7 +25,7 @@ TEST_LIB = $(SRC_DIR)/librequest.a
 .PHONY: test
 test: $(GTEST_DIR) create_lib
 	@$(CXX) $(CXXFLAGS) $(GTEST_INCLUDES) $(TEST_SRCS) $(TEST_LIB) -L$(GTEST_LIB_DIR) $(GTEST_LIBS) -o test
-	@./test
+	-@./test
 	@$(RM) test
 
 $(GTEST_DIR): 

@@ -5,6 +5,8 @@
 #include "ServerConfig.hpp"
 #include "test_helper.hpp"
 
+// requestの内容をファイルから読み込んでいるが、直接ベタ打ちした方がよかったい気がする。
+
 class HttpRequestParserTest : public ::testing::Test {
  protected:
   virtual void SetUp() {
@@ -220,4 +222,45 @@ TEST_F(HttpRequestParserTest, VersionIsNotSupported) {
   ASSERT_EQ(0, request->name_value_map.size());
   ASSERT_EQ(HttpStatus::HTTP_VERSION_NOT_SUPPORTED,
             request->response_status_code);
+}
+
+TEST_F(HttpRequestParserTest, HeaderHasNoColon) {
+  std::string file_content = readFile("request/header_has_no_colon.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkRequestline("GET", "/", "HTTP/1.1", request);
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
+TEST_F(HttpRequestParserTest, HeaderHasSpaceBeforeColon) {
+  std::string file_content =
+      readFile("request/header_has_space_before_colon.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkRequestline("GET", "/", "HTTP/1.1", request);
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
+TEST_F(HttpRequestParserTest, HeaderHasNoFieldName) {
+  std::string file_content = readFile("request/header_has_no_field_name.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkRequestline("GET", "/", "HTTP/1.1", request);
+  checkBody("", request->body);
+  ASSERT_EQ(1, request->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
+TEST_F(HttpRequestParserTest, CheckFieldValueIsTrimmedByWS) {
+  std::string file_content = readFile("request/field_value_is_trimmed.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkRequestline("GET", "/", "HTTP/1.1", request);
+  checkBody("", request->body);
+  ASSERT_EQ(1, request->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
