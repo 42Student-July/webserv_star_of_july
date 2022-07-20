@@ -47,9 +47,9 @@ int setPost(ConfigDTO &conf_, LocationConfig &loc_demo, HttpRequestDTO &req)
 	// http request data
 	req.method = "POST";
 	req.path = "/cgi-bin/tohoho.pl?name=yuki&hello=world";
-	req.body = "a=abc";
+	req.body = "a=abc&b=bcdef";
 	req.authorization = "auth_test";
-
+	req.content_length = "20";
 	return 0;
 }
 

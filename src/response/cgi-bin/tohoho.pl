@@ -96,7 +96,7 @@ foreach $a (@a) {
 	$value =~ tr/+/ /;
 	$value =~ s/%([0-9a-fA-F][0-9a-fA-F])/pack("C", hex($1))/eg;
 	# 変数名と値を書き出します
-	print "$name = [ " . html($value) . " \n";
+	print "$name = [ " . html($value) . " ] \n";
 	# 後で使用する場合は、$FORM{'変数名'} に代入しておきます
 	$FORM{$name} = $value;
 }

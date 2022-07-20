@@ -85,9 +85,6 @@ test_compile = clang++ -std=c++11 HttpResponse.cpp \
 					HttpResponsePlainText.cpp \
 					CGI.cpp \
 					CGIParser.cpp\
-					HttpResponseBuilder.cpp \
-					HttpResponseSerializer.cpp \
-					HttpResponsePlainText.cpp \
 					Path.cpp\
 	$(testdir)/gtest.cpp \
 	$(testdir)/response_test.cpp \

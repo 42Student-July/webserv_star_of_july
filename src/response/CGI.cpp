@@ -143,20 +143,15 @@ void CGI::spawnChild() {
   if (pid == 0) {
     // child process
     //dupIO();
-	if (req_.method == "POST") {
+	//常にやるべき
 	
-		dup2(pipe_p2c_[0], STDIN_FILENO);
-		close(pipe_p2c_[0]);
-		close(pipe_p2c_[1]);
+	dupFd(pipe_p2c_[0], STDIN_FILENO);
+	close(pipe_p2c_[0]);
+	close(pipe_p2c_[1]);
 
-	}
 	dupFd(pipe_c2p_[1], STDOUT_FILENO);
 	close(pipe_c2p_[1]);
 	close(pipe_c2p_[0]);
-
-	/* char tmp[BUF_SIZE]; */ 
-	/* read(STDIN_FILENO, tmp, BUF_SIZE); */
-	/* std::cerr << "tmp: " << tmp << std::endl; */
 
 	int a = execve(exec_args_[0], exec_args_, cgi_envs_);
     if (a < 0) {
@@ -168,11 +163,8 @@ void CGI::spawnChild() {
     close(pipe_p2c_[0]);
     close(pipe_c2p_[1]);
 
-	//int wstatus = 0;
-	/* std::cout << "req: " << req_.body.c_str() << std::endl; */
     write(pipe_p2c_[1], req_.body.c_str(), req_.body.length());
 	close(pipe_p2c_[1]);
-	//int wait_pid = wait(&wstatus);
 
     char buf[BUF_SIZE];
     memset(buf, 0, sizeof(buf));
