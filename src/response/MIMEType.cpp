@@ -51,3 +51,8 @@ const std::string &MIMEType::Default() const
 {
 	return default_;
 }
+
+const std::map<std::string, std::string> &MIMEType::GetMap() const
+{
+	return mime_type_map_;
+}
