@@ -269,12 +269,69 @@ TEST(MIMETest, txt)
 	EXPECT_EQ(res->ContentType(), "text/plain");
 }
 
-TEST(MIMETest, default)
+TEST(MIMETest, no_extension)
 {
 	ConfigDTO conf_;
 	LocationConfig loc;
 	HttpRequestDTO req;
 	setReqPath(req, std::string("/sample"));
+	setRoot(conf_, std::string("html"));
+	
+	conf_.root = "html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->ContentType(), "application/octet-stream");
+}
+
+TEST(MIMETest, only_dot_extension)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/.txt"));
+	setRoot(conf_, std::string("html"));
+	
+	conf_.root = "html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->ContentType(), "application/octet-stream");
+}
+
+TEST(MIMETest, only_extension)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/txt"));
+	setRoot(conf_, std::string("html"));
+	
+	conf_.root = "html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->ContentType(), "application/octet-stream");
+}
+
+TEST(MIMETest, end_is_dot)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/file."));
 	setRoot(conf_, std::string("html"));
 	
 	conf_.root = "html";
