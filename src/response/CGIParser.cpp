@@ -3,7 +3,7 @@
 const std::string CGIParser::CRLF = "\r\n";
 const std::string CGIParser::WS = " \t";
 
-CGIParser::CGIParser() : raw_buffer_(""), offset_(0) {}
+CGIParser::CGIParser() {}
 
 CGIParser::~CGIParser() {}
 
@@ -17,7 +17,6 @@ std::map<std::string, std::string> CGIParser::getCGIHeader() const {
 
 void CGIParser::parse(std::string cgi_response) {
   cgi_response_ = cgi_response;
-  raw_buffer_ = cgi_response_;
   std::stringstream ss(cgi_response_);
 
   parseHeaderField(ss);
@@ -50,18 +49,5 @@ void CGIParser::parseBody(std::stringstream &ss) {
     res_body_str_ += line;
     res_body_str_ += "\n";
   }
-}
-
-// よしえさんのrequestparserより
-// Parserクラスとして抽象化したい
-// 現在のオフセットから一行読み取る関数。読み取ったら改行の次の文字にoffsetを進める
-std::string CGIParser::getLine() {
-  StringPos crlf_pos = raw_buffer_.find(CRLF, offset_);
-  if (crlf_pos == std::string::npos) {
-    throw -1;
-  }
-  std::string line = raw_buffer_.substr(offset_, crlf_pos - offset_);
-  offset_ = crlf_pos + 2;
-  return line;
 }
 

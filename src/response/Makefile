@@ -18,6 +18,7 @@ SRCS			:=	HttpResponse.cpp \
 					HttpResponsePlainText.cpp \
 					MIMEType.cpp \
 					CGI.cpp \
+					CGIParser.cpp\
 					Path.cpp
 
 CXX				:= c++

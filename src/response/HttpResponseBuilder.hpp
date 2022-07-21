@@ -23,6 +23,7 @@
 #include "CGI.hpp"
 #include "Path.hpp"
 #include "MIMEType.hpp"
+#include "CGIParser.hpp"
 
 class HttpResponseBuilder
 {
@@ -59,6 +60,7 @@ private:
 	time_t now_;
 
 	CGI cgi_;
+	CGIParser cgi_parser_;
 	void setDefaultRoot();
 	std::string getActualRoot(LocationConfig location);
 	std::string getCurrentPath();
@@ -83,7 +85,7 @@ public:
 	void parseRequestPath(std::string req_path);
 	void reflectLocationStatus();
 	bool isCGI(std::string file);
-	void doCGI(HttpRequestDTO req);
+	void doCGI(HttpRequestDTO &req);
 	std::string getReasonPhrase(std::string httpStatus);
 	HttpResponse *buildDefaultErrorPage(int httpstatus, HttpRequestDTO &req);
 	void buildDefaultErrorBody(int httpStatus);
