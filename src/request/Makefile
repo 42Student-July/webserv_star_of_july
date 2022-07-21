@@ -58,11 +58,11 @@ fclean: clean
 re: fclean all
 
 # テスト
-TEST_DIR = tests
+TEST_DIR = gtest
 
 .PHONY: test
 test:
-	make -C $(TEST_DIR) googletest
+	@$(MAKE) -C $(TEST_DIR) test
 
 
 #endif /* MAKEFILE */

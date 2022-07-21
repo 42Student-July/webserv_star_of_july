@@ -56,16 +56,16 @@ ServerConfig initServerConfigWithLocation() {
 
 void checkRequestline(const std::string &method, const std::string &uri,
                       const std::string &version, HttpRequest *request) {
-  compareString(method, request->method);
-  compareString(uri, request->uri);
-  compareString(version, request->version);
+  ASSERT_EQ(method, request->method);
+  ASSERT_EQ(uri, request->uri);
+  ASSERT_EQ(version, request->version);
 }
 
 void checkRequestline(const std::string &method, const std::string &uri,
                       const std::string &version, HttpRequestDTO *dto) {
-  compareString(method, dto->method);
-  compareString(uri, dto->path);
-  compareString(version, dto->version);
+  ASSERT_EQ(method, dto->method);
+  ASSERT_EQ(uri, dto->path);
+  ASSERT_EQ(version, dto->version);
 }
 
 // Request用
@@ -74,15 +74,15 @@ void checkHeaderField(const std::string &name, const std::string &value,
   HttpRequest::HeaderFieldMap::const_iterator it = name_value_map.find(name);
 
   ASSERT_TRUE(it != name_value_map.end());
-  compareString(value, it->second);
+  ASSERT_EQ(value, it->second);
 }
 
 // DTO用
 void checkHeaderField(const std::string &expected, const std::string &actual) {
-  compareString(expected, actual);
+  ASSERT_EQ(expected, actual);
 }
 
 // 形式そろえるために
 void checkBody(const std::string &expected, const std::string &actual) {
-  compareString(expected, actual);
+  ASSERT_EQ(expected, actual);
 }

@@ -1,13 +1,14 @@
 #include <gtest/gtest.h>
 
+// #include "../../../response/ConfigDTO.hpp"
+#include "ConfigConverter.hpp"
+#include "ConfigDTO.hpp"
 #include "HttpRequest.hpp"
 #include "HttpRequestConverter.hpp"
 #include "HttpRequestDTO.hpp"
 #include "HttpRequestParser.hpp"
 #include "ServerConfig.hpp"
 #include "test_helper.hpp"
-#include "ConfigConverter.hpp"
-#include "../../../../response/ConfigDTO.hpp"
 
 TEST(ConfigConverterTest, StoreEverything) {
   ServerConfig config = initServerConfigWithLocation();
@@ -51,7 +52,8 @@ TEST(ConfigConverterTest, StoreEverything) {
 /* TEST(HttpConverterTest, StoreAllHeaderField) { */
 /*   HttpRequestParser parser; */
 /*   ServerConfig config = initServerCongig(); */
-/*   std::string file_content = readFile("request/dto_all_header_field.crlf"); */
+/*   std::string file_content = readFile("request/dto_all_header_field.crlf");
+ */
 /*   HttpRequest *request = parser.parse(file_content.c_str(), config); */
 
 /*   HttpRequestConverter converter; */
