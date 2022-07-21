@@ -2,7 +2,7 @@ CXX = c++
 CXXFLAGS = -std=c++11
 
 SRC_DIR = ../
-GTEST_DIR = googletest-release-1.12.1
+GTEST_DIR = ../../../tests/googletest-release-1.12.1
 TEST_SRC_DIR = src
 GTEST_LIB_DIR = $(GTEST_DIR)/lib
 UTILITY_DIR = ../../utility
@@ -42,6 +42,7 @@ test: $(GTEST_DIR) $(TEST_LIB) $(LIB_UTILITY)
 $(GTEST_DIR): 
 	curl -OL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.tar.gz
 	tar -xvzf release-1.12.1.tar.gz
+	mv googletest-release-1.12.1 $(GTEST_DIR)
 	rm -rf release-1.12.1.tar.gz
 	(cd $(GTEST_DIR) && \
 	cmake . && \

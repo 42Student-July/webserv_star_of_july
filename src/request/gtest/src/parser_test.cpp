@@ -24,7 +24,7 @@ class HttpRequestParserTest : public ::testing::Test {
 };
 
 TEST_F(HttpRequestParserTest, StoreRequestline) {
-  std::string file_content = readFile("request/simple_get.crlf");
+  std::string file_content = readFile("gtest/request/simple_get.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
@@ -32,7 +32,7 @@ TEST_F(HttpRequestParserTest, StoreRequestline) {
 }
 
 TEST_F(HttpRequestParserTest, StoreHeaderFieldWithCurl) {
-  std::string file_content = readFile("request/curl.crlf");
+  std::string file_content = readFile("gtest/request/curl.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
@@ -44,7 +44,7 @@ TEST_F(HttpRequestParserTest, StoreHeaderFieldWithCurl) {
 }
 
 TEST_F(HttpRequestParserTest, StoreHeaderFieldWithChrome) {
-  std::string file_content = readFile("request/chrome.crlf");
+  std::string file_content = readFile("gtest/request/chrome.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
@@ -81,7 +81,7 @@ TEST_F(HttpRequestParserTest, StoreHeaderFieldWithChrome) {
 }
 
 TEST_F(HttpRequestParserTest, StoreOneLineToBody) {
-  std::string file_content = readFile("request/body_one_line.crlf");
+  std::string file_content = readFile("gtest/request/body_one_line.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("POST", "/", "HTTP/1.1", request);
@@ -92,7 +92,7 @@ TEST_F(HttpRequestParserTest, StoreOneLineToBody) {
 }
 
 TEST_F(HttpRequestParserTest, StoreBodyMultiLinesToBody) {
-  std::string file_content = readFile("request/body_multi_lines.crlf");
+  std::string file_content = readFile("gtest/request/body_multi_lines.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("POST", "/", "HTTP/1.1", request);
@@ -103,7 +103,7 @@ TEST_F(HttpRequestParserTest, StoreBodyMultiLinesToBody) {
 }
 
 TEST_F(HttpRequestParserTest, StoreJsonToBody) {
-  std::string file_content = readFile("request/body_json.crlf");
+  std::string file_content = readFile("gtest/request/body_json.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("POST", "/", "HTTP/1.1", request);
@@ -117,7 +117,7 @@ TEST_F(HttpRequestParserTest, StoreJsonToBody) {
 }
 
 TEST_F(HttpRequestParserTest, StoreServerConfig) {
-  std::string file_content = readFile("request/simple_get.crlf");
+  std::string file_content = readFile("gtest/request/simple_get.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
@@ -133,7 +133,8 @@ TEST_F(HttpRequestParserTest, StoreServerConfig) {
 }
 
 TEST_F(HttpRequestParserTest, InvalidHttpVersion) {
-  std::string file_content = readFile("request/invalid_http_version.crlf");
+  std::string file_content =
+      readFile("gtest/request/invalid_http_version.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkBody("", request->body);
@@ -142,7 +143,7 @@ TEST_F(HttpRequestParserTest, InvalidHttpVersion) {
 }
 
 TEST_F(HttpRequestParserTest, NoRequestLine) {
-  std::string file_content = readFile("request/no_request_line.crlf");
+  std::string file_content = readFile("gtest/request/no_request_line.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkBody("", request->body);
@@ -151,7 +152,7 @@ TEST_F(HttpRequestParserTest, NoRequestLine) {
 }
 
 TEST_F(HttpRequestParserTest, NoMethod) {
-  std::string file_content = readFile("request/no_method.crlf");
+  std::string file_content = readFile("gtest/request/no_method.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkBody("", request->body);
@@ -160,7 +161,7 @@ TEST_F(HttpRequestParserTest, NoMethod) {
 }
 
 TEST_F(HttpRequestParserTest, NoUri) {
-  std::string file_content = readFile("request/no_uri.crlf");
+  std::string file_content = readFile("gtest/request/no_uri.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkBody("", request->body);
@@ -169,7 +170,7 @@ TEST_F(HttpRequestParserTest, NoUri) {
 }
 
 TEST_F(HttpRequestParserTest, NoHttpVersion) {
-  std::string file_content = readFile("request/no_http_version.crlf");
+  std::string file_content = readFile("gtest/request/no_http_version.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkBody("", request->body);
@@ -178,7 +179,7 @@ TEST_F(HttpRequestParserTest, NoHttpVersion) {
 }
 
 TEST_F(HttpRequestParserTest, InvalidProtocol) {
-  std::string file_content = readFile("request/invalid_protocol.crlf");
+  std::string file_content = readFile("gtest/request/invalid_protocol.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkBody("", request->body);
@@ -187,7 +188,8 @@ TEST_F(HttpRequestParserTest, InvalidProtocol) {
 }
 
 TEST_F(HttpRequestParserTest, VersionHasNoSlash) {
-  std::string file_content = readFile("request/version_has_no_slash.crlf");
+  std::string file_content =
+      readFile("gtest/request/version_has_no_slash.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkBody("", request->body);
@@ -196,7 +198,8 @@ TEST_F(HttpRequestParserTest, VersionHasNoSlash) {
 }
 
 TEST_F(HttpRequestParserTest, VersionHasNoPeriod) {
-  std::string file_content = readFile("request/version_has_no_period.crlf");
+  std::string file_content =
+      readFile("gtest/request/version_has_no_period.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkBody("", request->body);
@@ -206,7 +209,7 @@ TEST_F(HttpRequestParserTest, VersionHasNoPeriod) {
 
 TEST_F(HttpRequestParserTest, VersionHasOtherThanDigit) {
   std::string file_content =
-      readFile("request/version_has_other_than_digit.crlf");
+      readFile("gtest/request/version_has_other_than_digit.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkBody("", request->body);
@@ -215,7 +218,8 @@ TEST_F(HttpRequestParserTest, VersionHasOtherThanDigit) {
 }
 
 TEST_F(HttpRequestParserTest, VersionIsNotSupported) {
-  std::string file_content = readFile("request/version_is_not_supported.crlf");
+  std::string file_content =
+      readFile("gtest/request/version_is_not_supported.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkBody("", request->body);
@@ -225,7 +229,7 @@ TEST_F(HttpRequestParserTest, VersionIsNotSupported) {
 }
 
 TEST_F(HttpRequestParserTest, HeaderHasNoColon) {
-  std::string file_content = readFile("request/header_has_no_colon.crlf");
+  std::string file_content = readFile("gtest/request/header_has_no_colon.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
@@ -236,7 +240,7 @@ TEST_F(HttpRequestParserTest, HeaderHasNoColon) {
 
 TEST_F(HttpRequestParserTest, HeaderHasSpaceBeforeColon) {
   std::string file_content =
-      readFile("request/header_has_space_before_colon.crlf");
+      readFile("gtest/request/header_has_space_before_colon.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
@@ -246,7 +250,8 @@ TEST_F(HttpRequestParserTest, HeaderHasSpaceBeforeColon) {
 }
 
 TEST_F(HttpRequestParserTest, HeaderHasNoFieldName) {
-  std::string file_content = readFile("request/header_has_no_field_name.crlf");
+  std::string file_content =
+      readFile("gtest/request/header_has_no_field_name.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
@@ -256,7 +261,8 @@ TEST_F(HttpRequestParserTest, HeaderHasNoFieldName) {
 }
 
 TEST_F(HttpRequestParserTest, CheckFieldValueIsTrimmedByWS) {
-  std::string file_content = readFile("request/field_value_is_trimmed.crlf");
+  std::string file_content =
+      readFile("gtest/request/field_value_is_trimmed.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
@@ -267,7 +273,8 @@ TEST_F(HttpRequestParserTest, CheckFieldValueIsTrimmedByWS) {
 }
 
 TEST_F(HttpRequestParserTest, FieldValueHasOnlyWS) {
-  std::string file_content = readFile("request/field_value_has_only_WS.crlf");
+  std::string file_content =
+      readFile("gtest/request/field_value_has_only_WS.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
@@ -278,7 +285,8 @@ TEST_F(HttpRequestParserTest, FieldValueHasOnlyWS) {
 }
 
 TEST_F(HttpRequestParserTest, FieldNameHasOnlyWS) {
-  std::string file_content = readFile("request/field_name_has_only_WS.crlf");
+  std::string file_content =
+      readFile("gtest/request/field_name_has_only_WS.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
@@ -290,7 +298,7 @@ TEST_F(HttpRequestParserTest, FieldNameHasOnlyWS) {
 
 TEST_F(HttpRequestParserTest, FieldNameHasInvalidChar) {
   std::string file_content =
-      readFile("request/field_name_has_invalid_char.crlf");
+      readFile("gtest/request/field_name_has_invalid_char.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
@@ -302,7 +310,7 @@ TEST_F(HttpRequestParserTest, FieldNameHasInvalidChar) {
 
 TEST_F(HttpRequestParserTest, FieldNameLastIsInvalidChar) {
   std::string file_content =
-      readFile("request/field_name_last_is_invalid_char.crlf");
+      readFile("gtest/request/field_name_last_is_invalid_char.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
@@ -313,8 +321,7 @@ TEST_F(HttpRequestParserTest, FieldNameLastIsInvalidChar) {
 }
 
 TEST_F(HttpRequestParserTest, NoHost) {
-  std::string file_content =
-      readFile("request/no_host.crlf");
+  std::string file_content = readFile("gtest/request/no_host.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   checkRequestline("GET", "/", "HTTP/1.1", request);

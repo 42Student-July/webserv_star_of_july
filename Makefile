@@ -82,6 +82,14 @@ unit_test:
 	@$(MAKE) -C $(CONFIG_DIR) test
 	@$(MAKE) -C $(REQUEST_DIR) test
 
+setup_gtest: 
+	curl -OL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.tar.gz
+	tar -xvzf release-1.12.1.tar.gz
+	rm -rf release-1.12.1.tar.gz
+	(cd googletest-release-1.12.1 && \
+	cmake . && \
+	make)
+	mv googletest-release-1.12.1 tests
 
 ## Color
 END		= \e[0m

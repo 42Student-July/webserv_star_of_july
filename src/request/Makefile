@@ -17,13 +17,13 @@ NAME = librequest.a
 CXX = c++
 CXXFLAGS = -Wall -Werror -Wextra -Wshadow -std=c++98 -pedantic
 
-HEADERS = . \
+INCLUDE_PATH = . \
 		  ../config \
 		  ../response \
 		  ../utility \
 		  $(NULL)
 
-INCLUDES = $(addprefix -I, $(HEADERS))
+INCLUDES = $(addprefix -I, $(INCLUDE_PATH))
 
 SRCS = $(shell find . -maxdepth 1 -name '*.cpp' -not -name 'main.cpp')
 
@@ -68,12 +68,37 @@ $(LIB_UTILITY): dummy
 .PHONY: dummy
 dummy:
 
-# テスト
-TEST_DIR = gtest
+# Googleテスト
+ROOT_DIR = ../..
+GTEST_DIR = $(ROOT_DIR)/tests/googletest-release-1.12.1
+
+TEST_SRCS = $(shell find gtest/src -name '*.cpp')
+
+LDFLAGS = -L$(GTEST_DIR)/lib \
+		  -L. \
+		  -L$(UTILITY_DIR) \
+		  $(NULL)
+
+LDLIBS = -lgtest \
+		 -lgtest_main \
+		 -lpthread \
+		 $(NAME) \
+		 $(LIB_UTILITY) \
+		 $(NULL)
+
+$(GTEST_DIR):
+	$(MAKE) -C $(ROOT_DIR) setup_gtest
 
 .PHONY: test
-test:
-	@$(MAKE) -C $(TEST_DIR) test
+test: INCLUDES += -I$(GTEST_DIR)/googletest/include
+test: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
+	$(CXX) -std=c++11 $(INCLUDES) $(TEST_SRCS) $(LDFLAGS) $(LDLIBS) -o test
+	-@./test
+	@$(RM) test
 
+# test: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
+# 	$(CXX) -std=c++11 $(INCLUDES) $(TEST_SRCS) $(NAME) $(LIB_UTILITY) -L$(GTEST_LIB_DIR) $(LDLIBS) -o test
+# 	-@./test
+# 	@$(RM) test
 
 #endif /* MAKEFILE */
