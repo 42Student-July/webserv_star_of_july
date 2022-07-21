@@ -288,14 +288,18 @@ std::string HttpResponseBuilder::getReasonPhrase(std::string httpStatus)
 }
 
 
-void HttpResponseBuilder::doCGI(HttpRequestDTO req)
+void HttpResponseBuilder::doCGI(HttpRequestDTO &req)
 {
 	//TODO: ここにCGIの処理を追加
-	(void)req;
-	/* Path path(req.path); */
-	/* cgi_.run(req, conf_, path); */
-	/* std::string cgi_response = cgi_.getResponseFromCGI(); */
-	/* std::cout << cgi_response << std::endl; */
+	Path path(req.path, conf_);
+	cgi_.run(req, conf_, path);
+	std::string cgi_response = cgi_.getResponseFromCGI();
+	cgi_parser_.parse(cgi_response);
+	buildHeader(req);
+	//TODO: このあとcgiによるupdateHeaderを実行
+	
+	//bodyの作成
+	res_body_str_ << cgi_parser_.getBodyStr();	
 }
 
 void HttpResponseBuilder::buildErrorHeader(HttpRequestDTO &req, int httpStatus, std::string body_str)

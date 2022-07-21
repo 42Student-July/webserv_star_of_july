@@ -257,22 +257,23 @@ TEST(CGIParserTests, CanParseHeader)
 	ASSERT_EQ("200", cgi_parser.getCGIHeader()["StatusCode"]);
 }
 
-/* TEST(CGIParserTests, CanParseBody) */
-/* { */
-/* 	ConfigDTO conf; */
-/* 	LocationConfig loc_demo; */
-/* 	HttpRequestDTO req; */
-/* 	setGet(conf, loc_demo, req); */
+TEST(CGIParserTests, CanParseBody)
+{
+	ConfigDTO conf;
+	LocationConfig loc_demo;
+	HttpRequestDTO req;
+	setGet(conf, loc_demo, req);
 
-/* 	Path path(req.path, conf); */
-/* 	CGI cgi; */
-/* 	CGIParser cgi_parser; */
+	Path path(req.path, conf);
+	CGI cgi;
+	CGIParser cgi_parser;
 
-/* 	cgi.run(req, conf, path); */
-/* 	std::string res_cgi = cgi.getResponseFromCGI(); */
+	cgi.run(req, conf, path);
+	std::string res_cgi = cgi.getResponseFromCGI();
 
-/* 	cgi_parser.parse(res_cgi); */
-/* } */
+	cgi_parser.parse(res_cgi);
+	std::cout << cgi_parser.getBodyStr() << std::endl;
+}
 
 /* TEST(CGITests, CanPOST) */
 /* { */
@@ -285,13 +286,15 @@ TEST(CGIParserTests, CanParseHeader)
 /* 	std::string cgi_response = cgi.getResponseFromCGI(); */
 /* } */
 
-/* TEST(ConnectToBuilder, CanRunCGI) */
-/* { */
-/* 	ConfigDTO conf_; */
-/* 	LocationConfig loc_demo; */
-/* 	HttpRequestDTO req; */
-/* 	setGet(conf_, loc_demo, req); */
+/* TEST(ConnectToBuilder, CanRunCGI) */ 
+/* { */ 
+/* 	ConfigDTO conf_; */ 
+/* 	LocationConfig loc_demo; */ 
+/* 	HttpRequestDTO req; */ 
+/* 	setGet(conf_, loc_demo, req); */ 
 
-/*   // builder */
-/*   HttpResponseBuilder builder = HttpResponseBuilder(conf_); */
-/*   HttpResponse *res = builder.build(req); }*/
+/*   // builder */ 
+/*   HttpResponseBuilder builder = HttpResponseBuilder(conf_); */ 
+/*   HttpResponse *res = builder.build(req); */ 
+
+/* } */
