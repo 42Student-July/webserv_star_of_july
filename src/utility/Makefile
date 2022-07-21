@@ -12,15 +12,12 @@
 # 	./tester
 # 	rm tester
 
-NAME = librequest.a
+NAME = libutility.a
 
 CXX = c++
 CXXFLAGS = -Wall -Werror -Wextra -Wshadow -std=c++98 -pedantic
 
 HEADERS = . \
-		  ../config \
-		  ../response \
-		  ../utility \
 		  $(NULL)
 
 INCLUDES = $(addprefix -I, $(HEADERS))
@@ -30,9 +27,6 @@ SRCS = $(shell find . -maxdepth 1 -name '*.cpp' -not -name 'main.cpp')
 OBJS = $(SRCS:.cpp=.o)
 
 DEPS = $(OBJS:.o=.d)
-
-UTILITY_DIR = ../utility
-LIB_UTILITY = $(UTILITY_DIR)/libutility.a
 
 .PHONY: all
 all: $(NAME)
@@ -45,9 +39,8 @@ $(NAME):$(OBJS)
 %.o: %.cpp
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
 
-.PHONY: run
-run: $(OBJS) main.o $(LIB_UTILITY)
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) $(LIB_UTILITY) main.o -MMD -MP -o test
+run: $(OBJS) main.o
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) main.o -MMD -MP -o test
 	@./test
 	@$(RM) test
 
@@ -61,12 +54,6 @@ fclean: clean
 
 .PHONY: re
 re: fclean all
-
-$(LIB_UTILITY): dummy
-	@$(MAKE) -C $(UTILITY_DIR)
-
-.PHONY: dummy
-dummy:
 
 # テスト
 TEST_DIR = gtest

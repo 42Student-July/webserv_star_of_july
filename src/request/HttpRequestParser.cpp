@@ -1,4 +1,5 @@
 #include "HttpRequestParser.hpp"
+#include "utility.hpp"
 
 const std::string HttpRequestParser::CRLF = "\r\n";
 const std::string HttpRequestParser::WS = " \t";
@@ -149,20 +150,20 @@ bool HttpRequestParser::isHeaderToken(const std::string& str) {
   return true;
 }
 
-std::string HttpRequestParser::trimCopyIf(const std::string& str,
-                                          const std::string& set) {
-  if (str.empty() || set.empty()) {
-    return str;
-  }
-  StringPos begin = str.find_first_not_of(set);
-  StringPos end = str.find_last_not_of(set);
-  size_t len = end - begin + 1;
-  if (begin == std::string::npos) {
-    return "";
-  }
+// std::string HttpRequestParser::trimCopyIf(const std::string& str,
+//                                           const std::string& set) {
+//   if (str.empty() || set.empty()) {
+//     return str;
+//   }
+//   StringPos begin = str.find_first_not_of(set);
+//   StringPos end = str.find_last_not_of(set);
+//   size_t len = end - begin + 1;
+//   if (begin == std::string::npos) {
+//     return "";
+//   }
 
-  return str.substr(begin, len);
-}
+//   return str.substr(begin, len);
+// }
 
 void HttpRequestParser::validateHeaderField(HeaderFieldPair headerfield_pair) {
   std::string field_name = headerfield_pair.first;
@@ -190,7 +191,7 @@ HttpRequestParser::HeaderFieldPair HttpRequestParser::makeHeaderFieldPair(
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "header has no colon");
   }
   std::string name = line.substr(0, name_end);
-  std::string value = trimCopyIf(line.substr(name_end + 1), WS);
+  std::string value = utility::trimCopyIf(line.substr(name_end + 1), WS);
 
   return HeaderFieldPair(name, value);
 }
