@@ -37,6 +37,18 @@ std::string ReadIndexHtml()
 	return res.str();
 }
 
+std::string Read(std::string path)
+{
+	std::ifstream ifs(path.c_str());
+	std::string line;
+	std::stringstream res;
+	
+	while (std::getline(ifs, line)){
+        res << line << "\r\n";
+    }
+	return res.str();
+}
+
 std::string getCurrentPath()
 {
 	char *cwd;
@@ -344,3 +356,54 @@ TEST(MIMETest, end_is_dot)
 	
 	EXPECT_EQ(res->ContentType(), "application/octet-stream");
 }
+
+TEST(LocationTest, found_in_second_location)
+{
+	ConfigDTO conf_;
+	LocationConfig loc_1;
+	LocationConfig loc_2;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/index.html"));
+
+	loc_1.root = "html";
+	loc_1.location = "/upload/";
+	conf_.locations.push_back(loc_1);
+
+	loc_2.root = "html";
+	loc_2.location = "/";
+	conf_.locations.push_back(loc_2);
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), ReadIndexHtml());
+}
+
+TEST(LocationTest, found_in_third_location)
+{
+	ConfigDTO conf_;
+	LocationConfig loc_1;
+	LocationConfig loc_2;
+	LocationConfig loc_3;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/upload/sample.txt"));
+
+	loc_1.root = "html";
+	loc_1.location = "/img/";
+	conf_.locations.push_back(loc_1);
+
+	loc_2.root = "/";
+	loc_2.location = "/";
+	conf_.locations.push_back(loc_2);
+	
+	loc_3.root = "html";
+	loc_3.location = "/upload/";
+	conf_.locations.push_back(loc_3);
+	
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), Read(std::string("./html/upload/sample.txt")));
+}
+
