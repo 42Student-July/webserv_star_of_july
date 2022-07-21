@@ -30,8 +30,8 @@ MIMEType::MIMEType()
 	mime_type_map_.insert(p("exe", "application/octet-stream"));
 	mime_type_map_.insert(p("img", "application/octet-stream"));
 	mime_type_map_.insert(p("dmg", "application/octet-stream"));
+	mime_type_map_.insert(p("ico", "image/x-icon"));
 	default_ = OCTET_STREAM;
-
 }
 MIMEType::~MIMEType()
 {
