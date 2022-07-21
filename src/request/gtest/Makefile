@@ -10,6 +10,7 @@ INCLUDE_DIR = $(GTEST_DIR)/googletest/include \
  			  $(SRC_DIR) \
  			   ../../config \
  			   ../../response \
+ 			   ../../utility \
  			   $(NULL)
 
 TEST_SRCS = $(shell find $(TEST_SRC_DIR) -name '*.cpp')
