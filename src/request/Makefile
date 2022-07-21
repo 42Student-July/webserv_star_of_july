@@ -50,7 +50,6 @@ run: $(OBJS) main.o $(LIB_UTILITY)
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) $(LIB_UTILITY) main.o -MMD -MP -o test
 	@./test
 	@$(RM) test
-	@$(MAKE) -C $(UTILITY_DIR) fclean
 
 .PHONY: clean
 clean:

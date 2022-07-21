@@ -15,10 +15,3 @@ std::string utility::trimCopyIf(const std::string& str,
   }
   return str.substr(begin, len);
 }
-
-std::string utility::toString(size_t val) {
-  std::stringstream ss;
-
-  ss << val;
-  return ss.str();
-}
