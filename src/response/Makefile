@@ -6,7 +6,7 @@
 #    By: mhirabay <mhirabay@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/13 18:47:47 by mhirabay          #+#    #+#              #
-#    Updated: 2022/07/21 16:43:22 by user42           ###   ########.fr        #
+#    Updated: 2022/07/21 20:30:33 by user42           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -79,51 +79,43 @@ $(LIB_UTILITY): dummy
 .PHONY: dummy
 dummy:
 
-#cgiをgoogleテストで追加
-gtestdir	=	./cgitest
-gtest		=	$(gtestdir)/gtest $(gtestdir)/googletest-release-1.11.0
+# Googleテスト
+ROOT_DIR = ../..
+GTEST_DIR = $(ROOT_DIR)/tests/googletest-release-1.12.1
 
-testdir = ./gtest
+TEST_RESPONSE_SRCS = gtest/response_test.cpp
+TEST_CGI_SRCS = gtest/gtest.cpp
 
-$(gtest):
-	curl -OL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
-	tar -xvzf release-1.11.0.tar.gz googletest-release-1.11.0
-	$(RM) -rf release-1.11.0.tar.gz
-	python3 googletest-release-1.11.0/googletest/scripts/fuse_gtest_files.py $(gtestdir)
-	mv googletest-release-1.11.0 $(gtestdir)
+LDFLAGS = -L$(GTEST_DIR)/lib \
+		  -L. \
+		  -L$(UTILITY_DIR) \
+		  $(NULL)
 
-test_compile = clang++ -std=c++11 $(INC) \
-					HttpResponse.cpp \
-					CGI.cpp \
-					CGIParser.cpp\
-					HttpResponseBuilder.cpp \
-					HttpResponseSerializer.cpp \
-					HttpResponsePlainText.cpp \
-					Path.cpp \
-					MIMEType.cpp \
-	$(testdir)/gtest.cpp \
-	$(gtestdir)/googletest-release-1.11.0/googletest/src/gtest_main.cc $(gtestdir)/gtest/gtest-all.cc \
-	-I$(gtestdir) -lpthread $(LIB_UTILITY) -o tester
-	
-res_test_compile = clang++ -std=c++11 $(INC) \
-					HttpResponse.cpp \
-					CGI.cpp \
-					CGIParser.cpp\
-					HttpResponseBuilder.cpp \
-					HttpResponseSerializer.cpp \
-					HttpResponsePlainText.cpp \
-					MIMEType.cpp \
-					Path.cpp \
-	$(testdir)/response_test.cpp \
-	$(gtestdir)/googletest-release-1.11.0/googletest/src/gtest_main.cc $(gtestdir)/gtest/gtest-all.cc \
-	-I$(gtestdir) -lpthread $(LIB_UTILITY) -o res_tester
+LDLIBS = -lgtest \
+		 -lgtest_main \
+		 -lpthread \
+		 $(NAME) \
+		 $(LIB_UTILITY) \
+		 $(NULL)
 
-.PHONY: cgitest
-cgitest: $(gtest) $(LIB_UTILITY)
-	$(test_compile)
-	./tester # --gtest_filter=Vector.other
+$(GTEST_DIR):
+	$(MAKE) -C $(ROOT_DIR) setup_gtest
+
+.PHONY: test
+test: restest cgitest
 
 .PHONY: restest
-restest: $(gtest) $(LIB_UTILITY)
-	$(res_test_compile)
-	./res_tester # --gtest_filter=Vector.other
+restest: INC += -I$(GTEST_DIR)/googletest/include
+restest: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
+	$(CXX) -std=c++11 $(INC) $(TEST_RESPONSE_SRCS) $(LDFLAGS) $(LDLIBS) -o tester
+	-@./tester
+	@$(RM) tester
+
+
+.PHONY: cgitest
+cgitest: INC += -I$(GTEST_DIR)/googletest/include
+cgitest: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
+	$(CXX) -std=c++11 $(INC) $(TEST_CGI_SRCS) $(LDFLAGS) $(LDLIBS) -o tester
+	-@./tester
+	@$(RM) tester
+

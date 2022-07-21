@@ -79,8 +79,10 @@ void ConfigParser::parseRoot(ServerConfig &server,
 
 void ConfigParser::parseErrorPages(ServerConfig &server,
                                    std::vector<std::string>::iterator &it) {
-  server.error_pages.insert(std::pair<int, std::string>(
-      ft_stoi(*it), (*(++it)).substr(0, it->find(";"))));
+  int status_code = ft_stoi(*it++);
+  std::string path = (*it).substr(0, it->find(";"));
+
+  server.error_pages.insert(std::pair<int, std::string>(status_code, path));
 }
 
 void ConfigParser::parseClientBodySizeLimit(
@@ -132,16 +134,18 @@ void ConfigParser::parseLocationAutoindexes(
 
 void ConfigParser::parseLocationCGIPath(
     LocationConfig &location, std::vector<std::string>::iterator &it) {
-	//後ほど修正必要
+  //後ほど修正必要
   location.cgi_extensions.push_back(it->substr(0, it->find(";")));
 }
 
 void ConfigParser::parseLocationRedirect(
     LocationConfig &location, std::vector<std::string>::iterator &it) {
-  location.redirect.insert(std::pair<int, std::string>(
-      ft_stoi(*it), (*(++it)).substr(0, it->find(";"))));
+  int status_code = ft_stoi(*it++);
+  std::string str = (*it).substr(0, it->find(";"));
+
+  location.redirect.insert(std::pair<int, std::string>(status_code, str));
 }
- 
+
 // ToDo:それぞれ1回ずつしか入力できないようにする
 void ConfigParser::parseLocation(LocationConfig &location,
                                  std::vector<std::string>::iterator &it,
@@ -159,8 +163,8 @@ void ConfigParser::parseLocation(LocationConfig &location,
         parseLocationAutoindexes(location, ++it);
       } else if (*it == "cgi_path") {
         parseLocationCGIPath(location, ++it);
-	  } else if (*it == "return") {
-		parseLocationRedirect(location, ++it);
+      } else if (*it == "return") {
+        parseLocationRedirect(location, ++it);
       } else if (*it == "}") {
         break;
       }
@@ -240,6 +244,4 @@ std::vector<std::string> ConfigParser::isspaceSplit(std::string const str) {
   return tokens;
 }
 
-int ConfigParser::ft_stoi(std::string const &str){
-  return atoi(str.c_str());
-}
+int ConfigParser::ft_stoi(std::string const &str) { return atoi(str.c_str()); }

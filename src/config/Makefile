@@ -51,25 +51,31 @@ fclean: clean
 .PHONY: re
 re: fclean all
 
-gtestdir	=	./test
-gtest		=	$(gtestdir)/gtest $(gtestdir)/googletest-release-1.11.0
+# Googleテスト
+ROOT_DIR = ../..
+GTEST_DIR = $(ROOT_DIR)/tests/googletest-release-1.12.1
 
-testdir = ./gtest
+TEST_SRCS = $(shell find gtest -name '*.cpp')
 
-$(gtest):
-	curl -OL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
-	tar -xvzf release-1.11.0.tar.gz googletest-release-1.11.0
-	$(RM) -rf release-1.11.0.tar.gz
-	python3 googletest-release-1.11.0/googletest/scripts/fuse_gtest_files.py $(gtestdir)
-	mv googletest-release-1.11.0 $(gtestdir)
+LDFLAGS = -L$(GTEST_DIR)/lib \
+		  -L. \
+		  $(NULL)
 
-test_compile = clang++ -std=c++11 ConfigParser.cpp\
-	$(testdir)/gtest.cpp $(gtestdir)/googletest-release-1.11.0/googletest/src/gtest_main.cc $(gtestdir)/gtest/gtest-all.cc \
-	-I$(gtestdir) -I$(gtestdir)/googletest-release-1.11.0/googletest/include -lpthread -o tester
+LDLIBS = -lgtest \
+		 -lgtest_main \
+		 -lpthread \
+		 $(NAME) \
+		 $(NULL)
+
+$(GTEST_DIR):
+	$(MAKE) -C $(ROOT_DIR) setup_gtest
 
 .PHONY: test
-test: $(gtest)
-	$(test_compile)
-	./tester # --gtest_filter=Vector.other
+test: INCLUDES += -I$(GTEST_DIR)/googletest/include
+test: $(GTEST_DIR) $(NAME)
+	$(CXX) -std=c++11 $(INCLUDES) $(TEST_SRCS) $(LDFLAGS) $(LDLIBS) -o tester
+	-@./tester
+	@$(RM) tester
+
 
 #endif /* MAKEFILE */

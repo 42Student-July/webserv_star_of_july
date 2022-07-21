@@ -54,7 +54,7 @@ void setRoot(ConfigDTO &conf_, std::string root)
 	conf_.locations.push_back(loc);
 }
 
-TEST(RootTest, locationに絶対パス)
+TEST(RootTest, LocationIsAbsPath)
 {
 	ConfigDTO conf_;
 	LocationConfig loc;
@@ -72,7 +72,7 @@ TEST(RootTest, locationに絶対パス)
 	EXPECT_EQ(res->Body(), ReadIndexHtml());
 }
 
-TEST(RootTest, locationeに相対パス)
+TEST(RootTest, LocationIsRelativePath)
 {
 	ConfigDTO conf_;
 	LocationConfig loc;
@@ -90,7 +90,7 @@ TEST(RootTest, locationeに相対パス)
 	EXPECT_EQ(res->Body(), ReadIndexHtml());
 }
 
-TEST(RootTest, servereに絶対パス)
+TEST(RootTest, ServerIsAbsPath)
 {
 	ConfigDTO conf_;
 	LocationConfig loc;
@@ -108,7 +108,7 @@ TEST(RootTest, servereに絶対パス)
 	EXPECT_EQ(res->Body(), ReadIndexHtml());
 }
 
-TEST(RootTest, serverに相対パス)
+TEST(RootTest, ServerIsRelativePath)
 {
 	ConfigDTO conf_;
 	LocationConfig loc;
@@ -126,7 +126,7 @@ TEST(RootTest, serverに相対パス)
 	EXPECT_EQ(res->Body(), ReadIndexHtml());
 }
 
-TEST(RootTest, serverとlocation_locationは絶対パス)
+TEST(RootTest, ServerAndLocation_locationAreAbsPath)
 {
 	ConfigDTO conf_;
 	LocationConfig loc;
@@ -145,7 +145,7 @@ TEST(RootTest, serverとlocation_locationは絶対パス)
 	EXPECT_EQ(res->Body(), ReadIndexHtml());
 }
 
-TEST(RootTest, serverとlocation_locationは相対パス)
+TEST(RootTest, ServerAndLocation_locationAreRelativePath)
 {
 	ConfigDTO conf_;
 	LocationConfig loc;

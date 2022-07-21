@@ -10,7 +10,8 @@
 TEST(HttpConverterTest, StoreOneHeaderField) {
   HttpRequestParser parser;
   ServerConfig config = initServerCongig();
-  std::string file_content = readFile("request/dto_one_header_field.crlf");
+  std::string file_content =
+      readFile("gtest/request/dto_one_header_field.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   HttpRequestConverter converter;
@@ -24,7 +25,7 @@ TEST(HttpConverterTest, StoreOneHeaderField) {
 TEST(HttpConverterTest, StoreNoHeaderField) {
   HttpRequestParser parser;
   ServerConfig config = initServerCongig();
-  std::string file_content = readFile("request/dto_no_header_field.crlf");
+  std::string file_content = readFile("gtest/request/dto_no_header_field.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   HttpRequestConverter converter;
@@ -45,7 +46,8 @@ TEST(HttpConverterTest, StoreNoHeaderField) {
 TEST(HttpConverterTest, StoreAllHeaderField) {
   HttpRequestParser parser;
   ServerConfig config = initServerCongig();
-  std::string file_content = readFile("request/dto_all_header_field.crlf");
+  std::string file_content =
+      readFile("gtest/request/dto_all_header_field.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   HttpRequestConverter converter;
@@ -68,7 +70,7 @@ TEST(HttpConverterTest, StoreAllHeaderFieldShuffled) {
   HttpRequestParser parser;
   ServerConfig config = initServerCongig();
   std::string file_content =
-      readFile("request/dto_all_header_field_shuffled.crlf");
+      readFile("gtest/request/dto_all_header_field_shuffled.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   HttpRequestConverter converter;
@@ -90,7 +92,7 @@ TEST(HttpConverterTest, StoreAllHeaderFieldShuffled) {
 TEST(HttpConverterTest, StoreBodyMultiLinesToBody) {
   HttpRequestParser parser;
   ServerConfig config = initServerCongig();
-  std::string file_content = readFile("request/body_multi_lines.crlf");
+  std::string file_content = readFile("gtest/request/body_multi_lines.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   HttpRequestConverter converter;
@@ -104,7 +106,7 @@ TEST(HttpConverterTest, StoreBodyMultiLinesToBody) {
 TEST(HttpConverterTest, StoreServerConfig) {
   HttpRequestParser parser;
   ServerConfig config = initServerCongig();
-  std::string file_content = readFile("request/simple_get.crlf");
+  std::string file_content = readFile("gtest/request/simple_get.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), config);
 
   HttpRequestConverter converter;
