@@ -94,6 +94,7 @@ GTEST_DIR = tests/googletest-release-1.12.1
 setup_gtest: $(GTEST_DIR)
 
 $(GTEST_DIR):
+	mkdir -p tests
 	curl -OL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.tar.gz
 	tar -xvzf release-1.12.1.tar.gz
 	rm -rf release-1.12.1.tar.gz
