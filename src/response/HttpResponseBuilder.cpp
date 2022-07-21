@@ -1,5 +1,6 @@
 #include "HttpResponseBuilder.hpp"
 #include "HttpRequestDTO.hpp"
+#include "utility.hpp"
 
 const std::string HttpResponseBuilder::CRLF = "\r\n";
 const std::string HttpResponseBuilder::ACCEPT_RANGES = "none";
@@ -212,13 +213,6 @@ std::string HttpResponseBuilder::buildLastModified()
 	return mod_time;
 }
 
-static std::string toString(size_t val) {
-  std::stringstream ss;
-
-  ss << val;
-  return ss.str();
-}
-
 std::string HttpResponseBuilder::getContentTypeByExtension()
 {
 	MIMEType mime;
@@ -252,7 +246,7 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 	// とりあえずブラウザから見れるようにしました。
 	header_.content_type = getContentTypeByExtension();
 	size_t  content_length = res_body_str_.str().size();
-	header_.content_length = toString(content_length);
+	header_.content_length = utility::toString(content_length);
 	header_.last_modified = buildLastModified();
 	header_.connection = req.connection;
 	// 特にこういうふうにしろみたいな指定があるわけでもなさそう RFC7232
@@ -310,7 +304,7 @@ void HttpResponseBuilder::buildErrorHeader(HttpRequestDTO &req, int httpStatus, 
 	if (body_str.empty())
 		throw std::runtime_error("body uncreated");
 	header_.version = req.version;
-	header_.status_code = toString(httpStatus);
+	header_.status_code = utility::toString(httpStatus);
 	header_.reason_phrase = getReasonPhrase(header_.status_code);
 	header_.date = buildDate();
 	header_.content_length = body_str.size();
@@ -320,7 +314,7 @@ void HttpResponseBuilder::buildErrorHeader(HttpRequestDTO &req, int httpStatus, 
 
 void HttpResponseBuilder::buildDefaultErrorBody(int httpStatus)
 {
-	std::string status_code = toString(httpStatus);
+	std::string status_code = utility::toString(httpStatus);
 	
 	res_body_str_	<< "<html>" << CRLF
 					<< "<head><title>" << status_code << SP << getReasonPhrase(status_code) << "</title><head>" << CRLF

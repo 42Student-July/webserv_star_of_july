@@ -21,6 +21,7 @@ HEADERS = . \
 		  ../config \
 		  ../request \
 		  ../response \
+		  ../utility \
 		  $(NULL)
 
 INCLUDES = $(addprefix -I, $(HEADERS))

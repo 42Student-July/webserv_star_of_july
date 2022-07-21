@@ -5,6 +5,7 @@ SRC_DIR = ../
 GTEST_DIR = googletest-release-1.12.1
 TEST_SRC_DIR = src
 GTEST_LIB_DIR = $(GTEST_DIR)/lib
+UTILITY_DIR = ../../utility
 INCLUDE_DIR = $(GTEST_DIR)/googletest/include \
  			  $(SRC_DIR) \
  			   ../../config \
@@ -21,10 +22,19 @@ GTEST_LIBS = -lgtest \
 			 $(NULL)
 
 TEST_LIB = $(SRC_DIR)/librequest.a
+LIB_UTILITY = $(UTILITY_DIR)/libutility.a
+
+all: test
+
+$(LIB_UTILITY): dummy
+	@$(MAKE) -C $(UTILITY_DIR)
+
+$(TEST_LIB): dummy
+	@$(MAKE) -C $(SRC_DIR)
 
 .PHONY: test
-test: $(GTEST_DIR) create_lib
-	@$(CXX) $(CXXFLAGS) $(GTEST_INCLUDES) $(TEST_SRCS) $(TEST_LIB) -L$(GTEST_LIB_DIR) $(GTEST_LIBS) -o test
+test: $(GTEST_DIR) $(TEST_LIB) $(LIB_UTILITY)
+	@$(CXX) $(CXXFLAGS) $(GTEST_INCLUDES) $(TEST_SRCS) $(TEST_LIB) $(LIB_UTILITY) -L$(GTEST_LIB_DIR) $(GTEST_LIBS) -o test
 	-@./test
 	@$(RM) test
 
@@ -36,10 +46,6 @@ $(GTEST_DIR):
 	cmake . && \
 	make)
 
-.PHONY: create_lib
-create_lib:
-	@make -C $(SRC_DIR)
-
 .PHONY: clean
 clean:
 	@make -C $(SRC_DIR) clean
@@ -47,3 +53,7 @@ clean:
 .PHONY: fclean
 fclean: clean
 	@make -C $(SRC_DIR) fclean
+	@make -C $(UTILITY_DIR) fclean
+
+.PHONY: dummy
+dummy:

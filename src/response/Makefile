@@ -6,7 +6,7 @@
 #    By: mhirabay <mhirabay@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/13 18:47:47 by mhirabay          #+#    #+#              #
-#    Updated: 2022/07/20 17:06:57 by mhirabay         ###   ########.fr        #
+#    Updated: 2022/07/21 16:43:22 by user42           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,6 +23,7 @@ SRCS			:=	HttpResponse.cpp \
 CXX				:= c++
 RM				:= rm -rf
 INC				:= -I . \
+				   -I ../utility
 
 CXXFLAGS		:= -Wall -Wextra -Werror -std=c++98 $(INC) -pedantic -Wshadow
 DEBUG			:= -fsanitize=address
@@ -33,6 +34,9 @@ OBJS 	:= $(addprefix $(OBJSDIR), $(SRCS:%.cpp=%.o))
 DEPS	:= $(OBJS:.o=.d)
 
 SRCSDIR := ./
+
+UTILITY_DIR := ../utility
+LIB_UTILITY := $(UTILITY_DIR)/libutility.a
 
 all:			$(NAME)
 
@@ -68,6 +72,12 @@ debug:			re
 
 .PHONY:			all clean fclean re run
 
+$(LIB_UTILITY): dummy
+	@$(MAKE) -C $(UTILITY_DIR)
+
+.PHONY: dummy
+dummy:
+
 #cgiをgoogleテストで追加
 gtestdir	=	./cgitest
 gtest		=	$(gtestdir)/gtest $(gtestdir)/googletest-release-1.11.0
@@ -81,7 +91,8 @@ $(gtest):
 	python3 googletest-release-1.11.0/googletest/scripts/fuse_gtest_files.py $(gtestdir)
 	mv googletest-release-1.11.0 $(gtestdir)
 
-test_compile = clang++ -std=c++11 HttpResponse.cpp \
+test_compile = clang++ -std=c++11 $(INC) \
+					HttpResponse.cpp \
 					CGI.cpp \
 					CGIParser.cpp\
 					HttpResponseBuilder.cpp \
@@ -91,9 +102,10 @@ test_compile = clang++ -std=c++11 HttpResponse.cpp \
 					MIMEType.cpp \
 	$(testdir)/gtest.cpp \
 	$(gtestdir)/googletest-release-1.11.0/googletest/src/gtest_main.cc $(gtestdir)/gtest/gtest-all.cc \
-	-I$(gtestdir) -I$(includes) -lpthread -o tester
+	-I$(gtestdir) -lpthread $(LIB_UTILITY) -o tester
 	
-res_test_compile = clang++ -std=c++11 HttpResponse.cpp \
+res_test_compile = clang++ -std=c++11 $(INC) \
+					HttpResponse.cpp \
 					CGI.cpp \
 					CGIParser.cpp\
 					HttpResponseBuilder.cpp \
@@ -103,14 +115,14 @@ res_test_compile = clang++ -std=c++11 HttpResponse.cpp \
 					Path.cpp \
 	$(testdir)/response_test.cpp \
 	$(gtestdir)/googletest-release-1.11.0/googletest/src/gtest_main.cc $(gtestdir)/gtest/gtest-all.cc \
-	-I$(gtestdir) -I$(includes) -lpthread -o res_tester
+	-I$(gtestdir) -lpthread $(LIB_UTILITY) -o res_tester
 
 .PHONY: cgitest
-cgitest: $(gtest)
+cgitest: $(gtest) $(LIB_UTILITY)
 	$(test_compile)
 	./tester # --gtest_filter=Vector.other
 
 .PHONY: restest
-restest: $(gtest)
+restest: $(gtest) $(LIB_UTILITY)
 	$(res_test_compile)
 	./res_tester # --gtest_filter=Vector.other
