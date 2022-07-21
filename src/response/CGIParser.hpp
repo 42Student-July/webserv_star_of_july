@@ -4,8 +4,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <map>
 
-#include "HttpResponseBuilder.hpp"
 #include "HttpResponseHeaderDTO.hpp"
 
 class CGIParser {
@@ -36,8 +36,6 @@ class CGIParser {
   CGIParser(CGIParser const &other);
   CGIParser &operator=(CGIParser const &other);
 
-  StringPos offset_;
-  std::string raw_buffer_;
   std::string cgi_response_;
 
   std::map<std::string, std::string> cgi_header_;
