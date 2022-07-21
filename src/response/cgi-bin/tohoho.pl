@@ -20,6 +20,8 @@ sub html {
 #
 print <<EOF;
 Content-Type: text/html
+Location: http://127.0.0.1
+StatusCode: 200
 
 <!doctype html>
 <html>
