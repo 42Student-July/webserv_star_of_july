@@ -17,6 +17,14 @@ void setReqForConfTest(HttpRequestDTO &req)
 	req.connection = "Keep-Alive";
 }
 
+void setReqPath(HttpRequestDTO &req, std::string path)
+{
+	req.method = "GET";
+	req.version = "1.1";
+	req.path = path;
+	req.connection = "Keep-Alive";
+}
+
 std::string ReadIndexHtml()
 {
 	std::ifstream ifs("./html/index.html");
@@ -35,6 +43,15 @@ std::string getCurrentPath()
 	
 	cwd = getcwd(NULL, 0);
 	return std::string(cwd);
+}
+
+void setRoot(ConfigDTO &conf_, std::string root)
+{
+	conf_.root = root;
+	LocationConfig loc;
+	loc.root = root;
+	loc.location = "/";
+	conf_.locations.push_back(loc);
 }
 
 TEST(RootTest, locationに絶対パス)
@@ -150,12 +167,41 @@ TEST(RootTest, serverとlocation_locationは相対パス)
 TEST(MIMETest, html)
 {
 	ConfigDTO conf_;
-	LocationConfig loc;
 	HttpRequestDTO req;
 	setReqForConfTest(req);
+	setRoot(conf_, std::string("html"));
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
 	
-	conf_.root = "tekitou";
-	loc.root = "html";
+	EXPECT_EQ(res->ContentType(), "text/html");
+}
+
+TEST(MIMETest, htm)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/index.htm"));
+	setRoot(conf_, std::string("html"));
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->ContentType(), "text/html");
+}
+
+TEST(MIMETest, shtml)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/index.shtml"));
+	setRoot(conf_, std::string("html"));
+	
+	conf_.root = "html";
 	loc.location = "/";
 	conf_.locations.push_back(loc);
 
@@ -166,3 +212,78 @@ TEST(MIMETest, html)
 	EXPECT_EQ(res->ContentType(), "text/html");
 }
 
+TEST(MIMETest, css)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/index.css"));
+	setRoot(conf_, std::string("html"));
+	
+	conf_.root = "html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->ContentType(), "text/css");
+}
+
+TEST(MIMETest, xml)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/index.xml"));
+	setRoot(conf_, std::string("html"));
+	
+	conf_.root = "html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->ContentType(), "text/xml");
+}
+
+TEST(MIMETest, txt)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/sample.txt"));
+	setRoot(conf_, std::string("html"));
+	
+	conf_.root = "html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->ContentType(), "text/plain");
+}
+
+TEST(MIMETest, default)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/sample"));
+	setRoot(conf_, std::string("html"));
+	
+	conf_.root = "html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->ContentType(), "application/octet-stream");
+}
