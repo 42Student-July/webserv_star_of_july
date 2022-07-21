@@ -2,6 +2,8 @@
 #define CGIPARSER_HPP
 
 #include <iostream>
+#include <string>
+#include <sstream>
 
 #include "HttpResponseBuilder.hpp"
 #include "HttpResponseHeaderDTO.hpp"
@@ -15,13 +17,14 @@ class CGIParser {
   virtual ~CGIParser();
 
   void parse(std::string cgi_response);
-  void parseHeaderField();
-  void parseBody();
-  
+  void parseHeaderField(std::stringstream &ss);
+  void parseBody(std::stringstream &ss);
+
   std::string getBodyStr() const;
   HttpResponseHeaderDTO getHeader() const;
   std::map<std::string, std::string> getCGIHeader() const;
-  std::pair<std::string, std::string> makeHeaderFieldPair(const std::string& line);
+  std::pair<std::string, std::string> makeHeaderFieldPair(
+      const std::string &line);
 
   std::string getLine();
 

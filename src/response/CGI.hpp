@@ -2,15 +2,14 @@
 #define CGI_HPP
 
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
-#include <iostream>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <sstream>
-#include <sys/types.h>
-#include <sys/wait.h>
 
 #include "ConfigDTO.hpp"
 #include "HttpRequestDTO.hpp"
@@ -21,10 +20,10 @@ class CGI {
   CGI();
   virtual ~CGI();
   void run(HttpRequestDTO &req, ConfigDTO &conf, Path &path);
-  void createEnvs(Path &path);
-  void createArgs(Path &path);
+  char **createEnvs(Path &path);
+  char **createArgs(Path &path);
   void createPipe();
-  void spawnChild();
+  std::string buildCGIResponse(char **exec_args, char **exec_envs);
   void dupIO();
   void dupFd(int oldfd, int newfd);
   void readCGI();
@@ -45,8 +44,8 @@ class CGI {
   std::string method_;
   std::string exec_path_;
   std::string ip_;
-  char **exec_args_;
-  char **cgi_envs_;
+  //char **exec_args_;
+  //char **cgi_envs_;
   int pipe_c2p_[2];
   int pipe_p2c_[2];
   // pid_t child_pid_;
