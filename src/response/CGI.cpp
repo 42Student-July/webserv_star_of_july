@@ -1,40 +1,63 @@
 #include "CGI.hpp"
 
 #include <unistd.h>
+
 #include <iostream>
 
 CGI::CGI() {}
 CGI::~CGI() {}
 
+//libに入れる
+void freeArrays(char **arrays)
+{
+	size_t	idx = 0;
+
+	if (!arrays)
+		return ;
+	while (arrays[idx])
+	{
+		free(arrays[idx]);
+		idx += 1;
+	}
+	free(arrays);
+}
+
+//buildresponse
 void CGI::run(HttpRequestDTO &req, ConfigDTO &conf, Path &path) {
+  //init
   req_ = req;
   conf_ = conf;
-  createEnvs(path);
-  createArgs(path);
-  createPipe();
-  spawnChild();
+
+  //setup
+  char **exec_args = createArgs(path);
+  char **exec_envs = createEnvs(path);
+
+  // execve
+  cgi_response_ = buildCGIResponse(exec_args, exec_envs);
+
+  // free
+  freeArrays(exec_args);
+  freeArrays(exec_envs);
 }
 
 std::string CGI::getResponseFromCGI() const { return cgi_response_; }
 
 void CGI::readCGI() {
-
   size_t size = 0;
   char buf[BUF_SIZE];
   memset(buf, 0, sizeof(buf));
   size = read(pipe_c2p_[0], buf, BUF_SIZE - 1);
   (void)size;
-	// unused parameterでコンパイルできなかったので
-	// error処理した方がよさそうです
+  // unused parameterでコンパイルできなかったので
+  // error処理した方がよさそうです
 }
 
-char *CGI::allocStr(const std::string &str)
-{
-	char *ret = strdup(str.c_str());
-	if (ret == NULL) {
-		throw -1;
-	}
-	return ret;
+char *CGI::allocStr(const std::string &str) {
+  char *ret = strdup(str.c_str());
+  if (ret == NULL) {
+    throw -1;
+  }
+  return ret;
 }
 
 void print_char(char **c) {
@@ -55,36 +78,36 @@ char **map2Array(std::map<std::string, std::string> map_env,
   return array_env;
 }
 
-void CGI::createArgs(Path &path) {
+char ** CGI::createArgs(Path &path) {
   //もっと良いやり方に変える
   std::string command;
   if (path.getExtension() == ".py") {
-	command = "/usr/bin/python3";
+    command = "/usr/bin/python3";
   } else if (path.getExtension() == ".pl") {
     command = "/usr/bin/perl";
   } else {
-	  throw -1;
+    throw -1;
   }
 
-  //ToDo: ここをgetRawPathではなくlocal_path的なものに変える
+  // ToDo: ここをgetRawPathではなくlocal_path的なものに変える
   std::string exec_path = path.getRawPath().substr(1);
   std::vector<std::string> path_args = path.getArgs();
   int args_size = path_args.size() + 3;
 
-  exec_args_ = new char *[args_size];
+  char ** exec_args = new char *[args_size];
   int i = 0;
-  exec_args_[i++] = allocStr(command);
-  exec_args_[i++] = allocStr(exec_path);
+  exec_args[i++] = allocStr(command);
+  exec_args[i++] = allocStr(exec_path);
 
   std::vector<std::string>::iterator it_arg = path_args.begin();
   for (; it_arg != path_args.end(); ++it_arg) {
-	  exec_args_[i++] = allocStr(*it_arg);
+    exec_args[i++] = allocStr(*it_arg);
   }
-  exec_args_[i] = NULL;
+  exec_args[i] = NULL;
+  return exec_args;
 }
 
-void CGI::createEnvs(Path &path) {
-	(void)path;
+char ** CGI::createEnvs(Path &path) {
   std::map<std::string, std::string> map_env;
   map_env["AUTH_TYPE"] = req_.authorization;
   map_env["CONTENT_LENGTH"] = req_.content_length;
@@ -117,15 +140,13 @@ void CGI::createEnvs(Path &path) {
   map_env["SERVER_PROTOCOL"] = "HTTP/1.1";
   map_env["SERVER_SOFTWARE"] = "webserv/1.0";
 
-  cgi_envs_ = map2Array(map_env, "=");
-  // print_char(cgi_envs_);
+  char ** exec_envs = map2Array(map_env, "=");
+  return exec_envs;
 }
 
 void CGI::createPipe() {
-  if (req_.method == "POST") {
-    if (pipe(pipe_p2c_) < 0) {
-      throw -1;
-    }
+  if (pipe(pipe_p2c_) < 0) {
+    throw -1;
   }
   if (pipe(pipe_c2p_) < 0) {
     throw -1;
@@ -133,55 +154,50 @@ void CGI::createPipe() {
 }
 
 void throwclose(int fd) {
-	if (close(fd) == -1) {
-		throw -1;
-	}
+  if (close(fd) == -1) {
+    throw -1;
+  }
 }
 
-void CGI::spawnChild() {
-  //headerで宣言する
-
+std::string CGI::buildCGIResponse(char **exec_args, char **exec_envs) {
+  char buf[BUF_SIZE];
+  memset(buf, 0, sizeof(buf));
+  // リファクターする
+  createPipe();
   pid_t pid = fork();
   if (pid < 0) {
-	std::cerr << "fork" << std::endl;
+    std::cerr << "fork" << std::endl;
     throw(-1);
   }
   if (pid == 0) {
     // child process
-    //dupIO();
-	//常にやるべき
-	
-	dupFd(pipe_p2c_[0], STDIN_FILENO);
-	throwclose(pipe_p2c_[0]);
-	throwclose(pipe_p2c_[1]);
+    dupFd(pipe_p2c_[0], STDIN_FILENO);
+    throwclose(pipe_p2c_[0]);
+    throwclose(pipe_p2c_[1]);
 
-	dupFd(pipe_c2p_[1], STDOUT_FILENO);
-	throwclose(pipe_c2p_[1]);
-	throwclose(pipe_c2p_[0]);
+    dupFd(pipe_c2p_[1], STDOUT_FILENO);
+    throwclose(pipe_c2p_[1]);
+    throwclose(pipe_c2p_[0]);
 
-	int a = execve(exec_args_[0], exec_args_, cgi_envs_);
+    int a = execve(exec_args[0], exec_args, exec_envs);
     if (a < 0) {
-      std::cerr << "error: a = " << a << std::endl;
+		throw -1;
     }
   } else {
-	//deleteEnviron
     // parent_process
     throwclose(pipe_p2c_[0]);
     throwclose(pipe_c2p_[1]);
 
     write(pipe_p2c_[1], req_.body.c_str(), req_.body.length());
-	throwclose(pipe_p2c_[1]);
+    throwclose(pipe_p2c_[1]);
 
-    char buf[BUF_SIZE];
-    memset(buf, 0, sizeof(buf));
     ssize_t read_size = 0;
     read_size = read(pipe_c2p_[0], buf, BUF_SIZE);
-	throwclose(pipe_c2p_[0]);
+    throwclose(pipe_c2p_[0]);
     buf[read_size] = '\0';
-    cgi_response_ = buf;
   }
+  return buf;
 }
-
 
 /* void CGI::dupIO() { */
 

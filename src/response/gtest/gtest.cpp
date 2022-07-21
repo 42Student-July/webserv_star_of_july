@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <stdexcept>
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 
 #include "../response.h"
 #include "../CGI.hpp"
@@ -17,17 +17,20 @@ int setGet(ConfigDTO &conf_, LocationConfig &loc_demo, HttpRequestDTO &req)
 	loc_demo.location = "/";
 	loc_demo.root = "/html";
 	loc_demo.allowed_methods.push_back("GET");
+	loc_demo.allowed_methods.push_back("POST");
 	loc_demo.autoindex = true;
 	loc_demo.indexes.push_back("index.html");
 	loc_demo.cgi_extensions.push_back("/cgi-bin");
 	conf_.locations.push_back(loc_demo);
-
+	
 	// http request data
 	req.method = "GET";
-	req.path = "/cgi-bin/tohoho.pl";
-	req.body = "";
-
+	req.path = "/cgi-bin/tohoho.pl?name=yuki&hello=world";
+	req.body = "a=abc&b=bcdef";
+	req.authorization = "auth_test";
+	req.content_length = "20";
 	return 0;
+
 }
 
 int setPost(ConfigDTO &conf_, LocationConfig &loc_demo, HttpRequestDTO &req)
@@ -175,17 +178,17 @@ TEST(PathTests, CanGetPathFile)
 	ASSERT_EQ("tohoho.pl", path.getPathFile());
 }
 
-/* TEST(CGITests, CanRunCGI) */
-/* { */
-/* 	ConfigDTO conf; */
-/* 	LocationConfig loc_demo; */
-/* 	HttpRequestDTO req; */
-/* 	setGet(conf, loc_demo, req); */
+TEST(CGITests, CanRunCGI)
+{
+	ConfigDTO conf;
+	LocationConfig loc_demo;
+	HttpRequestDTO req;
+	setGet(conf, loc_demo, req);
 
-/* 	Path path(req.path, conf); */
-/* 	CGI cgi; */
-/* 	cgi.run(req, conf, path); */
-/* } */
+	Path path(req.path, conf);
+	CGI cgi;
+	cgi.run(req, conf, path);
+}
 
 //plにしたので一旦コメントアウト
 /* TEST(CGITests, CanGetResponseFromCGI) */
@@ -234,8 +237,27 @@ TEST(CGITests, CanPostResponseFromCGIArgs)
 	//std::cout << res_cgi << std::endl;
 }
 
-//plにしたので一旦コメントアウト
-/* TEST(CGIParserTests, CanParseHeader) */
+TEST(CGIParserTests, CanParseHeader)
+{
+	ConfigDTO conf;
+	LocationConfig loc_demo;
+	HttpRequestDTO req;
+	setGet(conf, loc_demo, req);
+
+	Path path(req.path, conf);
+	CGI cgi;
+	CGIParser cgi_parser;
+
+	cgi.run(req, conf, path);
+	std::string res_cgi = cgi.getResponseFromCGI();
+
+	cgi_parser.parse(res_cgi);
+	ASSERT_EQ("text/html", cgi_parser.getCGIHeader()["Content-Type"]);
+	ASSERT_EQ("http://127.0.0.1", cgi_parser.getCGIHeader()["Location"]);
+	ASSERT_EQ("200", cgi_parser.getCGIHeader()["StatusCode"]);
+}
+
+/* TEST(CGIParserTests, CanParseBody) */
 /* { */
 /* 	ConfigDTO conf; */
 /* 	LocationConfig loc_demo; */
@@ -250,9 +272,6 @@ TEST(CGITests, CanPostResponseFromCGIArgs)
 /* 	std::string res_cgi = cgi.getResponseFromCGI(); */
 
 /* 	cgi_parser.parse(res_cgi); */
-/* 	ASSERT_EQ("text/html", cgi_parser.getCGIHeader()["Content-type"]); */
-/* 	//ASSERT_EQ("http://127.0.0.1/", cgi_parser.getCGIHeader()["Location"]); */
-/* 	//ASSERT_EQ("200", cgi_parser.getCGIHeader()["StatusCode"]); */
 /* } */
 
 /* TEST(CGITests, CanPOST) */
