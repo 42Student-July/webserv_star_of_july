@@ -77,12 +77,23 @@ fclean: clean
 .PHONY: re
 re: fclean all
 
+
+## Test
+TEST_DIRS = $(CONFIG_DIR) \
+			$(REQUEST_DIR) \
+			$(RESPONSE_DIR) \
+			$(NULL)
+
 .PHONY: unit_test
 unit_test:
-	@$(MAKE) -C $(CONFIG_DIR) test
-	@$(MAKE) -C $(REQUEST_DIR) test
+	@for dir in $(TEST_DIRS); do $(MAKE) -C $$dir test; done
 
-setup_gtest: 
+GTEST_DIR = tests/googletest-release-1.12.1
+
+.PHONY:setup_gtest
+setup_gtest: $(GTEST_DIR)
+
+$(GTEST_DIR):
 	curl -OL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.tar.gz
 	tar -xvzf release-1.12.1.tar.gz
 	rm -rf release-1.12.1.tar.gz
