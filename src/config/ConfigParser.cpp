@@ -13,9 +13,9 @@ void print_vector(std::vector<T> vec) {
 ConfigParser::ConfigParser() {}
 
 ConfigParser::ConfigParser(std::string file) {
+
   std::string file_content = readFile(file);
   std::vector<std::string> tokens = isspaceSplit(file_content);
-  // print_vector(tokens);
 
   parseTokens(tokens);
 }
@@ -32,7 +32,8 @@ void ConfigParser::parseTokens(std::vector<std::string> tokens) {
   for (; it < tokens.end(); it++) {
     if (*it == "server" && *(++it) == "{") {
       ServerConfig server;
-      parseServer(server, ++it, ite);
+  	  unsigned int exist_flag = 0;
+      parseServer(server, ++it, ite, exist_flag);
       serverconfigs_.push_back(server);
     } else {
       throw std::runtime_error("Error: Config: Wrong syntax");
@@ -49,7 +50,14 @@ int countContents(std::vector<std::string>::iterator it) {
 }
 
 void ConfigParser::parseListen(ServerConfig &server,
-                               std::vector<std::string>::iterator &it) {
+                               std::vector<std::string>::iterator &it,
+							   unsigned int &exist_flag) {
+	// listenが複数あったら弾く
+	if (exist_flag & BIT_FLAG_LISTEN) {
+    	throw std::runtime_error("Error: Config: duplicated listen");
+	}
+	exist_flag |= BIT_FLAG_LISTEN;
+
   if (it->find(":") != std::string::npos) {
     server.host = it->substr(0, it->find(":"));
     server.port = ft_stoi(it->substr(it->find(":") + 1, it->find(";")));
@@ -175,11 +183,12 @@ void ConfigParser::parseLocation(LocationConfig &location,
 // ToDo:それぞれ1回ずつしか入力できないようにする
 void ConfigParser::parseServer(ServerConfig &server,
                                std::vector<std::string>::iterator &it,
-                               std::vector<std::string>::iterator &ite) {
+                               std::vector<std::string>::iterator &ite,
+							   unsigned int &exist_flag) {
   bool finished_with_bracket = false;
   for (; it != ite; ++it) {
     if (*it == "listen") {
-      parseListen(server, ++it);
+      parseListen(server, ++it, exist_flag);
     } else if (*it == "server_name") {
       parseServerName(server, ++it);
     } else if (*it == "root") {

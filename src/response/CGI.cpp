@@ -4,6 +4,9 @@
 
 #include <iostream>
 
+const std::map<std::string, std::string> CGI::EXEC_COMMANDS = CGI::setExecuteCommands();
+const std::map<std::string, std::string> CGI::EXEC_PATHS = CGI::setExecutePaths();
+
 CGI::CGI() {}
 CGI::~CGI() {}
 
@@ -29,11 +32,12 @@ void CGI::run(HttpRequestDTO &req, ConfigDTO &conf, Path &path) {
   conf_ = conf;
 
   //setup
+  const char *exec_command_path = EXEC_PATHS.find(path.getExtension())->second.c_str();
   char **exec_args = createArgs(path);
   char **exec_envs = createEnvs(path);
 
   // execve
-  cgi_response_ = buildCGIResponse(exec_args, exec_envs);
+  cgi_response_ = buildCGIResponse(exec_command_path, exec_args, exec_envs);
 
   // free
   freeArrays(exec_args);
@@ -42,14 +46,22 @@ void CGI::run(HttpRequestDTO &req, ConfigDTO &conf, Path &path) {
 
 std::string CGI::getResponseFromCGI() const { return cgi_response_; }
 
-void CGI::readCGI() {
-  size_t size = 0;
-  char buf[BUF_SIZE];
-  memset(buf, 0, sizeof(buf));
-  size = read(pipe_c2p_[0], buf, BUF_SIZE - 1);
-  (void)size;
-  // unused parameterでコンパイルできなかったので
-  // error処理した方がよさそうです
+std::map<std::string, std::string> CGI::setExecutePaths() {
+	std::map<std::string, std::string> exec_paths;
+
+	exec_paths[".py"] = "/usr/bin/python3";
+	exec_paths[".pl"] = "/usr/bin/perl";
+
+	return exec_paths;
+}
+
+std::map<std::string, std::string> CGI::setExecuteCommands() {
+	std::map<std::string, std::string> exec_commands;
+
+	exec_commands[".py"] = "python3";
+	exec_commands[".pl"] = "perl";
+
+	return exec_commands;
 }
 
 char *CGI::allocStr(const std::string &str) {
@@ -79,25 +91,18 @@ char **map2Array(std::map<std::string, std::string> map_env,
 }
 
 char ** CGI::createArgs(Path &path) {
-  //もっと良いやり方に変える
-  std::string command;
-  if (path.getExtension() == ".py") {
-    command = "/usr/bin/python3";
-  } else if (path.getExtension() == ".pl") {
-    command = "/usr/bin/perl";
-  } else {
-    throw -1;
-  }
+  //見つからないときのエラー処理検討
+  std::string command = EXEC_COMMANDS.find(path.getExtension())->second;
 
   // ToDo: ここをgetRawPathではなくlocal_path的なものに変える
-  std::string exec_path = path.getRawPath().substr(1);
+  std::string file_path = path.getRawPath().substr(1);
   std::vector<std::string> path_args = path.getArgs();
   int args_size = path_args.size() + 3;
 
   char ** exec_args = new char *[args_size];
   int i = 0;
   exec_args[i++] = allocStr(command);
-  exec_args[i++] = allocStr(exec_path);
+  exec_args[i++] = allocStr(file_path);
 
   std::vector<std::string>::iterator it_arg = path_args.begin();
   for (; it_arg != path_args.end(); ++it_arg) {
@@ -159,7 +164,7 @@ void throwclose(int fd) {
   }
 }
 
-std::string CGI::buildCGIResponse(char **exec_args, char **exec_envs) {
+std::string CGI::buildCGIResponse(const char *exec_command_path, char **exec_args, char **exec_envs) {
   char buf[BUF_SIZE];
   memset(buf, 0, sizeof(buf));
   // リファクターする
@@ -179,7 +184,7 @@ std::string CGI::buildCGIResponse(char **exec_args, char **exec_envs) {
     throwclose(pipe_c2p_[1]);
     throwclose(pipe_c2p_[0]);
 
-    int a = execve(exec_args[0], exec_args, exec_envs);
+    int a = execve(exec_command_path, exec_args, exec_envs);
     if (a < 0) {
 		throw -1;
     }

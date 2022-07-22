@@ -33,6 +33,15 @@ class ConfigParser {
  private:
   std::vector<ServerConfig> serverconfigs_;
 
+  const unsigned int BIT_FLAG_LISTEN = (1 << 0); // 0000 0000 0000 0001
+  const unsigned int BIT_FLAG_HOST = (1 << 1); // 0000 0000 0000 0010
+  const unsigned int BIT_FLAG_S_ROOT = (1 << 2); // 0000 0000 0000 0100
+  const unsigned int BIT_FLAG_BODY_LIMIT = (1 << 3); // 0000 0000 0000 1000
+  const unsigned int BIT_FLAG_ = (1 << 4); // 0000 0000 0001 0000
+  const unsigned int BIT_FLAG_5 = (1 << 5); // 0000 0000 0010 0000
+  const unsigned int BIT_FLAG_6 = (1 << 6); // 0000 0000 0100 0000
+  const unsigned int BIT_FLAG_7 = (1 << 7); // 0000 0000 1000 0000
+
   // locationのparse
   void parseLocation(LocationConfig &location,
                      std::vector<std::string>::iterator &it,
@@ -52,7 +61,7 @@ class ConfigParser {
 
   // serverのparse
   void parseServer(ServerConfig &server, std::vector<std::string>::iterator &it,
-                   std::vector<std::string>::iterator &ite);
+                   std::vector<std::string>::iterator &ite, unsigned int &exist_flag);
   void parseClientBodySizeLimit(ServerConfig &server,
                                 std::vector<std::string>::iterator &it);
   void parseErrorPages(ServerConfig &server,
@@ -61,7 +70,8 @@ class ConfigParser {
   void parseServerName(ServerConfig &server,
                        std::vector<std::string>::iterator &it);
   void parseListen(ServerConfig &server,
-                   std::vector<std::string>::iterator &it);
+                   std::vector<std::string>::iterator &it,
+				   unsigned int &exist_flag);
   void parseTokens(std::vector<std::string> tokens);
 
   // token化のためのutils

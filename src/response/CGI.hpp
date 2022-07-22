@@ -23,7 +23,7 @@ class CGI {
   char **createEnvs(Path &path);
   char **createArgs(Path &path);
   void createPipe();
-  std::string buildCGIResponse(char **exec_args, char **exec_envs);
+  std::string buildCGIResponse(const char *exec_command_path, char **exec_args, char **exec_envs);
   void dupIO();
   void dupFd(int oldfd, int newfd);
   void readCGI();
@@ -37,6 +37,11 @@ class CGI {
 
  private:
   static const int BUF_SIZE = 8192;
+  static const std::map<std::string, std::string> EXEC_COMMANDS;
+  static const std::map<std::string, std::string> EXEC_PATHS;
+  static std::map<std::string, std::string> setExecutePaths();
+  static std::map<std::string, std::string> setExecuteCommands();
+
   std::string cgi_response_;
 
   HttpRequestDTO req_;
