@@ -146,6 +146,19 @@ TEST(Error, NoCurlyBracketsLocationThrowsException) {
   }
 }
 
+TEST(Error, DuplicatedListen) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/duplicated_listen.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/duplicated_listen.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: duplicated listen", e.what());
+  }
+}
+
 TEST(ConfigParserLocationsTests, CanParseSaishoConf) {
   ConfigParser configparser("./TestConfigs/saisho_example.conf");
   std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
