@@ -1,5 +1,7 @@
 NAME = webserv
 
+SHELL = /bin/bash
+
 CXX = c++
 CXXFLAGS = -Wall -Werror -Wextra -Wshadow -std=c++98 -pedantic
 
