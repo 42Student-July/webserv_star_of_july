@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>upload python (Apr/11/2021)</title>
+</head>
+<body>
+<h2>HTML5</h2>
+<form method="post" action="upload_python.py" enctype="multipart/form-data">
+<input type="file" name="files"  multiple>
+<p><input type="submit" value="送信する"></p>
+</form>
+
+<blockquote>
+<p>File is uploaded to /tmp.</p>
+</blockquote>
+<hr />
+Nginx<br />
+<blockquote>
+    <pre>
+    server {
+        client_max_body_size 20M;
+    </pre>
+</blockquote>
+<hr />
+Apr/11/2021 AM 08:25<p />
+</body>
+</html>
