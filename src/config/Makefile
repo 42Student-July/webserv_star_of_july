@@ -73,7 +73,7 @@ $(GTEST_DIR):
 .PHONY: test
 test: INCLUDES += -I$(GTEST_DIR)/googletest/include
 test: $(GTEST_DIR) $(NAME)
-	$(CXX) -std=c++11 $(INCLUDES) $(TEST_SRCS) $(LDFLAGS) $(LDLIBS) -o tester
+	clang++ -std=c++11 $(INCLUDES) $(TEST_SRCS) $(LDFLAGS) $(LDLIBS) -o tester
 	-@./tester
 	@$(RM) tester
 
