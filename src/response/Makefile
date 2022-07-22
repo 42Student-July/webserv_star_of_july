@@ -6,7 +6,7 @@
 #    By: mhirabay <mhirabay@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/13 18:47:47 by mhirabay          #+#    #+#              #
-#    Updated: 2022/07/21 20:30:33 by user42           ###   ########.fr        #
+#    Updated: 2022/07/22 20:20:49 by user42           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -107,7 +107,7 @@ test: restest cgitest
 .PHONY: restest
 restest: INC += -I$(GTEST_DIR)/googletest/include
 restest: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
-	$(CXX) -std=c++11 $(INC) $(TEST_RESPONSE_SRCS) $(LDFLAGS) $(LDLIBS) -o tester
+	clang++ -std=c++11 $(INC) $(TEST_RESPONSE_SRCS) $(LDFLAGS) $(LDLIBS) -o tester
 	-@./tester
 	@$(RM) tester
 
@@ -115,7 +115,7 @@ restest: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
 .PHONY: cgitest
 cgitest: INC += -I$(GTEST_DIR)/googletest/include
 cgitest: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
-	$(CXX) -std=c++11 $(INC) $(TEST_CGI_SRCS) $(LDFLAGS) $(LDLIBS) -o tester
+	clang++ -std=c++11 $(INC) $(TEST_CGI_SRCS) $(LDFLAGS) $(LDLIBS) -o tester
 	-@./tester
 	@$(RM) tester
 

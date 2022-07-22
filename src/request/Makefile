@@ -92,7 +92,7 @@ $(GTEST_DIR):
 .PHONY: test
 test: INCLUDES += -I$(GTEST_DIR)/googletest/include
 test: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
-	$(CXX) -std=c++11 $(INCLUDES) $(TEST_SRCS) $(LDFLAGS) $(LDLIBS) -o test
+	clang++ -std=c++11 $(INCLUDES) $(TEST_SRCS) $(LDFLAGS) $(LDLIBS) -o test
 	-@./test
 	@$(RM) test
 
