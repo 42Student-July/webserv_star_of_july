@@ -21,9 +21,9 @@ std::string HttpRequestConverter::searchRequestHeaderField(
 HttpRequestDTO* HttpRequestConverter::toDTO(HttpRequest* request) {
   HttpRequestDTO* dto = new HttpRequestDTO;
 
-  dto->method = request->method;
-  dto->path = request->uri;
-  dto->version = request->version.substr(sizeof("HTTP/") - 1);
+  dto->method = request->request_line.method;
+  dto->path = request->request_line.uri;
+  dto->version = request->request_line.version.substr(sizeof("HTTP/") - 1);
   dto->body = request->body;
 
   dto->connection =

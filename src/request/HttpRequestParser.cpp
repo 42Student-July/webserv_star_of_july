@@ -23,73 +23,9 @@ HttpRequest* HttpRequestParser::parse(const char* request_str,
 }
 
 void HttpRequestParser::parseRequestLine(HttpRequest* request) {
-  StringPos offset = 0;
-  std::string line = getLine();
+  RequestLineParser rl_parser;
 
-  offset = parseMethod(line, request);
-  offset = parseUri(line, request, offset);
-  offset = parseHttpVersion(line, request, offset);
-  validateRequestLine(request);
-}
-
-HttpRequestParser::StringPos HttpRequestParser::parseMethod(
-    const std::string& request_line, HttpRequest* request) {
-  StringPos method_end = request_line.find_first_of(" ");
-
-  request->method = request_line.substr(0, method_end);
-  return method_end;
-}
-
-HttpRequestParser::StringPos HttpRequestParser::parseUri(
-    const std::string& request_line, HttpRequest* request, StringPos offset) {
-  StringPos uri_begin = request_line.find_first_not_of(" ", offset);
-  // StringPos uri_end = request_line.find_last_of(" ");
-  StringPos uri_end = request_line.find_first_of(" ", uri_begin);
-
-  request->uri = request_line.substr(uri_begin, uri_end - uri_begin);
-  return uri_end;
-}
-
-HttpRequestParser::StringPos HttpRequestParser::parseHttpVersion(
-    const std::string& request_line, HttpRequest* request, StringPos offset) {
-  request->version = request_line.substr(offset + 1);
-  return std::string::npos;
-}
-
-void HttpRequestParser::validateRequestLine(HttpRequest* request) {
-  if (request->method.empty()) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No Method");
-  }
-  if (request->uri.empty()) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No Uri");
-  }
-  if (request->version.empty()) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No Version");
-  }
-  // httpversion
-  if (request->version.size() != 8) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
-                             "HttpVersion length error");
-  }
-  if (request->version.compare(0, 4, "HTTP") != 0) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "Invalid Protocol");
-  }
-  if (request->version.compare(4, 1, "/") != 0) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "/ is not found");
-  }
-
-  std::string version_num = request->version.substr(5);
-  if (version_num[1] != '.') {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, ". is not found");
-  }
-  if (!isdigit(version_num[0]) || !isdigit(version_num[2])) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
-                             "version has other than digit");
-  }
-  if (version_num[0] != '1' || version_num[2] != '1') {
-    throw ParseErrorExeption(HttpStatus::HTTP_VERSION_NOT_SUPPORTED,
-                             "version is not supported");
-  }
+  request->request_line = rl_parser.parse(getLine());
 }
 
 void HttpRequestParser::parseHeaderField(HttpRequest* request) {

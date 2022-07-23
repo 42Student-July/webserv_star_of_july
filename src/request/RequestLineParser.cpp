@@ -1,0 +1,73 @@
+#include "RequestLineParser.hpp"
+
+RequestLineParser::RequestLineParser() {}
+
+RequestLineParser::~RequestLineParser() {}
+
+RequestLine RequestLineParser::parse(const std::string& line) {
+  RequestLine request_line;
+  StringPos offset = 0;
+
+  request_line.method = parseMethod(line, &offset);
+  request_line.uri = parseUri(line, &offset);
+  request_line.version = parseHttpVersion(line, offset);
+  validateRequestLine(request_line);
+  return request_line;
+}
+
+std::string RequestLineParser::parseMethod(const std::string& line,
+                                           StringPos* offset) {
+  StringPos method_end = line.find_first_of(" ");
+
+  *offset = method_end;
+  return line.substr(0, method_end);
+}
+std::string RequestLineParser::parseUri(const std::string& line,
+                                        StringPos* offset) {
+  StringPos uri_begin = line.find_first_not_of(" ", *offset);
+  StringPos uri_end = line.find_first_of(" ", uri_begin);
+
+  *offset = uri_end;
+  return line.substr(uri_begin, uri_end - uri_begin);
+}
+
+std::string RequestLineParser::parseHttpVersion(const std::string& line,
+                                                StringPos offset) {
+  return line.substr(offset + 1);
+}
+
+void RequestLineParser::validateRequestLine(const RequestLine& request_line) {
+  if (request_line.method.empty()) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No Method");
+  }
+  if (request_line.uri.empty()) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No Uri");
+  }
+  if (request_line.version.empty()) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No Version");
+  }
+  // httpversion
+  if (request_line.version.size() != 8) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
+                             "HttpVersion length error");
+  }
+  if (request_line.version.compare(0, 4, "HTTP") != 0) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "Invalid Protocol");
+  }
+  if (request_line.version.compare(4, 1, "/") != 0) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "/ is not found");
+  }
+
+  std::string version_num = request_line.version.substr(5);
+  if (version_num[1] != '.') {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, ". is not found");
+  }
+  if (!isdigit(version_num[0]) || !isdigit(version_num[2])) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
+                             "version has other than digit");
+  }
+  if (version_num[0] != '1' || version_num[2] != '1') {
+    throw ParseErrorExeption(HttpStatus::HTTP_VERSION_NOT_SUPPORTED,
+                             "version is not supported");
+  }
+}

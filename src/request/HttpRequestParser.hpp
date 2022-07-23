@@ -8,6 +8,7 @@
 #include "HttpParser.hpp"
 #include "HttpRequest.hpp"
 #include "HttpStatus.hpp"
+#include "RequestLineParser.hpp"
 #include "ServerConfig.hpp"
 
 class HttpRequestParser : public HttpParser {
@@ -25,12 +26,6 @@ class HttpRequestParser : public HttpParser {
   void parseRequestLine(HttpRequest* request);
   void parseHeaderField(HttpRequest* request);
   void parseBody(HttpRequest* request);
-  StringPos parseMethod(const std::string& request_line, HttpRequest* request);
-  StringPos parseUri(const std::string& request_line, HttpRequest* request,
-                     StringPos offset);
-  StringPos parseHttpVersion(const std::string& request_line,
-                             HttpRequest* request, StringPos offset);
-  void validateRequestLine(HttpRequest* request);
   static HeaderFieldPair makeHeaderFieldPair(const std::string& line);
   static void validateHeaderField(const HeaderFieldPair& headerfield_pair);
   static void validateHeaderFields(const HeaderFieldMap& headers);
