@@ -29,81 +29,13 @@ void HttpRequestParser::parseRequestLine(HttpRequest* request) {
 }
 
 void HttpRequestParser::parseHeaderField(HttpRequest* request) {
+  HeaderFieldParser hf_parser;
+  StringVector headerfield_vec;
+
   for (std::string line = getLine(); line.size() != 0; line = getLine()) {
-    HeaderFieldPair name_value_pair = makeHeaderFieldPair(line);
-
-    validateHeaderField(name_value_pair);
-    request->name_value_map.insert(name_value_pair);
+    headerfield_vec.push_back(line);
   }
-  validateHeaderFields(request->name_value_map);
-}
-
-void HttpRequestParser::validateHeaderFields(const HeaderFieldMap& headers) {
-  HeaderFieldMap::const_iterator it = headers.find("Host");
-  if (it == headers.end()) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "no host");
-  }
-}
-
-bool isWS(int c) { return (c == ' ' || c == '\t'); }
-
-bool HttpRequestParser::isHeaderDelimiter(int c) {
-  return Delimiters.find(c) != std::string::npos;
-}
-
-bool HttpRequestParser::isHeaderTokenChar(int c) {
-  if (isHeaderDelimiter(c) || c == ' ') {
-    return false;
-  }
-  return isprint(c);
-}
-
-bool HttpRequestParser::isHeaderToken(const std::string& str) {
-  if (str.empty()) {
-    return false;
-  }
-  for (StringPos pos = 0; pos <= str.size() - 1; ++pos) {
-    if (!isHeaderTokenChar(str[pos])) {
-      return false;
-    }
-  }
-  return true;
-}
-
-void HttpRequestParser::validateHeaderField(
-    const HeaderFieldPair& headerfield_pair) {
-  std::string field_name = headerfield_pair.first;
-  std::string field_value = headerfield_pair.second;
-
-  if (field_name.empty()) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
-                             "header has no field name");
-  }
-  if (isWS(field_name[field_name.size() - 1])) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
-                             "header has space before colon");
-  }
-  if (!isHeaderToken(field_name)) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
-                             "field_name is not header token");
-  }
-  // if (headerfield_map.find(field_name) != headerfield_map.end()) {
-  //   throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
-  //                            "field_name has already existed");
-  // }
-}
-
-// 変数宣言と初期化を同時にするとなんか読みにくい。
-HttpRequestParser::HeaderFieldPair HttpRequestParser::makeHeaderFieldPair(
-    const std::string& line) {
-  StringPos name_end = line.find_first_of(":");
-  if (name_end == std::string::npos) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "header has no colon");
-  }
-  std::string name = line.substr(0, name_end);
-  std::string value = utility::trimCopyIf(line.substr(name_end + 1), WS);
-
-  return HeaderFieldPair(name, value);
+  request->name_value_map = hf_parser.parse(headerfield_vec);
 }
 
 void HttpRequestParser::parseBody(HttpRequest* request) {

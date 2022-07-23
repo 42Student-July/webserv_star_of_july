@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 
+#include "HeaderFieldParser.hpp"
 #include "HttpParser.hpp"
 #include "HttpRequest.hpp"
 #include "HttpStatus.hpp"
@@ -26,12 +27,6 @@ class HttpRequestParser : public HttpParser {
   void parseRequestLine(HttpRequest* request);
   void parseHeaderField(HttpRequest* request);
   void parseBody(HttpRequest* request);
-  static HeaderFieldPair makeHeaderFieldPair(const std::string& line);
-  static void validateHeaderField(const HeaderFieldPair& headerfield_pair);
-  static void validateHeaderFields(const HeaderFieldMap& headers);
-  static bool isHeaderDelimiter(int c);
-  static bool isHeaderTokenChar(int c);
-  static bool isHeaderToken(const std::string& str);
   std::string getLine();
 
   // メンバ変数

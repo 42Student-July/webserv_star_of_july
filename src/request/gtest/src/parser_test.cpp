@@ -256,7 +256,7 @@ TEST_F(HttpRequestParserTest, HeaderHasNoFieldName) {
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
   checkBody("", request->body);
-  ASSERT_EQ(1, request->name_value_map.size());
+  ASSERT_EQ(0, request->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
 
@@ -291,8 +291,7 @@ TEST_F(HttpRequestParserTest, FieldNameHasOnlyWS) {
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
   checkBody("", request->body);
-  checkHeaderField("Host", "admin", request->name_value_map);
-  ASSERT_EQ(1, request->name_value_map.size());
+  ASSERT_EQ(0, request->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
 
@@ -303,8 +302,7 @@ TEST_F(HttpRequestParserTest, FieldNameHasInvalidChar) {
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
   checkBody("", request->body);
-  checkHeaderField("Host", "admin", request->name_value_map);
-  ASSERT_EQ(1, request->name_value_map.size());
+  ASSERT_EQ(0, request->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
 
@@ -315,8 +313,7 @@ TEST_F(HttpRequestParserTest, FieldNameLastIsInvalidChar) {
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
   checkBody("", request->body);
-  checkHeaderField("Host", "admin", request->name_value_map);
-  ASSERT_EQ(1, request->name_value_map.size());
+  ASSERT_EQ(0, request->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
 
@@ -326,7 +323,6 @@ TEST_F(HttpRequestParserTest, NoHost) {
 
   checkRequestline("GET", "/", "HTTP/1.1", request);
   checkBody("", request->body);
-  checkHeaderField("user-agent", "send_response.sh", request->name_value_map);
-  ASSERT_EQ(1, request->name_value_map.size());
+  ASSERT_EQ(0, request->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
 }

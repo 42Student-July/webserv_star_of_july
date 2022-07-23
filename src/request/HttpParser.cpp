@@ -1,8 +1,6 @@
 #include "HttpParser.hpp"
 
 const std::string HttpParser::CRLF = "\r\n";
-const std::string HttpParser::WS = " \t";
-const std::string HttpParser::Delimiters = "\"(),/:;<=>?@[\\]{}";
 
 HttpParser::ParseErrorExeption::ParseErrorExeption(
     const std::string& error_status, const std::string& reason)

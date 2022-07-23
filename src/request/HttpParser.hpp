@@ -12,6 +12,7 @@ class HttpParser {
   typedef HttpRequest::HeaderFieldPair HeaderFieldPair;
   typedef HttpRequest::HeaderFieldMap HeaderFieldMap;
   typedef std::string::size_type StringPos;
+  typedef std::vector<std::string> StringVector;
 
   class ParseErrorExeption : public std::runtime_error {
    public:
@@ -26,8 +27,6 @@ class HttpParser {
 
   // 定数
   static const std::string CRLF;
-  static const std::string WS;
-  static const std::string Delimiters;
 
  private:
   HttpParser(const HttpParser& other);
