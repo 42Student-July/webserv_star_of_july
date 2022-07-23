@@ -77,7 +77,7 @@ void HeaderFieldParser::validateOneHeaderField(const std::string& field_name,
 void HeaderFieldParser::validateAllHeaderFields(const HeaderFieldMap& headers) {
   HeaderFieldMap::const_iterator it = headers.find("Host");
 
-  if (it == headers.end()) {
+  if (it == headers.end() || it->second.empty()) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "no host");
   }
 }
