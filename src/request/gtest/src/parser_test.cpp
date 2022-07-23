@@ -349,3 +349,12 @@ TEST_F(HttpRequestParserTest, SameHeaderFieldName) {
   ASSERT_EQ(2, request->name_value_map.size());
   ASSERT_EQ(HttpStatus::OK, request->response_status_code);
 }
+
+TEST_F(HttpRequestParserTest, NoCr) {
+  std::string file_content = readFile("gtest/request/no_cr.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
