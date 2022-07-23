@@ -16,8 +16,15 @@ class HeaderFieldParser : public HttpParser {
 
   HeaderFieldParser(const HeaderFieldParser& other);
   HeaderFieldParser& operator=(const HeaderFieldParser& other);
-  static HeaderFieldPair makeHeaderFieldPair(const std::string& line);
-  static void validateHeaderField(const HeaderFieldPair& headerfield_pair);
+  static void handleSameFiledName(HeaderFieldPair* header_field_pair,
+                                  const HeaderFieldMap& header_field_map);
+  static HeaderFieldPair parseHeaderField(const std::string& line);
+  static std::string parseFieldName(const std::string& line,
+                                    StringPos colon_pos);
+  static std::string parseFieldValue(const std::string& line,
+                                     StringPos colon_pos);
+  static void validateHeaderField(const std::string& field_name,
+                                  const std::string& field_value);
   static void validateHeaderFields(const HeaderFieldMap& headers);
   static bool isOWS(int c);
   static bool isHeaderDelimiter(int c);
