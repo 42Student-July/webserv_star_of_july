@@ -119,9 +119,8 @@ void HttpRequestParser::parseHeaderField(HttpRequest* request) {
 
 void HttpRequestParser::validateHeaderFields(const HeaderFieldMap& headers) {
   HeaderFieldMap::const_iterator it = headers.find("Host");
-  if (it == headers.end()){
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
-                             "no host");
+  if (it == headers.end()) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "no host");
   }
 }
 
@@ -150,22 +149,8 @@ bool HttpRequestParser::isHeaderToken(const std::string& str) {
   return true;
 }
 
-// std::string HttpRequestParser::trimCopyIf(const std::string& str,
-//                                           const std::string& set) {
-//   if (str.empty() || set.empty()) {
-//     return str;
-//   }
-//   StringPos begin = str.find_first_not_of(set);
-//   StringPos end = str.find_last_not_of(set);
-//   size_t len = end - begin + 1;
-//   if (begin == std::string::npos) {
-//     return "";
-//   }
-
-//   return str.substr(begin, len);
-// }
-
-void HttpRequestParser::validateHeaderField(HeaderFieldPair headerfield_pair) {
+void HttpRequestParser::validateHeaderField(
+    const HeaderFieldPair& headerfield_pair) {
   std::string field_name = headerfield_pair.first;
   std::string field_value = headerfield_pair.second;
 
@@ -181,6 +166,10 @@ void HttpRequestParser::validateHeaderField(HeaderFieldPair headerfield_pair) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
                              "field_name is not header token");
   }
+  // if (headerfield_map.find(field_name) != headerfield_map.end()) {
+  //   throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
+  //                            "field_name has already existed");
+  // }
 }
 
 // 変数宣言と初期化を同時にするとなんか読みにくい。

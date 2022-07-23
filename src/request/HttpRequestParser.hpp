@@ -52,9 +52,8 @@ class HttpRequestParser {
                              HttpRequest* request, StringPos offset);
   void validateRequestLine(HttpRequest* request);
   static HeaderFieldPair makeHeaderFieldPair(const std::string& line);
-  static void validateHeaderField(HeaderFieldPair headerfield_pair);
+  static void validateHeaderField(const HeaderFieldPair& headerfield_pair);
   static void validateHeaderFields(const HeaderFieldMap& headers);
-  static std::string trimCopyIf(const std::string& str, const std::string& set);
   static bool isHeaderDelimiter(int c);
   static bool isHeaderTokenChar(int c);
   static bool isHeaderToken(const std::string& str);
