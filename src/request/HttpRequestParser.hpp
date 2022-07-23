@@ -17,21 +17,15 @@ class HttpRequestParser : public HttpParser {
   HttpRequestParser();
   ~HttpRequestParser();
   // 2つの引数はコンストラクタで渡した方が読みやすいかも。
-  HttpRequest* parse(const char* request_str,
-                     const ServerConfig& server_config);
+  HttpRequest *parse(const char *buffer, const ServerConfig &server_config);
 
  private:
-  // メソッド
-  HttpRequestParser(const HttpRequestParser& other);
-  HttpRequestParser& operator=(const HttpRequestParser& other);
-  void parseRequestLine(HttpRequest* request);
-  void parseHeaderField(HttpRequest* request);
-  void parseBody(HttpRequest* request);
-  std::string getLine();
-
-  // メンバ変数
-  std::string raw_buffer_;
-  StringPos offset_;
+  HttpRequestParser(const HttpRequestParser &other);
+  HttpRequestParser &operator=(const HttpRequestParser &other);
+  RequestLine parseRequestLine(const std::string &buffer, StringPos *offset);
+  HeaderFieldMap parseHeaderField(const std::string &buffer, StringPos *offset);
+  std::string parseBody(const std::string &buffer, StringPos offset);
+  std::string getLine(const std::string &buffer, StringPos *offset);
 };
 
 #endif  // SRC_HTTPREQUESTPARSER_HPP_
