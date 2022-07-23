@@ -18,6 +18,9 @@ HttpRequest *HttpRequestParser::parse(const char *buffer,
   } catch (const ParseErrorExeption &e) {
     req->response_status_code = e.getErrorStatus();
     std::cerr << e.what() << std::endl;
+  } catch (const std::exception &e) {
+    req->response_status_code = HttpStatus::INTERNAL_SERVER_ERROR;
+    std::cerr << e.what() << std::endl;
   }
   return req;
 }
