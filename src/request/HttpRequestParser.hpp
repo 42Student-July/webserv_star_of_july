@@ -5,11 +5,12 @@
 #include <map>
 #include <string>
 
+#include "HttpParser.hpp"
 #include "HttpRequest.hpp"
 #include "HttpStatus.hpp"
 #include "ServerConfig.hpp"
 
-class HttpRequestParser {
+class HttpRequestParser : public HttpParser {
  public:
   HttpRequestParser();
   ~HttpRequestParser();
@@ -18,27 +19,6 @@ class HttpRequestParser {
                      const ServerConfig& server_config);
 
  private:
-  // 型
-  typedef HttpRequest::HeaderFieldPair HeaderFieldPair;
-  typedef HttpRequest::HeaderFieldMap HeaderFieldMap;
-  typedef std::string::size_type StringPos;
-
-  class ParseErrorExeption : public std::runtime_error {
-   public:
-    ParseErrorExeption(const std::string& error_status,
-                       const std::string& reason = "Undefined Error");
-    ~ParseErrorExeption() throw();
-    const std::string& getErrorStatus() const;
-
-   private:
-    std::string error_status_;
-  };
-
-  // 定数
-  static const std::string CRLF;
-  static const std::string WS;
-  static const std::string Delimiters;
-
   // メソッド
   HttpRequestParser(const HttpRequestParser& other);
   HttpRequestParser& operator=(const HttpRequestParser& other);

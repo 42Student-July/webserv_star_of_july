@@ -1,24 +1,9 @@
 #include "HttpRequestParser.hpp"
 #include "utility.hpp"
 
-const std::string HttpRequestParser::CRLF = "\r\n";
-const std::string HttpRequestParser::WS = " \t";
-const std::string HttpRequestParser::Delimiters = "\"(),/:;<=>?@[\\]{}";
-
 HttpRequestParser::HttpRequestParser() : raw_buffer_(""), offset_(0) {}
 
 HttpRequestParser::~HttpRequestParser() {}
-
-HttpRequestParser::ParseErrorExeption::ParseErrorExeption(
-    const std::string& error_status, const std::string& reason)
-    : std::runtime_error(reason), error_status_(error_status) {}
-
-HttpRequestParser::ParseErrorExeption::~ParseErrorExeption() throw() {}
-
-const std::string& HttpRequestParser::ParseErrorExeption::getErrorStatus()
-    const {
-  return error_status_;
-}
 
 // 2つの引数はコンストラクタで渡した方が読みやすいかも。
 HttpRequest* HttpRequestParser::parse(const char* request_str,
