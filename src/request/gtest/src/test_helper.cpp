@@ -56,9 +56,9 @@ ServerConfig initServerConfigWithLocation() {
 
 void checkRequestline(const std::string &method, const std::string &uri,
                       const std::string &version, HttpRequest *request) {
-  ASSERT_EQ(method, request->method);
-  ASSERT_EQ(uri, request->uri);
-  ASSERT_EQ(version, request->version);
+  ASSERT_EQ(method, request->request_line.method);
+  ASSERT_EQ(uri, request->request_line.uri);
+  ASSERT_EQ(version, request->request_line.version);
 }
 
 void checkRequestline(const std::string &method, const std::string &uri,
