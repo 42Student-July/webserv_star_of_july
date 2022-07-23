@@ -21,8 +21,12 @@ class HttpRequestParser : public HttpParser {
                             const ServerConfig &server_config);
 
  private:
+  static const size_t kMaxHeaderLength = 1 << 10;
+  static const size_t kMaxBodyLength = 1 << 20;
+
   HttpRequestParser(const HttpRequestParser &other);
   HttpRequestParser &operator=(const HttpRequestParser &other);
+  static void validateRequestLength(const std::string &buffer);
   static RequestLine parseRequestLine(const std::string &buffer,
                                       StringPos *offset);
   static HeaderFieldMap parseHeaderField(const std::string &buffer,
