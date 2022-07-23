@@ -37,28 +37,39 @@ std::string RequestLineParser::parseHttpVersion(const std::string& line,
 }
 
 void RequestLineParser::validateRequestLine(const RequestLine& request_line) {
-  if (request_line.method.empty()) {
+  validateMethod(request_line.method);
+  validateUri(request_line.uri);
+  validateHttpVersion(request_line.version);
+}
+
+void RequestLineParser::validateMethod(const std::string& method) {
+  if (method.empty()) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No Method");
   }
-  if (request_line.uri.empty()) {
+}
+
+void RequestLineParser::validateUri(const std::string& uri) {
+  if (uri.empty()) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No Uri");
   }
-  if (request_line.version.empty()) {
+}
+
+void RequestLineParser::validateHttpVersion(const std::string& http_version) {
+  if (http_version.empty()) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No Version");
   }
-  // httpversion
-  if (request_line.version.size() != 8) {
+  if (http_version.size() != 8) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
                              "HttpVersion length error");
   }
-  if (request_line.version.compare(0, 4, "HTTP") != 0) {
+  if (http_version.compare(0, 4, "HTTP") != 0) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "Invalid Protocol");
   }
-  if (request_line.version.compare(4, 1, "/") != 0) {
+  if (http_version.compare(4, 1, "/") != 0) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "/ is not found");
   }
 
-  std::string version_num = request_line.version.substr(5);
+  std::string version_num = http_version.substr(5);
   if (version_num[1] != '.') {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, ". is not found");
   }

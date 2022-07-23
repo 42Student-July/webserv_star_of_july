@@ -1,8 +1,5 @@
 #include "HeaderFieldParser.hpp"
 
-const std::string HeaderFieldParser::WS = " \t";
-const std::string HeaderFieldParser::Delimiters = "\"(),/:;<=>?@[\\]{}";
-
 HeaderFieldParser::HeaderFieldParser() {}
 
 HeaderFieldParser::~HeaderFieldParser() {}
@@ -19,7 +16,7 @@ HttpRequest::HeaderFieldMap HeaderFieldParser::parse(
     handleSameFiledName(&header_field_pair, header_field_map);
     header_field_map[header_field_pair.first] = header_field_pair.second;
   }
-  validateHeaderFields(header_field_map);
+  validateAllHeaderFields(header_field_map);
   return header_field_map;
 }
 
@@ -32,7 +29,7 @@ HttpRequest::HeaderFieldPair HeaderFieldParser::parseHeaderField(
   std::string field_name = parseFieldName(line, colon_pos);
   std::string field_value = parseFieldValue(line, colon_pos);
 
-  validateHeaderField(field_name, field_value);
+  validateOneHeaderField(field_name, field_value);
   return HeaderFieldPair(field_name, field_value);
 }
 
@@ -43,14 +40,15 @@ std::string HeaderFieldParser::parseFieldName(const std::string& line,
 
 std::string HeaderFieldParser::parseFieldValue(const std::string& line,
                                                StringPos colon_pos) {
-  return utility::trimCopyIf(line.substr(colon_pos + 1), WS);
+  return utility::trimCopyIf(line.substr(colon_pos + 1), OWS);
 }
 
 void HeaderFieldParser::handleSameFiledName(
     HeaderFieldPair* header_field_pair,
     const HeaderFieldMap& header_field_map) {
-  std::string currnt_field_name = header_field_pair->first;
-  HeaderFieldMap::const_iterator it = header_field_map.find(currnt_field_name);
+  std::string target_field_name = header_field_pair->first;
+  HeaderFieldMap::const_iterator it = header_field_map.find(target_field_name);
+
   if (it != header_field_map.end()) {
     std::string old_field_value = it->second;
     std::string new_field_value =
@@ -59,8 +57,8 @@ void HeaderFieldParser::handleSameFiledName(
   };
 }
 
-void HeaderFieldParser::validateHeaderField(const std::string& field_name,
-                                            const std::string& field_value) {
+void HeaderFieldParser::validateOneHeaderField(const std::string& field_name,
+                                               const std::string& field_value) {
   if (field_name.empty()) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
                              "header has no field name");
@@ -76,34 +74,10 @@ void HeaderFieldParser::validateHeaderField(const std::string& field_name,
   (void)field_value;
 }
 
-void HeaderFieldParser::validateHeaderFields(const HeaderFieldMap& headers) {
+void HeaderFieldParser::validateAllHeaderFields(const HeaderFieldMap& headers) {
   HeaderFieldMap::const_iterator it = headers.find("Host");
+
   if (it == headers.end()) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "no host");
   }
-}
-
-bool HeaderFieldParser::isOWS(int c) { return (c == ' ' || c == '\t'); }
-
-bool HeaderFieldParser::isHeaderDelimiter(int c) {
-  return Delimiters.find(c) != std::string::npos;
-}
-
-bool HeaderFieldParser::isHeaderTokenChar(int c) {
-  if (isHeaderDelimiter(c) || c == ' ') {
-    return false;
-  }
-  return isprint(c);
-}
-
-bool HeaderFieldParser::isHeaderToken(const std::string& str) {
-  if (str.empty()) {
-    return false;
-  }
-  for (StringPos pos = 0; pos <= str.size() - 1; ++pos) {
-    if (!isHeaderTokenChar(str[pos])) {
-      return false;
-    }
-  }
-  return true;
 }
