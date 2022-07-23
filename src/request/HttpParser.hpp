@@ -9,6 +9,7 @@ class HttpParser {
   ~HttpParser();
 
  protected:
+  // 型
   typedef HttpRequest::HeaderFieldPair HeaderFieldPair;
   typedef HttpRequest::HeaderFieldMap HeaderFieldMap;
   typedef std::string::size_type StringPos;
@@ -24,9 +25,15 @@ class HttpParser {
    private:
     std::string error_status_;
   };
-
   // 定数
   static const std::string CRLF;
+  static const std::string OWS;
+  static const std::string Delimiters;
+  // メソッド
+  static bool isOWS(int c);
+  static bool isHeaderDelimiter(int c);
+  static bool isHeaderTokenChar(int c);
+  static bool isHeaderToken(const std::string& str);
 
  private:
   HttpParser(const HttpParser& other);

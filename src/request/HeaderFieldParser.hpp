@@ -11,18 +11,18 @@ class HeaderFieldParser : public HttpParser {
   HeaderFieldMap parse(const std::vector<std::string>& header_field_vec);
 
  private:
-  static const std::string WS;
-  static const std::string Delimiters;
-
   HeaderFieldParser(const HeaderFieldParser& other);
   HeaderFieldParser& operator=(const HeaderFieldParser& other);
-  static HeaderFieldPair makeHeaderFieldPair(const std::string& line);
-  static void validateHeaderField(const HeaderFieldPair& headerfield_pair);
-  static void validateHeaderFields(const HeaderFieldMap& headers);
-  static bool isOWS(int c);
-  static bool isHeaderDelimiter(int c);
-  static bool isHeaderTokenChar(int c);
-  static bool isHeaderToken(const std::string& str);
+  static void handleSameFiledName(HeaderFieldPair* header_field_pair,
+                                  const HeaderFieldMap& header_field_map);
+  static HeaderFieldPair parseHeaderField(const std::string& line);
+  static std::string parseFieldName(const std::string& line,
+                                    StringPos colon_pos);
+  static std::string parseFieldValue(const std::string& line,
+                                     StringPos colon_pos);
+  static void validateOneHeaderField(const std::string& field_name,
+                                     const std::string& field_value);
+  static void validateAllHeaderFields(const HeaderFieldMap& headers);
 };
 
 #endif /* HEADERFIELDPARSER_HPP */

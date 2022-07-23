@@ -13,10 +13,14 @@ class RequestLineParser : public HttpParser {
  private:
   RequestLineParser(const RequestLineParser& other);
   RequestLineParser& operator=(const RequestLineParser& other);
-  std::string parseMethod(const std::string& line, StringPos* offset);
-  std::string parseUri(const std::string& line, StringPos* offset);
-  std::string parseHttpVersion(const std::string& line, StringPos offset);
-  void validateRequestLine(const RequestLine& request_line);
+  static std::string parseMethod(const std::string& line, StringPos* offset);
+  static std::string parseUri(const std::string& line, StringPos* offset);
+  static std::string parseHttpVersion(const std::string& line,
+                                      StringPos offset);
+  static void validateRequestLine(const RequestLine& request_line);
+  static void validateMethod(const std::string& method);
+  static void validateUri(const std::string& uri);
+  static void validateHttpVersion(const std::string& http_version);
 };
 
 #endif /* REQUESTLINEPARSER_HPP */

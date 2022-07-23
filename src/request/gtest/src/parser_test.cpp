@@ -326,3 +326,35 @@ TEST_F(HttpRequestParserTest, NoHost) {
   ASSERT_EQ(0, request->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
+
+TEST_F(HttpRequestParserTest, NoHostEmpty) {
+  std::string file_content = readFile("gtest/request/no_host_empty.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkRequestline("GET", "/", "HTTP/1.1", request);
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
+TEST_F(HttpRequestParserTest, SameHeaderFieldName) {
+  std::string file_content =
+      readFile("gtest/request/same_header_field_name.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkRequestline("GET", "/", "HTTP/1.1", request);
+  checkBody("", request->body);
+  checkHeaderField("Host", "admin", request->name_value_map);
+  checkHeaderField("user-agent", "agent1,agent2", request->name_value_map);
+  ASSERT_EQ(2, request->name_value_map.size());
+  ASSERT_EQ(HttpStatus::OK, request->response_status_code);
+}
+
+TEST_F(HttpRequestParserTest, NoCr) {
+  std::string file_content = readFile("gtest/request/no_cr.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
+}

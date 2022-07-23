@@ -12,14 +12,34 @@ HttpRequest *HttpRequestParser::parse(const char *buffer,
   StringPos offset = 0;
 
   try {
+    validateRequestLength(buffer);
     req->request_line = parseRequestLine(buffer, &offset);
     req->name_value_map = parseHeaderField(buffer, &offset);
     req->body = parseBody(buffer, offset);
   } catch (const ParseErrorExeption &e) {
     req->response_status_code = e.getErrorStatus();
     std::cerr << e.what() << std::endl;
+  } catch (const std::exception &e) {
+    req->response_status_code = HttpStatus::INTERNAL_SERVER_ERROR;
+    std::cerr << e.what() << std::endl;
   }
   return req;
+}
+
+// http://nginx.org/en/docs/http/ngx_http_core_module.html#client_header_buffer_size
+void HttpRequestParser::validateRequestLength(const std::string &buffer) {
+  StringPos header_end = buffer.find(CRLF + CRLF);
+  if (header_end == std::string::npos) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No header_end");
+  }
+  if (header_end > kMaxHeaderLength) {
+    throw ParseErrorExeption(HttpStatus::REQUEST_HEADER_FIELD_TOO_LARGE,
+                             "request is too long");
+  }
+  size_t body_len = buffer.size() - header_end;
+  if (body_len > kMaxBodyLength) {
+    throw ParseErrorExeption(HttpStatus::PAYLOAD_TOO_LARGE, "body is too long");
+  }
 }
 
 RequestLine HttpRequestParser::parseRequestLine(const std::string &buffer,
