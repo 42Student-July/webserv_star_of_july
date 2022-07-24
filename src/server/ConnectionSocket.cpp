@@ -62,14 +62,14 @@ void ConnectionSocket::generateResponse() {
   ConfigConverter conf_converter;
   ConfigDTO *conf_dto = conf_converter.toDTO(serverconfig_);
   HttpRequestConverter req_converter;
-  HttpRequestDTO *req_dto = req_converter.toDTO(current_request_);
+  HttpRequestDTO *req_dto = req_converter.toDTO(*current_request_);
   HttpResponseBuilder builder = HttpResponseBuilder(*conf_dto);
   current_response_ = builder.build(*req_dto);
 }
 
 void ConnectionSocket::sendResponse() const {
-  HttpResponseSerializer  serializer = HttpResponseSerializer();
-  HttpResponsePlainText  *plain_txt = serializer.serialize(*current_response_);
+  HttpResponseSerializer serializer = HttpResponseSerializer();
+  HttpResponsePlainText *plain_txt = serializer.serialize(*current_response_);
   const char *response = plain_txt->Text().c_str();
   size_t response_len = plain_txt->Size();
 
