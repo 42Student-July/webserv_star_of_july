@@ -33,9 +33,14 @@ HttpRequest::HeaderFieldPair HeaderFieldParser::parseHeaderField(
   return HeaderFieldPair(field_name, field_value);
 }
 
+// field nameは小文字で管理する。大文字小文字を区別しないため。
+// rfc7230 3.2
+// Each header field consists of a case-insensitive field name...
 std::string HeaderFieldParser::parseFieldName(const std::string& line,
                                               StringPos colon_pos) {
-  return line.substr(0, colon_pos);
+  std::string raw_field_name = line.substr(0, colon_pos);
+
+  return utility::toLower(raw_field_name);
 }
 
 std::string HeaderFieldParser::parseFieldValue(const std::string& line,
@@ -50,7 +55,7 @@ void HeaderFieldParser::handleSameFiledName(
   HeaderFieldMap::const_iterator it = header_field_map.find(target_field_name);
 
   if (it != header_field_map.end()) {
-    if (target_field_name == "Host") {
+    if (target_field_name == "host") {
       throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "header has two Host");
     }
     std::string old_field_value = it->second;
@@ -78,7 +83,7 @@ void HeaderFieldParser::validateOneHeaderField(const std::string& field_name,
 }
 
 void HeaderFieldParser::validateAllHeaderFields(const HeaderFieldMap& headers) {
-  HeaderFieldMap::const_iterator it = headers.find("Host");
+  HeaderFieldMap::const_iterator it = headers.find("host");
 
   if (it == headers.end() || it->second.empty()) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "no host");

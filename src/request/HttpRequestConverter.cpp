@@ -27,21 +27,21 @@ HttpRequestDTO* HttpRequestConverter::toDTO(HttpRequest* request) {
   dto->body = request->body;
 
   dto->connection =
-      searchRequestHeaderField(request->name_value_map, "Connection");
+      searchRequestHeaderField(request->name_value_map, "connection");
   dto->authorization =
-      searchRequestHeaderField(request->name_value_map, "Authorization");
+      searchRequestHeaderField(request->name_value_map, "authorization");
   dto->content_length =
-      searchRequestHeaderField(request->name_value_map, "Content-Length");
+      searchRequestHeaderField(request->name_value_map, "content-length");
   dto->content_type =
-      searchRequestHeaderField(request->name_value_map, "Content-Type");
-  dto->accept = searchRequestHeaderField(request->name_value_map, "Accept");
+      searchRequestHeaderField(request->name_value_map, "content-type");
+  dto->accept = searchRequestHeaderField(request->name_value_map, "accept");
   dto->forwarded =
-      searchRequestHeaderField(request->name_value_map, "Forwarded");
-  dto->referer = searchRequestHeaderField(request->name_value_map, "Referer");
+      searchRequestHeaderField(request->name_value_map, "forwarded");
+  dto->referer = searchRequestHeaderField(request->name_value_map, "referer");
   dto->user_agent =
-      searchRequestHeaderField(request->name_value_map, "User_Agent");
+      searchRequestHeaderField(request->name_value_map, "user_agent");
   dto->x_forwarded_for =
-      searchRequestHeaderField(request->name_value_map, "X_Forwarded_For");
+      searchRequestHeaderField(request->name_value_map, "x_forwarded_for");
 
   dto->host = request->server_config.host;
   dto->port = request->server_config.port;
