@@ -105,12 +105,11 @@ TEST_F(HttpRequestParserTest, StoreJsonToBody) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkRequestline("POST", "/", "HTTP/1.1", req);
-  checkHeaderField("host", "admin", req->name_value_map);
-  checkHeaderField("user-agent", "send_response.sh", req->name_value_map);
+  checkHeaderField("host", "localhost:80", req->name_value_map);
   checkHeaderField("content-type", "application/json", req->name_value_map);
   checkBody("{\n\t\"asa-gohan\":\"misosiru\",\n\t\"oyatsu\":\"karl\"\n}\n",
             req->body);
-  ASSERT_EQ(3, req->name_value_map.size());
+  ASSERT_EQ(2, req->name_value_map.size());
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
 
