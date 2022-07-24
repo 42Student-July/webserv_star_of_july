@@ -337,6 +337,15 @@ TEST_F(HttpRequestParserTest, NoHostEmpty) {
   ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
 }
 
+TEST_F(HttpRequestParserTest, TwoHost) {
+  std::string file_content = readFile("gtest/request/two_host.crlf");
+  HttpRequest *request = parser.parse(file_content.c_str(), config);
+
+  checkBody("", request->body);
+  ASSERT_EQ(0, request->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, request->response_status_code);
+}
+
 TEST_F(HttpRequestParserTest, SameHeaderFieldName) {
   std::string file_content =
       readFile("gtest/request/same_header_field_name.crlf");

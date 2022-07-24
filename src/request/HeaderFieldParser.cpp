@@ -50,6 +50,9 @@ void HeaderFieldParser::handleSameFiledName(
   HeaderFieldMap::const_iterator it = header_field_map.find(target_field_name);
 
   if (it != header_field_map.end()) {
+    if (target_field_name == "Host") {
+      throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "header has two Host");
+    }
     std::string old_field_value = it->second;
     std::string new_field_value =
         old_field_value + "," + header_field_pair->second;
