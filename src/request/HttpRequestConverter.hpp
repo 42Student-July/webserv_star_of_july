@@ -8,14 +8,15 @@ class HttpRequestConverter {
  public:
   HttpRequestConverter();
   ~HttpRequestConverter();
-  HttpRequestDTO* toDTO(HttpRequest* request);
+  HttpRequestDTO* toDTO(const HttpRequest& request);
 
  private:
+  typedef HttpRequest::HeaderFieldMap HeaderFieldMap;
+
   HttpRequestConverter(const HttpRequestConverter& other);
   HttpRequestConverter& operator=(const HttpRequestConverter& other);
-  static std::string searchRequestHeaderField(
-      const HttpRequest::HeaderFieldMap& name_value_map,
-      const std::string& name);
+  static std::string searchFieldValue(const HeaderFieldMap& name_value_map,
+                                      const std::string& name);
 };
 
 #endif /* HTTPREQUESTCONVERTER_HPP */

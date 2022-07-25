@@ -66,17 +66,16 @@ HttpRequest::HeaderFieldMap HttpRequestParser::parseHeaderField(
 
 std::string HttpRequestParser::parseBody(const std::string &buffer,
                                          StringPos offset) {
-  std::string body;
   // bodyがないケース
   if (offset == buffer.size()) {
     return "";
   }
-  for (std::string line = getLine(buffer, &offset); line.size() != 0;
-       line = getLine(buffer, &offset)) {
-    body += line;
-    body += "\n";
+
+  StringPos body_end = buffer.find(CRLF, offset);
+  if (body_end == std::string::npos) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No body_end");
   }
-  return body;
+  return buffer.substr(offset, body_end - offset);
 }
 
 // 変数宣言と初期化を同時にするとなんか読みにくい。

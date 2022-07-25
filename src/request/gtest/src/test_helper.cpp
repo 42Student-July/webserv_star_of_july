@@ -4,10 +4,6 @@
 
 #include "test_helper.hpp"
 
-void compareString(const std::string &expected, const std::string &actual) {
-  ASSERT_STREQ(expected.c_str(), actual.c_str());
-}
-
 std::string readFile(const char *filepath) {
   std::ifstream ifs(filepath);
 
@@ -20,17 +16,25 @@ std::string readFile(const char *filepath) {
   return file_content;
 }
 
-ServerConfig initServerCongig() {
-  ServerConfig server_config;
-  server_config.port = 4242;
-  server_config.host = "42tokyo";
-  server_config.server.push_back("nop");
-  server_config.server.push_back("cluster");
-  // error_pages_は省略
-  server_config.root = "www/html";
-  server_config.client_body_size_limit = 65536;
-  // locations_は省略
-  return server_config;
+HttpRequest *buildRequest(const std::string &filepath,
+                          const ServerConfig config) {
+  std::string content;
+  HttpRequestParser parser;
+
+  content = readFile(filepath.c_str());
+  return parser.parse(content.c_str(), config);
+}
+
+HttpRequestDTO *buildDTO(const std::string &filepath,
+                         const ServerConfig config) {
+  HttpRequestConverter converter;
+  HttpRequest *req;
+  HttpRequestDTO *dto;
+
+  req = buildRequest(filepath, config);
+  dto = converter.toDTO(*req);
+  delete req;
+  return dto;
 }
 
 ServerConfig initServerConfigWithLocation() {

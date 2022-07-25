@@ -15,3 +15,11 @@ std::string utility::trimCopyIf(const std::string& str,
   }
   return str.substr(begin, len);
 }
+
+std::string utility::toLower(const std::string& str) {
+  std::string lower_str;
+
+  lower_str.resize(str.size());
+  std::transform(str.begin(), str.end(), lower_str.begin(), tolower);
+  return lower_str;
+}
