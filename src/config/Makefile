@@ -16,6 +16,7 @@ NAME = libconfig.a
 
 CXX = c++
 CXXFLAGS = -Wall -Werror -Wextra -Wshadow -std=c++98 -pedantic
+DEBUG			:= -fsanitize=address
 
 HEADERS = . \
 		  ../config \
@@ -39,6 +40,10 @@ $(NAME):$(OBJS)
 
 %.o: %.cpp
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
+
+.PHONY: debug
+debug:			CXXFLAGS += $(DEBUG)
+debug:			re
 
 .PHONY: clean
 clean:

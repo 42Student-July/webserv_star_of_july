@@ -16,6 +16,7 @@ NAME = librequest.a
 
 CXX = c++
 CXXFLAGS = -Wall -Werror -Wextra -Wshadow -std=c++98 -pedantic
+DEBUG			:= -fsanitize=address
 
 INCLUDE_PATH = . \
 		  ../config \
@@ -50,6 +51,10 @@ run: $(OBJS) main.o $(LIB_UTILITY)
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) $(LIB_UTILITY) main.o -MMD -MP -o test
 	@./test
 	@$(RM) test
+
+.PHONY: debug
+debug:			CXXFLAGS += $(DEBUG)
+debug:			re
 
 .PHONY: clean
 clean:

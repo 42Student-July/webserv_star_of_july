@@ -3,7 +3,7 @@ NAME = webserv
 SHELL = /bin/bash
 
 CXX = c++
-DEBUGFLAG = -g
+DEBUG			:= -fsanitize=address
 CXXFLAGS = -Wall -Werror -Wextra -Wshadow -std=c++98 -pedantic
 
 SRCS_DIR = ./src
@@ -50,9 +50,13 @@ $(NAME): $(OBJS) $(LIBS)
 	@printf "$(GREEN)Compile done:)\n$(END)"
 
 .PHONY: debug
-debug: $(OBJS) $(LIBS)
-	@$(CXX) $(DEBUGFLAG) $(CXXFLAGS) $(INCLUDES) $(OBJS) $(LIBS) -o $(NAME)
-	@printf "$(GREEN)Compile with -g flag done:)\n$(END)"
+debug: $(OBJS) 
+	for dir in $(MODULE_DIRS); do $(MAKE) -C $$dir debug; done
+	$(CXX) $(DEBUG) $(CXXFLAGS) $(INCLUDES) $(OBJS) $(LIBS) -o $(NAME)
+	printf "$(GREEN)Compile with -g flag done:)\n$(END)"
+
+$(LIB_DEBUG): dummy
+	@$(MAKE) -C $(SERVER_DIR)
 
 $(LIB_SERVER): dummy
 	@$(MAKE) -C $(SERVER_DIR)
