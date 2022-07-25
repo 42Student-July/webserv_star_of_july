@@ -23,3 +23,45 @@ std::string utility::toLower(const std::string& str) {
   std::transform(str.begin(), str.end(), lower_str.begin(), tolower);
   return lower_str;
 }
+
+int utility::stoi(const std::string& str, size_t* endpos, long base) {
+  const char* p = str.c_str();
+  char* end;
+  errno = 0;
+  long num = std::strtol(p, &end, base);
+  if (p == end) {
+    throw std::invalid_argument("stoi");
+  }
+  if (errno == ERANGE || num < std::numeric_limits<int>::min() ||
+      num > std::numeric_limits<int>::max()) {
+    throw std::out_of_range("stoi");
+  }
+  if (endpos != NULL) {
+    *endpos = static_cast<std::size_t>(end - p);
+  }
+  return num;
+}
+
+bool utility::isHexDigitString(const std::string& str) {
+  for (size_t i = 0; str[i]; i++) {
+    if (!isxdigit(str[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// 16進数の文字列をintに変換する。
+// 0123456789abcdefABCDEF以外の文字を許容しない
+// 変換エラーは例外で対応
+int utility::hexStringToInt(const std::string& hex_str) {
+  if (!isHexDigitString(hex_str)) {
+    throw std::invalid_argument("stoi");
+  }
+  size_t endpos = 0;
+  long num = utility::stoi(hex_str, &endpos, 16);
+  if (endpos != hex_str.size()) {
+    throw std::invalid_argument("stoi");
+  }
+  return num;
+}

@@ -4,6 +4,7 @@
 #include <iostream>  //デバッグ用
 
 #include "HttpParser.hpp"
+#include "utility.hpp"
 
 class BodyParser : public HttpParser {
  public:
@@ -16,6 +17,8 @@ class BodyParser : public HttpParser {
   BodyParser(const BodyParser& other);
   BodyParser& operator=(const BodyParser& other);
   std::string parseBody(const std::string& buffer, size_t content_length);
+  std::string parseChunkedBody(const std::string& buffer);
+  std::string getLine(const std::string& buffer, StringPos* offset);
 };
 
 #endif /* BODYPARSER_HPP */
