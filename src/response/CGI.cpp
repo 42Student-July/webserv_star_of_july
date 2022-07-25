@@ -95,7 +95,8 @@ char ** CGI::createArgs(Path &path) {
   std::string command = EXEC_COMMANDS.find(path.getExtension())->second;
 
   // ToDo: ここをgetRawPathではなくlocal_path的なものに変える
-  std::string file_path = path.getRawPath().substr(1);
+  std::string file_path = "/Users/yuki/Documents/42_tokyo/webserv_star_of_july/www/cgi-bin/" + path.getRawPath().substr(1);
+  std::cout << "file_path: " << file_path << std::endl;
   std::vector<std::string> path_args = path.getArgs();
   int args_size = path_args.size() + 3;
 
