@@ -407,3 +407,61 @@ TEST(LocationTest, found_in_third_location)
 	EXPECT_EQ(res->Body(), Read(std::string("./html/upload/sample.txt")));
 }
 
+
+TEST(IndexTest, default_html)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/"));
+	setRoot(conf_, std::string("html"));
+	
+	conf_.root = "html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), ReadIndexHtml());
+}
+
+TEST(IndexTest, location_conf_first_html)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/"));
+	
+	conf_.root = "html/index";
+	loc.location = "/";
+	loc.indexes.push_back(std::string("hello.html"));
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), Read(std::string("./html/index/hello.html")));
+}
+
+TEST(IndexTest, location_conf_second_html)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/"));
+	
+	conf_.root = "html/index";
+	loc.location = "/";
+	loc.indexes.push_back(std::string("hey.html"));
+	loc.indexes.push_back(std::string("hello.html"));
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), Read(std::string("./html/index/hello.html")));
+}
