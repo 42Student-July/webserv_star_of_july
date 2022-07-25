@@ -342,15 +342,6 @@ TEST_F(HttpRequestParserTest, SameHeaderFieldName) {
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
 
-TEST_F(HttpRequestParserTest, NoCrRequestLine) {
-  std::string file_name = "no_cr_request_line.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
-
-  checkBody("", req->body);
-  ASSERT_EQ(0, req->name_value_map.size());
-  ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
-}
-
 TEST_F(HttpRequestParserTest, FieldNameCaseInsesitive) {
   std::string file_name = "field_name_case_insensitive.crlf";
   HttpRequest *req = buildRequest(file_dir + file_name, config);
@@ -362,4 +353,40 @@ TEST_F(HttpRequestParserTest, FieldNameCaseInsesitive) {
   checkHeaderField("accept", "text/html", req->name_value_map);
   ASSERT_EQ(3, req->name_value_map.size());
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
+}
+
+TEST_F(HttpRequestParserTest, NoCrRequestLine) {
+  std::string file_name = "no_cr_request_line.crlf";
+  HttpRequest *req = buildRequest(file_dir + file_name, config);
+
+  checkBody("", req->body);
+  ASSERT_EQ(0, req->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
+}
+
+TEST_F(HttpRequestParserTest, NoCrHeaderField) {
+  std::string file_name = "no_cr_header_field.crlf";
+  HttpRequest *req = buildRequest(file_dir + file_name, config);
+
+  checkBody("", req->body);
+  ASSERT_EQ(0, req->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
+}
+
+TEST_F(HttpRequestParserTest, NoCrHeaderEnd) {
+  std::string file_name = "no_cr_header_end.crlf";
+  HttpRequest *req = buildRequest(file_dir + file_name, config);
+
+  checkBody("", req->body);
+  ASSERT_EQ(0, req->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
+}
+
+TEST_F(HttpRequestParserTest, NoCrBodyEnd) {
+  std::string file_name = "no_cr_body_end.crlf";
+  HttpRequest *req = buildRequest(file_dir + file_name, config);
+
+  checkBody("", req->body);
+  ASSERT_EQ(2, req->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
