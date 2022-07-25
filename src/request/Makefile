@@ -96,6 +96,10 @@ test: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
 	-@./test
 	@$(RM) test
 
+.PHONY: test
+body_test: TEST_SRCS = gtest/src/body_parser_test.cpp
+body_test: test
+
 # test: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
 # 	$(CXX) -std=c++11 $(INCLUDES) $(TEST_SRCS) $(NAME) $(LIB_UTILITY) -L$(GTEST_LIB_DIR) $(LDLIBS) -o test
 # 	-@./test

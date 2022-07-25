@@ -19,7 +19,9 @@ HttpRequest *HttpRequestParser::parse(const char *buffer,
   } catch (const ParseErrorExeption &e) {
     req->response_status_code = e.getErrorStatus();
     std::cerr << e.what() << std::endl;
-  } catch (const std::exception &e) {
+  } catch (
+      const std::exception &
+          e) {  // (...)ですべての例外をキャッチした方がいいかも。でもe.what()でエラーメッセージを見たいのでこちらで対応
     req->response_status_code = HttpStatus::INTERNAL_SERVER_ERROR;
     std::cerr << e.what() << std::endl;
   }
