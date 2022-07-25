@@ -285,6 +285,8 @@ std::string HttpResponseBuilder::getReasonPhrase(std::string httpStatus)
 		return HttpStatus::ReasonPhrase::UNAUTHORIZED;
 	else if (httpStatus == HttpStatus::FORBIDDEN)
 		return HttpStatus::ReasonPhrase::FORBIDDEN;
+	else if (httpStatus == HttpStatus::NOT_FOUND)
+		return HttpStatus::ReasonPhrase::NOT_FOUND;
 	else if (httpStatus == HttpStatus::INTERNAL_SERVER_ERROR)
 		return HttpStatus::ReasonPhrase::INTERNAL_SERVER_ERROR;
 	else if (httpStatus == HttpStatus::SERVICE_UNAVAILABLE)
