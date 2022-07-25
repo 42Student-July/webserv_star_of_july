@@ -25,7 +25,7 @@ TEST_F(BodyParserTest, ContentLength_0) {
 
 TEST_F(BodyParserTest, ContentLength_BodyIsLess) {
   std::string buffer = "12345\r\n";
-  EXPECT_THROW(parser.parse(buffer, false, 4), std::runtime_error);
+  EXPECT_THROW(parser.parse(buffer, false, 6), std::runtime_error);
 }
 
 TEST_F(BodyParserTest, Chunk_NoChunk) {

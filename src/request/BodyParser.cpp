@@ -22,7 +22,7 @@ std::string BodyParser::parseBody(const std::string& buffer,
   if (body_len == std::string::npos) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No body_len");
   }
-  if (body_len > content_length) {
+  if (body_len < content_length) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
                              "body length is less than content_length");
   }
