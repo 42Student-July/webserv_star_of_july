@@ -1,10 +1,11 @@
 #include "ConfigParser.hpp"
+#include "ServerConfig.hpp"
 
-const unsigned int ConfigParser::BIT_FLAG_LISTEN = (1 << 0); // 0000 0000 0000 0001
-const unsigned int ConfigParser::BIT_FLAG_HOST = (1 << 1); // 0000 0000 0000 0010
+const unsigned int ConfigParser::BIT_FLAG_LISTEN = (1 << 0);  // 0000 0000 0000 0001
+const unsigned int ConfigParser::BIT_FLAG_HOST = (1 << 1);  // 0000 0000 0000 0010
 const unsigned int ConfigParser::BIT_FLAG_S_ROOT = (1 << 2); // 0000 0000 0000 0100
 const unsigned int ConfigParser::BIT_FLAG_BODY_LIMIT = (1 << 3); // 0000 0000 0000 1000
-const unsigned int ConfigParser::BIT_FLAG_ = (1 << 4); // 0000 0000 0001 0000
+const unsigned int ConfigParser::BIT_FLAG_ = (1 << 4);  // 0000 0000 0001 0000
 const unsigned int ConfigParser::BIT_FLAG_5 = (1 << 5); // 0000 0000 0010 0000
 const unsigned int ConfigParser::BIT_FLAG_6 = (1 << 6); // 0000 0000 0100 0000
 const unsigned int ConfigParser::BIT_FLAG_7 = (1 << 7); // 0000 0000 1000 0000
@@ -22,7 +23,6 @@ void print_vector(std::vector<T> vec) {
 ConfigParser::ConfigParser() {}
 
 ConfigParser::ConfigParser(std::string file) {
-
   std::string file_content = readFile(file);
   std::vector<std::string> tokens = isspaceSplit(file_content);
 
@@ -33,6 +33,33 @@ std::vector<ServerConfig> ConfigParser::getServerConfigs() const {
   return (serverconfigs_);
 }
 
+void ConfigParser::serverValidate(const ServerConfig &server, const int &exist_flag) {
+  // 必須項目が設定されていなかったらエラー
+  if (!(exist_flag & BIT_FLAG_LISTEN)) {
+	throw std::runtime_error("Error: Config: Need listen setting");
+  }
+
+  if (isDupLocation(server)) {
+	throw std::runtime_error("Error: Config: Duplicated location");
+  }
+}
+
+//このやり方で良いのか要検討
+//it_x++の部分
+bool ConfigParser::isDupLocation(const ServerConfig &server) {
+	std::vector<LocationConfig>::const_iterator it_x = server.locations.begin();
+	std::vector<LocationConfig>::const_iterator it_y = server.locations.begin();
+	it_x++;
+	for (;it_y != server.locations.end(); it_y++) {
+		for (; it_x != server.locations.end(); it_x++) {
+			if (it_x->location == it_y->location) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 ConfigParser::~ConfigParser() {}
 
 void ConfigParser::parseTokens(std::vector<std::string> tokens) {
@@ -41,9 +68,15 @@ void ConfigParser::parseTokens(std::vector<std::string> tokens) {
   for (; it < tokens.end(); it++) {
     if (*it == "server" && *(++it) == "{") {
       ServerConfig server;
-  	  unsigned int exist_flag = 0;
+
+	  //サーバーごとに必須項目が設定されているか確認するためのフラグ
+      unsigned int exist_flag = 0;
+
       parseServer(server, ++it, ite, exist_flag);
+	  serverValidate(server, exist_flag);
+
       serverconfigs_.push_back(server);
+
     } else {
       throw std::runtime_error("Error: Config: Wrong syntax");
     }
@@ -60,12 +93,12 @@ int countContents(std::vector<std::string>::iterator it) {
 
 void ConfigParser::parseListen(ServerConfig &server,
                                std::vector<std::string>::iterator &it,
-							   unsigned int &exist_flag) {
-	// listenが複数あったら弾く
-	if (exist_flag & BIT_FLAG_LISTEN) {
-    	throw std::runtime_error("Error: Config: duplicated listen");
-	}
-	exist_flag |= BIT_FLAG_LISTEN;
+                               unsigned int &exist_flag) {
+  // listenが複数あったら弾く
+  if (exist_flag & BIT_FLAG_LISTEN) {
+    throw std::runtime_error("Error: Config: Duplicated listen");
+  }
+  exist_flag |= BIT_FLAG_LISTEN;
 
   if (it->find(":") != std::string::npos) {
     server.host = it->substr(0, it->find(":"));
@@ -193,11 +226,12 @@ void ConfigParser::parseLocation(LocationConfig &location,
   }
 }
 
+
 // ToDo:それぞれ1回ずつしか入力できないようにする
 void ConfigParser::parseServer(ServerConfig &server,
                                std::vector<std::string>::iterator &it,
                                std::vector<std::string>::iterator &ite,
-							   unsigned int &exist_flag) {
+                               unsigned int &exist_flag) {
   bool finished_with_bracket = false;
   for (; it != ite; ++it) {
     if (*it == "listen") {
@@ -211,9 +245,15 @@ void ConfigParser::parseServer(ServerConfig &server,
     } else if (*it == "client_body_size_limit") {
       parseClientBodySizeLimit(server, ++it);
     } else if (*it == "location") {
+	  
       LocationConfig location;
       parseLocation(location, ++it, ite);
-      server.locations.push_back(location);
+	  /* if (std::find(server.locations.begin(), server.locations.end(), location) == server.locations.end()) { */
+      /* 	  throw std::runtime_error("Error: Config: Duplicated location"); */
+	  /* } */
+	  //if (!is_duplicated_location(location, server)) {
+        server.locations.push_back(location);
+	  //}
     } else if (*it == "}") {
       finished_with_bracket = true;
       break;
