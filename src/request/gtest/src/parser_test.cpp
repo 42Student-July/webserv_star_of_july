@@ -342,11 +342,24 @@ TEST_F(HttpRequestParserTest, SameHeaderFieldName) {
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
 
-TEST_F(HttpRequestParserTest, NoCr) {
-  std::string file_name = "no_cr.crlf";
+TEST_F(HttpRequestParserTest, NoCrRequestLine) {
+  std::string file_name = "no_cr_request_line.crlf";
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
+}
+
+TEST_F(HttpRequestParserTest, FieldNameCaseInsesitive) {
+  std::string file_name = "field_name_case_insensitive.crlf";
+  HttpRequest *req = buildRequest(file_dir + file_name, config);
+
+  checkRequestline("GET", "/", "HTTP/1.1", req);
+  checkBody("", req->body);
+  checkHeaderField("host", "admin", req->name_value_map);
+  checkHeaderField("user-agent", "agent1", req->name_value_map);
+  checkHeaderField("accept", "text/html", req->name_value_map);
+  ASSERT_EQ(3, req->name_value_map.size());
+  ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
