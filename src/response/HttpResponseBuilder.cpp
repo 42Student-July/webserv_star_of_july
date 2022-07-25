@@ -358,11 +358,17 @@ HttpResponse *HttpResponseBuilder::buildErrorResponse(int httpstatus, HttpReques
 		return buildDefaultErrorPage(httpstatus, req);
 	try
 	{
-		readFile(found_location_.root + error_page);
-		buildHeader(req);
+		if (filepath_.exists){
+			if (!found_location_.root.empty())
+				readFile(found_location_.root + error_page);
+		} else {
+			readFile(default_root_ + error_page);
+		}
+		buildErrorHeader(req, httpstatus, res_body_str_.str());
 	}
 	catch(const std::runtime_error& e)
 	{
+		std::cerr << e.what() << std::endl;
 		return buildDefaultErrorPage(httpstatus, req);
 	}
 	

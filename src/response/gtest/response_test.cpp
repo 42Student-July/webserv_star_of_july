@@ -438,7 +438,6 @@ TEST(IndexTest, location_conf_first_html)
 	loc.location = "/";
 	loc.indexes.push_back(std::string("hello.html"));
 	conf_.locations.push_back(loc);
-
 	// builder
 	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
 	HttpResponse *res = builder.build(req);
@@ -464,4 +463,23 @@ TEST(IndexTest, location_conf_second_html)
 	HttpResponse *res = builder.build(req);
 	
 	EXPECT_EQ(res->Body(), Read(std::string("./html/index/hello.html")));
+}
+
+TEST(ErrorTest, error_pages_exists)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/error_page"));
+	
+	conf_.root = "html";
+	conf_.error_pages[404] = "/40x.html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), Read(std::string("./html/40x.html")));
 }
