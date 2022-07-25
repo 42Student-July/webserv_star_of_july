@@ -42,6 +42,9 @@ class ConfigParser {
   static const unsigned int BIT_FLAG_6;           // 0000 0000 0100 0000
   static const unsigned int BIT_FLAG_7;           // 0000 0000 1000 0000
 
+  static const std::vector<std::string> VALID_MOETHODS;
+  static std::vector<std::string> setValidMethods();
+
   // locationのparse
   void parseLocation(LocationConfig &location,
                      std::vector<std::string>::iterator &it,
@@ -76,7 +79,12 @@ class ConfigParser {
 
   // validation
   void serverValidate(const ServerConfig &server, const int &exist_flag);
-  void serverValidateLocation(const ServerConfig &server);
+
+  void locationValidate(const LocationConfig &location);
+  bool isValidAllowedMethod(const std::vector<std::string> &allowed_methods);
+
+  bool validVectorCheck(const std::vector<std::string> vec_to_check, const std::vector<std::string> valid_vec);
+
 
   // token化のためのutils
   std::string readFile(std::string const file);

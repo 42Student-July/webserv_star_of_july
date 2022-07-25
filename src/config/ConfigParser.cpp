@@ -10,6 +10,18 @@ const unsigned int ConfigParser::BIT_FLAG_5 = (1 << 5); // 0000 0000 0010 0000
 const unsigned int ConfigParser::BIT_FLAG_6 = (1 << 6); // 0000 0000 0100 0000
 const unsigned int ConfigParser::BIT_FLAG_7 = (1 << 7); // 0000 0000 1000 0000
 
+const std::vector<std::string> ConfigParser::VALID_MOETHODS = ConfigParser::setValidMethods();
+
+std::vector<std::string> ConfigParser::setValidMethods() {
+	std::vector<std::string> valid_methods;
+
+	valid_methods.push_back("GET");
+	valid_methods.push_back("POST");
+	valid_methods.push_back("DELETE");
+
+	return valid_methods;
+}
+
 template <typename T>
 void print_vector(std::vector<T> vec) {
   typename std::vector<T>::iterator it = vec.begin();
@@ -226,6 +238,27 @@ void ConfigParser::parseLocation(LocationConfig &location,
   }
 }
 
+bool ConfigParser::validVectorCheck(const std::vector<std::string> vec_to_check, const std::vector<std::string> valid_vec) {
+	std::vector<std::string>::const_iterator it = vec_to_check.begin();
+	for (; it != vec_to_check.end(); it++) {
+		if (std::find(valid_vec.begin(), valid_vec.end(), *it) == valid_vec.end()) {
+			return false;
+		}
+	}
+	return true;
+
+}
+
+bool ConfigParser::isValidAllowedMethod(const std::vector<std::string> &allowed_methods) {
+	return validVectorCheck(allowed_methods, VALID_MOETHODS);
+}
+
+void ConfigParser::locationValidate(const LocationConfig &location) {
+	if (!isValidAllowedMethod(location.allowed_methods)) {
+		throw std::runtime_error("Error: Config: Invalid allowed_method");
+	}
+
+}
 
 // ToDo:それぞれ1回ずつしか入力できないようにする
 void ConfigParser::parseServer(ServerConfig &server,
@@ -248,12 +281,10 @@ void ConfigParser::parseServer(ServerConfig &server,
 	  
       LocationConfig location;
       parseLocation(location, ++it, ite);
-	  /* if (std::find(server.locations.begin(), server.locations.end(), location) == server.locations.end()) { */
-      /* 	  throw std::runtime_error("Error: Config: Duplicated location"); */
-	  /* } */
-	  //if (!is_duplicated_location(location, server)) {
-        server.locations.push_back(location);
-	  //}
+	  locationValidate(location);
+
+      server.locations.push_back(location);
+
     } else if (*it == "}") {
       finished_with_bracket = true;
       break;
