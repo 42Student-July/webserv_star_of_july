@@ -155,7 +155,33 @@ TEST(Error, DuplicatedListen) {
     ConfigParser configparser(
         "./TestConfigs/ErrorCases/duplicated_listen.conf");
   } catch (std::exception &e) {
-    ASSERT_STREQ("Error: Config: duplicated listen", e.what());
+    ASSERT_STREQ("Error: Config: Duplicated listen", e.what());
+  }
+}
+
+TEST(Error, DuplicatedLocation) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/duplicated_location.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/duplicated_location.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Duplicated location", e.what());
+  }
+}
+
+TEST(Error, NoListen) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/no_listen.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/no_listen.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Need listen setting", e.what());
   }
 }
 

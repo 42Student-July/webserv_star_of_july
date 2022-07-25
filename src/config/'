@@ -76,7 +76,7 @@ class ConfigParser {
 
   // validation
   void serverValidate(const ServerConfig &server, const int &exist_flag);
-  void serverValidateLocation(const ServerConfig &server);
+  void serverValidateLocation();
 
   // token化のためのutils
   std::string readFile(std::string const file);
@@ -84,7 +84,7 @@ class ConfigParser {
 
   // utils
   static int ft_stoi(std::string const &str);
-  bool isDupLocation(const ServerConfig &server);
+  bool isDupLocation();
 
   // 使わない関数
   ConfigParser(ConfigParser const &other);

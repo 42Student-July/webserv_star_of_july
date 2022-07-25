@@ -23,6 +23,7 @@ void CGIParser::parse(std::string cgi_response) {
   parseBody(ss);
 }
 
+// crが来るのかどうか確認
 void CGIParser::parseHeaderField(std::stringstream &ss) {
 	std::string line;
 	while (std::getline(ss, line, '\n')) {
