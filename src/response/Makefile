@@ -6,7 +6,7 @@
 #    By: mhirabay <mhirabay@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/13 18:47:47 by mhirabay          #+#    #+#              #
-#    Updated: 2022/07/22 20:20:49 by user42           ###   ########.fr        #
+#    Updated: 2022/07/25 13:18:18 by user42           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -78,6 +78,21 @@ $(LIB_UTILITY): dummy
 
 .PHONY: dummy
 dummy:
+
+error_status_grep = grep 'HttpStatus::' $(shell find ../request -maxdepth 1 -name '*.cpp') \
+					| grep -v OK \
+					| cut -d : -f 4 \
+					| cut -d , -f 1 \
+					| sort \
+					| uniq
+# リクエストパース中に発生するエラーステータス一覧を表示する
+.PHONY: parse_error_status
+parse_error_status:
+	@$(error_status_grep)
+	@echo "###"
+	@echo -n "種類は"
+	@$(error_status_grep) | wc -l
+	@echo "###"
 
 # Googleテスト
 ROOT_DIR = ../..
