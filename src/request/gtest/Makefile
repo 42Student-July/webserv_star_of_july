@@ -39,6 +39,14 @@ test: $(GTEST_DIR) $(TEST_LIB) $(LIB_UTILITY)
 	-@./test
 	@$(RM) test
 
+.PHONY: body_test
+body_test: TEST_SRCS = $(TEST_SRC_DIR)/body_parser_test.cpp
+body_test: test
+# body_test: $(GTEST_DIR) $(TEST_LIB) $(LIB_UTILITY)
+# 	@$(CXX) $(CXXFLAGS) $(GTEST_INCLUDES) $(TEST_SRCS) $(TEST_LIB) $(LIB_UTILITY) -L$(GTEST_LIB_DIR) $(GTEST_LIBS) -o test
+# 	-@./test
+# 	@$(RM) test
+
 $(GTEST_DIR): 
 	curl -OL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.tar.gz
 	tar -xvzf release-1.12.1.tar.gz
