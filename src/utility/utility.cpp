@@ -42,28 +42,17 @@ int utility::stoi(const std::string& str, size_t* endpos, long base) {
   return num;
 }
 
-bool utility::isHexDigitString(const std::string& str) {
-  for (size_t i = 0; str[i]; i++) {
-    if (!isxdigit(str[i])) {
-      return false;
-    }
-  }
-  return true;
+static bool consistsOfHexadecimal(const std::string& str) {
+  return utility::all_of(str.begin(), str.end(), isxdigit);
 }
 
 // 16進数の文字列をintに変換する。
 // 0123456789abcdefABCDEF以外の文字を許容しない
-// 変換エラーは例外で対応
 int utility::hexStringToInt(const std::string& hex_str) {
-  if (!isHexDigitString(hex_str)) {
+  if (!consistsOfHexadecimal(hex_str)) {
     throw std::invalid_argument("stoi");
   }
-  size_t endpos = 0;
-  long num = utility::stoi(hex_str, &endpos, 16);
-  if (endpos != hex_str.size()) {
-    throw std::invalid_argument("stoi");
-  }
-  return num;
+  return utility::stoi(hex_str, NULL, 16);
 }
 
 void utility::freeArrays(char** arrays) {
