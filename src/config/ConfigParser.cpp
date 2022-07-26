@@ -1,14 +1,12 @@
 #include "ConfigParser.hpp"
+#include <stdexcept>
 #include "ServerConfig.hpp"
 
 const unsigned int ConfigParser::BIT_FLAG_LISTEN = (1 << 0);  // 0000 0000 0000 0001
-const unsigned int ConfigParser::BIT_FLAG_HOST = (1 << 1);  // 0000 0000 0000 0010
-const unsigned int ConfigParser::BIT_FLAG_S_ROOT = (1 << 2); // 0000 0000 0000 0100
-const unsigned int ConfigParser::BIT_FLAG_BODY_LIMIT = (1 << 3); // 0000 0000 0000 1000
-const unsigned int ConfigParser::BIT_FLAG_ = (1 << 4);  // 0000 0000 0001 0000
-const unsigned int ConfigParser::BIT_FLAG_5 = (1 << 5); // 0000 0000 0010 0000
-const unsigned int ConfigParser::BIT_FLAG_6 = (1 << 6); // 0000 0000 0100 0000
-const unsigned int ConfigParser::BIT_FLAG_7 = (1 << 7); // 0000 0000 1000 0000
+const unsigned int ConfigParser::BIT_FLAG_ROOT = (1 << 1);  // 0000 0000 0000 0010
+const unsigned int ConfigParser::BIT_FLAG_BODY_LIMIT = (1 << 2); // 0000 0000 0000 0100
+const unsigned int ConfigParser::BIT_FLAG_LOC_ROOT = (1 << 3);  // 0000 0000 0001 0000
+const unsigned int ConfigParser::BIT_FLAG_AUTOINDEX = (1 << 4); // 0000 0000 0010 0000
 
 const std::vector<std::string> ConfigParser::VALID_MOETHODS = ConfigParser::setValidMethods();
 
@@ -149,7 +147,11 @@ void ConfigParser::parseServerName(ServerConfig &server,
 }
 
 void ConfigParser::parseRoot(ServerConfig &server,
-                             std::vector<std::string>::iterator &it) {
+                             std::vector<std::string>::iterator &it, unsigned int &exist_flag) {
+  if (exist_flag & BIT_FLAG_ROOT) {
+	  throw std::runtime_error("Error: Config: Duplicated root");
+  }
+  exist_flag |= BIT_FLAG_ROOT;
   server.root = it->substr(0, it->find(";"));
 }
 
@@ -162,12 +164,20 @@ void ConfigParser::parseErrorPages(ServerConfig &server,
 }
 
 void ConfigParser::parseClientBodySizeLimit(
-    ServerConfig &server, std::vector<std::string>::iterator &it) {
+    ServerConfig &server, std::vector<std::string>::iterator &it, unsigned int &exist_flag) {
+  if (exist_flag & BIT_FLAG_BODY_LIMIT) {
+	  throw std::runtime_error("Error: Config: Duplicated client_body_size_limit");
+  }
+  exist_flag |= BIT_FLAG_BODY_LIMIT;
   server.client_body_size_limit = ft_stoi(*it);
 }
 
 void ConfigParser::parseLocationRoot(LocationConfig &location,
-                                     std::vector<std::string>::iterator &it) {
+                                     std::vector<std::string>::iterator &it, unsigned int &l_exist_flag) {
+  if (l_exist_flag & BIT_FLAG_LOC_ROOT) {
+	  throw std::runtime_error("Error: Config: Duplicated root in location");
+  }
+  l_exist_flag |= BIT_FLAG_LOC_ROOT;
   location.root = it->substr(0, it->find(";"));
 }
 
@@ -198,7 +208,12 @@ void ConfigParser::parseLocationIndexes(
 }
 
 void ConfigParser::parseLocationAutoindexes(
-  LocationConfig &location, std::vector<std::string>::iterator &it) {
+  LocationConfig &location, std::vector<std::string>::iterator &it, unsigned int &l_exist_flag) {
+  if (l_exist_flag & BIT_FLAG_AUTOINDEX) {
+	  throw std::runtime_error("Error: Config: Duplicated autoindex");
+  }
+  l_exist_flag |= BIT_FLAG_AUTOINDEX;
+  
   if (it->substr(0, it->find(";")) == "on") {
     location.autoindex = true;
   } else if (it->substr(0, it->find(";")) == "off") {
@@ -226,27 +241,28 @@ void ConfigParser::parseLocationRedirect(
 void ConfigParser::parseLocation(LocationConfig &location,
                                  std::vector<std::string>::iterator &it,
                                  std::vector<std::string>::iterator &ite) {
+  unsigned int l_exist_flag = 0;
   location.location = *it;
   if (*(++it) == "{") {
+	it++;
     for (; it != ite; ++it) {
       if (*it == "root") {
-        parseLocationRoot(location, ++it);
+        parseLocationRoot(location, ++it, l_exist_flag);
       } else if (*it == "allowed_method") {
         parseLocationAllowedMethods(location, ++it);
       } else if (*it == "index") {
         parseLocationIndexes(location, ++it);
       } else if (*it == "autoindex") {
-        parseLocationAutoindexes(location, ++it);
+        parseLocationAutoindexes(location, ++it, l_exist_flag);
       } else if (*it == "cgi_path") {
         parseLocationCGIPath(location, ++it);
       } else if (*it == "return") {
         parseLocationRedirect(location, ++it);
       } else if (*it == "}") {
         break;
-	  }
-      /* } else { */
-      /* 	throw std::runtime_error("Error: Something is wrong in config file."); */
-      /* } */
+      } else {
+      	throw std::runtime_error("Error: Config: Syntax error.");
+      }
     }
   }
 }
@@ -288,11 +304,11 @@ void ConfigParser::parseServer(ServerConfig &server,
     } else if (*it == "server_name") {
       parseServerName(server, ++it);
     } else if (*it == "root") {
-      parseRoot(server, ++it);
+      parseRoot(server, ++it, exist_flag);
     } else if (*it == "error_page") {
       parseErrorPages(server, ++it);
     } else if (*it == "client_body_size_limit") {
-      parseClientBodySizeLimit(server, ++it);
+      parseClientBodySizeLimit(server, ++it, exist_flag);
     } else if (*it == "location") {
 	  
       LocationConfig location;

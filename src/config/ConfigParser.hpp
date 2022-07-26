@@ -35,13 +35,10 @@ class ConfigParser {
   std::vector<ServerConfig> serverconfigs_;
 
   static const unsigned int BIT_FLAG_LISTEN;      // 0000 0000 0000 0001
-  static const unsigned int BIT_FLAG_HOST;        // 0000 0000 0000 0010
-  static const unsigned int BIT_FLAG_S_ROOT;      // 0000 0000 0000 0100
-  static const unsigned int BIT_FLAG_BODY_LIMIT;  // 0000 0000 0000 1000
-  static const unsigned int BIT_FLAG_;            // 0000 0000 0001 0000
-  static const unsigned int BIT_FLAG_5;           // 0000 0000 0010 0000
-  static const unsigned int BIT_FLAG_6;           // 0000 0000 0100 0000
-  static const unsigned int BIT_FLAG_7;           // 0000 0000 1000 0000
+  static const unsigned int BIT_FLAG_ROOT;        // 0000 0000 0000 0010
+  static const unsigned int BIT_FLAG_BODY_LIMIT;      // 0000 0000 0000 0100
+  static const unsigned int BIT_FLAG_LOC_ROOT;            // 0000 0000 0001 0000
+  static const unsigned int BIT_FLAG_AUTOINDEX;           // 0000 0000 0010 0000
 
   static const std::vector<std::string> VALID_MOETHODS;
   static std::vector<std::string> setValidMethods();
@@ -54,11 +51,11 @@ class ConfigParser {
   void parseLocationCGIPath(LocationConfig &location,
                             std::vector<std::string>::iterator &it);
   void parseLocationAutoindexes(LocationConfig &location,
-                                std::vector<std::string>::iterator &it);
+                                std::vector<std::string>::iterator &it, unsigned int &l_exist_flag);
   void parseLocationIndexes(LocationConfig &location,
                             std::vector<std::string>::iterator &it);
   void parseLocationRoot(LocationConfig &location,
-                         std::vector<std::string>::iterator &it);
+                         std::vector<std::string>::iterator &it, unsigned int &exist_flag);
   void parseLocationAllowedMethods(LocationConfig &location,
                                    std::vector<std::string>::iterator &it);
   void parseLocationRedirect(LocationConfig &location,
@@ -69,10 +66,10 @@ class ConfigParser {
                    std::vector<std::string>::iterator &ite,
                    unsigned int &exist_flag);
   void parseClientBodySizeLimit(ServerConfig &server,
-                                std::vector<std::string>::iterator &it);
+                                std::vector<std::string>::iterator &it, unsigned int &exist_flag);
   void parseErrorPages(ServerConfig &server,
                        std::vector<std::string>::iterator &it);
-  void parseRoot(ServerConfig &server, std::vector<std::string>::iterator &it);
+  void parseRoot(ServerConfig &server, std::vector<std::string>::iterator &it, unsigned int &exist_flag);
   void parseServerName(ServerConfig &server,
                        std::vector<std::string>::iterator &it);
   void parseListen(ServerConfig &server, std::vector<std::string>::iterator &it,
