@@ -32,13 +32,5 @@ bool HttpParser::isHeaderTokenChar(int c) {
 }
 
 bool HttpParser::isHeaderToken(const std::string& str) {
-  if (str.empty()) {
-    return false;
-  }
-  for (StringPos pos = 0; pos <= str.size() - 1; ++pos) {
-    if (!isHeaderTokenChar(str[pos])) {
-      return false;
-    }
-  }
-  return true;
+  return utility::all_of(str.begin(), str.end(), isHeaderTokenChar);
 }
