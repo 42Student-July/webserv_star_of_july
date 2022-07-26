@@ -41,7 +41,7 @@ class ConfigParser {
   static const unsigned int BIT_FLAG_LOC_ROOT;            // 0000 0000 0001 0000
   static const unsigned int BIT_FLAG_AUTOINDEX;           // 0000 0000 0010 0000
 
-  static const std::vector<std::string> VALID_MOETHODS;
+  static const std::vector<std::string> VALID_METHODS;
   static std::vector<std::string> setValidMethods();
 
 
@@ -82,9 +82,8 @@ class ConfigParser {
   bool isValidStatus(const std::map<int, std::string> &config_map);
 
   void locationValidate(const LocationConfig &location);
-  bool isValidAllowedMethod(const std::vector<std::string> &allowed_methods);
-
-  bool validVectorCheck(const std::vector<std::string> vec_to_check, const std::vector<std::string> valid_vec);
+  
+  bool isValidVector(const std::vector<std::string> vec_to_check, const std::vector<std::string> valid_vec);
 
 
   // token化のためのutils
