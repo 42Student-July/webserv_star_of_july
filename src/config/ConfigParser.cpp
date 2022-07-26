@@ -238,21 +238,10 @@ void ConfigParser::parseLocation(LocationConfig &location,
   }
 }
 
-template< class InputIt, class T >
-InputIt myFind(InputIt first, InputIt last, const T& value)
-{
-	for (; first != last; ++first) {
-		if (*first == value) {
-			return first;
-		}
-	}
-	return last;
-}
-
 bool ConfigParser::validVectorCheck(const std::vector<std::string> vec_to_check, const std::vector<std::string> valid_vec) {
 	std::vector<std::string>::const_iterator it = vec_to_check.begin();
 	for (; it != vec_to_check.end(); it++) {
-		if (myFind(valid_vec.begin(), valid_vec.end(), *it) == valid_vec.end()) {
+		if (utility::myFind(valid_vec.begin(), valid_vec.end(), *it) == valid_vec.end()) {
 			return false;
 		}
 	}

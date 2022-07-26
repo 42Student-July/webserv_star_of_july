@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "ServerConfig.hpp"
+#include "../utility/utility.hpp"
 
 #define BUFFER_SIZE 128
 
