@@ -54,6 +54,10 @@ void ConfigParser::serverValidate(const ServerConfig &server, const int &exist_f
   if (isDupLocation(server)) {
 	throw std::runtime_error("Error: Config: Duplicated location");
   }
+
+  if (!isValidErrorPages(server.error_pages)) {
+	  throw std::runtime_error("Error: Config: Invalid error_page");
+  }
 }
 
 //このやり方で良いのか要検討
@@ -70,6 +74,23 @@ bool ConfigParser::isDupLocation(const ServerConfig &server) {
 		}
 	}
 	return false;
+}
+
+bool ConfigParser::isValidResponseStatus(const int &status) {
+	if (status <= 100 || status >= 600)
+		return false;
+	else
+		return true;
+}
+
+bool ConfigParser::isValidErrorPages(const std::map<int, std::string> &error_pages) {
+	std::map<int, std::string>::const_iterator it = error_pages.begin();
+	for (; it != error_pages.end(); ++it) {
+		if (!isValidResponseStatus(it->first)) {
+			return false;
+		}
+	}
+	return true;
 }
 
 ConfigParser::~ConfigParser() {}
@@ -229,10 +250,9 @@ void ConfigParser::parseLocation(LocationConfig &location,
         parseLocationRedirect(location, ++it);
       } else if (*it == "}") {
         break;
-      }
+	  }
       /* } else { */
-      /* 	throw std::runtime_error("Error: Something is wrong in config
-       * file."); */
+      /* 	throw std::runtime_error("Error: Something is wrong in config file."); */
       /* } */
     }
   }
@@ -257,6 +277,7 @@ void ConfigParser::locationValidate(const LocationConfig &location) {
 	if (!isValidAllowedMethod(location.allowed_methods)) {
 		throw std::runtime_error("Error: Config: Invalid allowed_method");
 	}
+	
 }
 
 // ToDo:それぞれ1回ずつしか入力できないようにする

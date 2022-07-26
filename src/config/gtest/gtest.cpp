@@ -211,6 +211,20 @@ TEST(Error, InvalidAutoIndex) {
   }
 }
 
+TEST(Error, InvalidErrorPages) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_error_pages.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_error_pages.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid error_page", e.what());
+  }
+}
+
+
 TEST(Error, NoListen) {
   try {
     ASSERT_THROW(
