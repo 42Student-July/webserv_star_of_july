@@ -10,21 +10,6 @@ const std::map<std::string, std::string> CGI::EXEC_PATHS = CGI::setExecutePaths(
 CGI::CGI() {}
 CGI::~CGI() {}
 
-//libに入れる
-void freeArrays(char **arrays)
-{
-	size_t	idx = 0;
-
-	if (!arrays)
-		return ;
-	while (arrays[idx])
-	{
-		free(arrays[idx]);
-		idx += 1;
-	}
-	free(arrays);
-}
-
 //buildresponse
 void CGI::run(HttpRequestDTO &req, ConfigDTO &conf, Path &path) {
   //init
@@ -40,8 +25,8 @@ void CGI::run(HttpRequestDTO &req, ConfigDTO &conf, Path &path) {
   cgi_response_ = buildCGIResponse(exec_command_path, exec_args, exec_envs);
 
   // free
-  freeArrays(exec_args);
-  freeArrays(exec_envs);
+  utility::freeArrays(exec_args);
+  utility::freeArrays(exec_envs);
 }
 
 std::string CGI::getResponseFromCGI() const { return cgi_response_; }
@@ -95,7 +80,8 @@ char ** CGI::createArgs(Path &path) {
   std::string command = EXEC_COMMANDS.find(path.getExtension())->second;
 
   // ToDo: ここをgetRawPathではなくlocal_path的なものに変える
-  std::string file_path = "/Users/yuki/Documents/42_tokyo/webserv_star_of_july/www/cgi-bin/" + path.getRawPath().substr(1);
+  // "/Users/yuki/Documents/42_tokyo/webserv_star_of_july/www/cgi-bin/"をつけたら全体テストで動く
+  std::string file_path = "www/cgi-bin/" + path.getRawPath().substr(1);
   std::cout << "file_path: " << file_path << std::endl;
   std::vector<std::string> path_args = path.getArgs();
   int args_size = path_args.size() + 3;
