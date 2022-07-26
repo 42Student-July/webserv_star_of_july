@@ -9,6 +9,7 @@
 namespace utility {
 std::string trimCopyIf(const std::string& str, const std::string& set);
 std::string toLower(const std::string& str);
+void freeArrays(char **arrays);
 
 template <typename T>
 std::string toString(T& val);

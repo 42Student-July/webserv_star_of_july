@@ -301,12 +301,13 @@ void HttpResponseBuilder::doCGI(HttpRequestDTO &req)
 	cgi_.run(req, conf_, path);
 	std::string cgi_response = cgi_.getResponseFromCGI();
 	cgi_parser_.parse(cgi_response);
+	//bodyの作成
+	res_body_str_ << cgi_parser_.getBodyStr();	
+
 	buildHeader(req);
 	//TODO: このあとcgiによるupdateHeaderを実行
 	updateHeader();
 	
-	//bodyの作成
-	res_body_str_ << cgi_parser_.getBodyStr();	
 }
 
 void HttpResponseBuilder::buildErrorHeader(HttpRequestDTO &req, int httpStatus, std::string body_str)

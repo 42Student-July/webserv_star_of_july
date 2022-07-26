@@ -23,3 +23,17 @@ std::string utility::toLower(const std::string& str) {
   std::transform(str.begin(), str.end(), lower_str.begin(), tolower);
   return lower_str;
 }
+
+void utility::freeArrays(char **arrays)
+{
+	size_t	idx = 0;
+
+	if (!arrays)
+		return ;
+	while (arrays[idx])
+	{
+		free(arrays[idx]);
+		idx += 1;
+	}
+	free(arrays);
+}

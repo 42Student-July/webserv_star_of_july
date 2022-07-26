@@ -14,6 +14,7 @@
 #include "ConfigDTO.hpp"
 #include "HttpRequestDTO.hpp"
 #include "Path.hpp"
+#include "../utility/utility.hpp"
 
 class CGI {
  public:
