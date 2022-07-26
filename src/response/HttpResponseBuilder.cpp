@@ -298,6 +298,7 @@ void HttpResponseBuilder::doCGI(HttpRequestDTO &req)
 {
 	//TODO: ここにCGIの処理を追加
 	Path path(req.path, conf_);
+	
 	cgi_.run(req, conf_, path);
 	std::string cgi_response = cgi_.getResponseFromCGI();
 	cgi_parser_.parse(cgi_response);
@@ -347,14 +348,10 @@ HttpResponse *HttpResponseBuilder::buildDefaultErrorPage(int httpStatus, HttpReq
 }
 
 // http requestのpathをdirの部分とfileの部分に分解
-void HttpResponseBuilder::parseRequestPath(std::string req_path)
+void HttpResponseBuilder::parseRequestPath(const Path &path)
 {
-	size_t last_slash_pos = req_path.find_last_of('/');
-	if (last_slash_pos == std::string::npos) {
-		throw std::runtime_error("no slash found in request path");
-    }
-	path_dir_ = req_path.substr(0, last_slash_pos + 1);
-	path_file_ = req_path.substr(last_slash_pos + 1);
+	path_dir_ = path.getPathDir();
+	path_file_ = path.getPathFile();
 }
 
 HttpResponse *HttpResponseBuilder::buildErrorResponse(int httpstatus, HttpRequestDTO &req)
@@ -412,7 +409,8 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 	try
 	{
 		setDefaultRoot();
-		parseRequestPath(req.path);
+		Path path(req.path, conf_);
+		parseRequestPath(path);
 		findFileInServer();
 		reflectLocationStatus();
 		if (is_file_cgi)

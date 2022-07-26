@@ -83,7 +83,7 @@ public:
 	void findIndexFilepath(std::string dir, LocationConfig location);
 	std::string buildDate();
 	std::string buildLastModified();
-	void parseRequestPath(std::string req_path);
+	void parseRequestPath(const Path &path);
 	void reflectLocationStatus();
 	bool isCGI(std::string file);
 	void doCGI(HttpRequestDTO &req);
