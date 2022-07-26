@@ -277,7 +277,7 @@ void ConfigParser::parseLocation(LocationConfig &location,
 bool ConfigParser::validVectorCheck(const std::vector<std::string> vec_to_check, const std::vector<std::string> valid_vec) {
 	std::vector<std::string>::const_iterator it = vec_to_check.begin();
 	for (; it != vec_to_check.end(); it++) {
-		if (utility::myFind(valid_vec.begin(), valid_vec.end(), *it) == valid_vec.end()) {
+		if (std::find(valid_vec.begin(), valid_vec.end(), *it) == valid_vec.end()) {
 			return false;
 		}
 	}

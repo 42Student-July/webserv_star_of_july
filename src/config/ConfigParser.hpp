@@ -15,6 +15,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <algorithm>
 
 #include "ServerConfig.hpp"
 #include "../utility/utility.hpp"
