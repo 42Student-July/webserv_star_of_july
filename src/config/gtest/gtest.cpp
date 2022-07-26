@@ -185,6 +185,32 @@ TEST(Error, DuplicatedLocation2) {
   }
 }
 
+TEST(Error, DuplicatedLocation3) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/duplicated_location3.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/duplicated_location3.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Wrong syntax", e.what());
+  }
+}
+
+TEST(Error, DuplicatedLocation4) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/duplicated_location4.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/duplicated_location4.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Wrong syntax", e.what());
+  }
+}
+
 TEST(Error, InvalidAllowedMethod) {
   try {
     ASSERT_THROW(
@@ -195,6 +221,123 @@ TEST(Error, InvalidAllowedMethod) {
         "./TestConfigs/ErrorCases/invalid_allowed_method.conf");
   } catch (std::exception &e) {
     ASSERT_STREQ("Error: Config: Invalid allowed_method", e.what());
+  }
+}
+
+TEST(Error, InvalidAutoIndex) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_auto_index.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_auto_index.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid autoindex", e.what());
+  }
+}
+
+TEST(Error, InvalidErrorPages) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_error_pages.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_error_pages.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid error_page", e.what());
+  }
+}
+
+TEST(Error, InvalidErrorPages2) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_error_pages2.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_error_pages2.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid error_page", e.what());
+  }
+}
+
+TEST(Error, InvalidRedirect) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_location_redirect.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_location_redirect.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid return", e.what());
+  }
+}
+
+TEST(Error, InvalidRedirect2) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_location_redirect2.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_location_redirect2.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid return", e.what());
+  }
+}
+
+TEST(Error, DupRoot) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/duplicated_root.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/duplicated_root.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Duplicated root", e.what());
+  }
+}
+
+TEST(Error, DupClientBodySizeLimit) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/duplicated_client_body_size_limit.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/duplicated_client_body_size_limit.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Duplicated client_body_size_limit", e.what());
+  }
+}
+
+TEST(Error, DupLocationRoot) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/duplicated_location_root.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/duplicated_location_root.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Duplicated root in location", e.what());
+  }
+}
+
+TEST(Error, DupLocationAutoindex) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/duplicated_autoindex.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/duplicated_autoindex.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Duplicated autoindex", e.what());
   }
 }
 
