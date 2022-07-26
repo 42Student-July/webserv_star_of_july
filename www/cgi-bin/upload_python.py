@@ -34,7 +34,7 @@ def multi_uploaded_file_proc(upload_dir,fileitem):
         single_upload_file_proc(upload_dir,item)
 #
 # --------------------------------------------------------------------
-upload_dir = "upload"
+upload_dir = "www/cgi-bin/upload"
 #
 print("Content-Type: text/html")
 print("")
