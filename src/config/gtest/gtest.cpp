@@ -102,6 +102,12 @@ TEST(ConfigParserLocationsTests, CanParseLocationCGIPath) {
   ASSERT_EQ(".py", serverconfig[0].locations[0].cgi_extensions[0]);
 }
 
+TEST(ConfigParserLocationsTests, CanParseLocationCGIPath2) {
+  ConfigParser configparser("./TestConfigs/location_cgipath2.conf");
+  std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
+  ASSERT_EQ(".pl", serverconfig[0].locations[0].cgi_extensions[1]);
+}
+
 TEST(ConfigParserLocationsTests, CanParseLocationRedirection)
 {
   ConfigParser configparser("./TestConfigs/location_redirect.conf");

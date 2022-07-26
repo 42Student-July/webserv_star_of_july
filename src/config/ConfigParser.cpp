@@ -223,10 +223,17 @@ void ConfigParser::parseLocationAutoindexes(
   }
 }
 
-void ConfigParser::parseLocationCGIPath(
-    LocationConfig &location, std::vector<std::string>::iterator &it) {
-  //後ほど修正必要
-  location.cgi_extensions.push_back(it->substr(0, it->find(";")));
+void ConfigParser::parseLocationCGIExtension(
+  LocationConfig &location, std::vector<std::string>::iterator &it) {
+  int num = countContents(it);
+  for (int i = 0; i < num; ++i, ++it) {
+    if (it->find(";") != std::string::npos) {
+      location.cgi_extensions.push_back(it->substr(0, it->find(";")));
+    } else {
+      location.cgi_extensions.push_back(*it);
+    }
+  }
+  it--;
 }
 
 void ConfigParser::parseLocationRedirect(
@@ -254,8 +261,8 @@ void ConfigParser::parseLocation(LocationConfig &location,
         parseLocationIndexes(location, ++it);
       } else if (*it == "autoindex") {
         parseLocationAutoindexes(location, ++it, l_exist_flag);
-      } else if (*it == "cgi_path") {
-        parseLocationCGIPath(location, ++it);
+      } else if (*it == "cgi_extension") {
+        parseLocationCGIExtension(location, ++it);
       } else if (*it == "return") {
         parseLocationRedirect(location, ++it);
       } else if (*it == "}") {
