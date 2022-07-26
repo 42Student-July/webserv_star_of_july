@@ -55,18 +55,12 @@ void RequestLineParser::validateUri(const std::string& uri) {
 }
 
 void RequestLineParser::validateHttpVersion(const std::string& http_version) {
-  if (http_version.empty()) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No Version");
-  }
   if (http_version.size() != 8) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
                              "HttpVersion length error");
   }
-  if (http_version.compare(0, 4, "HTTP") != 0) {
+  if (http_version.compare(0, 5, "HTTP/") != 0) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "Invalid Protocol");
-  }
-  if (http_version.compare(4, 1, "/") != 0) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "/ is not found");
   }
 
   std::string version_num = http_version.substr(5);
