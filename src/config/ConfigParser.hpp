@@ -81,11 +81,10 @@ class ConfigParser {
 
   // validation
   void serverValidate(const ServerConfig &server, const int &exist_flag);
-  bool  isValidErrorPages(const std::map<int, std::string> &error_pages);
+  bool isValidStatus(const std::map<int, std::string> &config_map);
 
   void locationValidate(const LocationConfig &location);
   bool isValidAllowedMethod(const std::vector<std::string> &allowed_methods);
-  bool isValidResponseStatus(const int &status);
 
   bool validVectorCheck(const std::vector<std::string> vec_to_check, const std::vector<std::string> valid_vec);
 

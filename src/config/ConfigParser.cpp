@@ -55,7 +55,7 @@ void ConfigParser::serverValidate(const ServerConfig &server, const int &exist_f
 	throw std::runtime_error("Error: Config: Duplicated location");
   }
 
-  if (!isValidErrorPages(server.error_pages)) {
+  if (!isValidStatus(server.error_pages)) {
 	  throw std::runtime_error("Error: Config: Invalid error_page");
   }
 }
@@ -76,17 +76,10 @@ bool ConfigParser::isDupLocation(const ServerConfig &server) {
 	return false;
 }
 
-bool ConfigParser::isValidResponseStatus(const int &status) {
-	if (status <= 100 || status >= 600)
-		return false;
-	else
-		return true;
-}
-
-bool ConfigParser::isValidErrorPages(const std::map<int, std::string> &error_pages) {
-	std::map<int, std::string>::const_iterator it = error_pages.begin();
-	for (; it != error_pages.end(); ++it) {
-		if (!isValidResponseStatus(it->first)) {
+bool ConfigParser::isValidStatus(const std::map<int, std::string> &config_map) {
+	std::map<int, std::string>::const_iterator it = config_map.begin();
+	for (; it != config_map.end(); ++it) {
+		if (it->first <= 100 || it->first >=600) {
 			return false;
 		}
 	}
@@ -276,6 +269,9 @@ bool ConfigParser::isValidAllowedMethod(const std::vector<std::string> &allowed_
 void ConfigParser::locationValidate(const LocationConfig &location) {
 	if (!isValidAllowedMethod(location.allowed_methods)) {
 		throw std::runtime_error("Error: Config: Invalid allowed_method");
+	}
+	if (!isValidStatus(location.redirect)) {
+		throw std::runtime_error("Error: Config: Invalid return");
 	}
 	
 }

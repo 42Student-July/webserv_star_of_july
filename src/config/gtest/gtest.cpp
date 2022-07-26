@@ -224,6 +224,44 @@ TEST(Error, InvalidErrorPages) {
   }
 }
 
+TEST(Error, InvalidErrorPages2) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_error_pages2.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_error_pages2.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid error_page", e.what());
+  }
+}
+
+TEST(Error, InvalidRedirect) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_location_redirect.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_location_redirect.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid return", e.what());
+  }
+}
+
+TEST(Error, InvalidRedirect2) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_location_redirect2.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_location_redirect2.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid return", e.what());
+  }
+}
 
 TEST(Error, NoListen) {
   try {
