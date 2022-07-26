@@ -238,20 +238,21 @@ void ConfigParser::parseLocation(LocationConfig &location,
   }
 }
 
-bool ConfigParser::validVectorCheck(const std::vector<std::string> vec_to_check, const std::vector<std::string> valid_vec) {
-	std::vector<std::string>::const_iterator it_c = vec_to_check.begin();
-	std::vector<std::string>::const_iterator it_v = valid_vec.begin();
-	for (; it_c != vec_to_check.end(); it_c++) {
-		int flag = 0;
-		for (; it_v != valid_vec.end(); it_v++) {
-			std::cout << "it_v: " << *it_v << std::endl;
-			std::cout << "it_c: " << *it_c << std::endl;
-			if (*it_c == *it_v) {
-				flag = 1;
-			}
+template< class InputIt, class T >
+InputIt myFind(InputIt first, InputIt last, const T& value)
+{
+	for (; first != last; ++first) {
+		if (*first == value) {
+			return first;
 		}
-		std::cout << "flag: " << flag << std::endl;
-		if (flag == 0) {
+	}
+	return last;
+}
+
+bool ConfigParser::validVectorCheck(const std::vector<std::string> vec_to_check, const std::vector<std::string> valid_vec) {
+	std::vector<std::string>::const_iterator it = vec_to_check.begin();
+	for (; it != vec_to_check.end(); it++) {
+		if (myFind(valid_vec.begin(), valid_vec.end(), *it) == valid_vec.end()) {
 			return false;
 		}
 	}
