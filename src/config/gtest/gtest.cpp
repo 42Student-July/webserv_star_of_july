@@ -172,6 +172,32 @@ TEST(Error, DuplicatedLocation) {
   }
 }
 
+TEST(Error, DuplicatedLocation2) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/duplicated_location2.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/duplicated_location2.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Duplicated location", e.what());
+  }
+}
+
+TEST(Error, InvalidAllowedMethod) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_allowed_method.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_allowed_method.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid allowed_method", e.what());
+  }
+}
+
 TEST(Error, NoListen) {
   try {
     ASSERT_THROW(
