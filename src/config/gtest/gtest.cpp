@@ -198,6 +198,19 @@ TEST(Error, InvalidAllowedMethod) {
   }
 }
 
+TEST(Error, InvalidAutoIndex) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_auto_index.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_auto_index.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid autoindex", e.what());
+  }
+}
+
 TEST(Error, NoListen) {
   try {
     ASSERT_THROW(

@@ -46,6 +46,7 @@ class ConfigParser {
   static const std::vector<std::string> VALID_MOETHODS;
   static std::vector<std::string> setValidMethods();
 
+
   // locationのparse
   void parseLocation(LocationConfig &location,
                      std::vector<std::string>::iterator &it,

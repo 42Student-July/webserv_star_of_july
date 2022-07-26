@@ -184,13 +184,13 @@ void ConfigParser::parseLocationIndexes(
 }
 
 void ConfigParser::parseLocationAutoindexes(
-    LocationConfig &location, std::vector<std::string>::iterator &it) {
+  LocationConfig &location, std::vector<std::string>::iterator &it) {
   if (it->substr(0, it->find(";")) == "on") {
     location.autoindex = true;
   } else if (it->substr(0, it->find(";")) == "off") {
     location.autoindex = false;
   } else {
-    throw std::runtime_error("Error: Config: Wrong syntax");
+    throw std::runtime_error("Error: Config: Invalid autoindex");
   }
 }
 
@@ -257,7 +257,6 @@ void ConfigParser::locationValidate(const LocationConfig &location) {
 	if (!isValidAllowedMethod(location.allowed_methods)) {
 		throw std::runtime_error("Error: Config: Invalid allowed_method");
 	}
-
 }
 
 // ToDo:それぞれ1回ずつしか入力できないようにする
