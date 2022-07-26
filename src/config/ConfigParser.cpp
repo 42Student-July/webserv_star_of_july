@@ -8,7 +8,7 @@ const unsigned int ConfigParser::BIT_FLAG_BODY_LIMIT = (1 << 2); // 0000 0000 00
 const unsigned int ConfigParser::BIT_FLAG_LOC_ROOT = (1 << 3);  // 0000 0000 0001 0000
 const unsigned int ConfigParser::BIT_FLAG_AUTOINDEX = (1 << 4); // 0000 0000 0010 0000
 
-const std::vector<std::string> ConfigParser::VALID_MOETHODS = ConfigParser::setValidMethods();
+const std::vector<std::string> ConfigParser::VALID_METHODS = ConfigParser::setValidMethods();
 
 std::vector<std::string> ConfigParser::setValidMethods() {
 	std::vector<std::string> valid_methods;
@@ -274,23 +274,13 @@ void ConfigParser::parseLocation(LocationConfig &location,
   }
 }
 
-bool ConfigParser::validVectorCheck(const std::vector<std::string> vec_to_check, const std::vector<std::string> valid_vec) {
-	std::vector<std::string>::const_iterator it = vec_to_check.begin();
-	for (; it != vec_to_check.end(); it++) {
-		if (utility::myFind(valid_vec.begin(), valid_vec.end(), *it) == valid_vec.end()) {
-			return false;
-		}
-	}
-	return true;
-
-}
-
-bool ConfigParser::isValidAllowedMethod(const std::vector<std::string> &allowed_methods) {
-	return validVectorCheck(allowed_methods, VALID_MOETHODS);
+bool ConfigParser::isValidVector(const std::vector<std::string> vec_to_check, const std::vector<std::string> valid_vec) {
+  return std::includes(valid_vec.begin(), valid_vec.end(), vec_to_check.begin(),                                                       
+                        vec_to_check.end());
 }
 
 void ConfigParser::locationValidate(const LocationConfig &location) {
-	if (!isValidAllowedMethod(location.allowed_methods)) {
+	if (!isValidVector(location.allowed_methods, VALID_METHODS)) {
 		throw std::runtime_error("Error: Config: Invalid allowed_method");
 	}
 	if (!isValidStatus(location.redirect)) {

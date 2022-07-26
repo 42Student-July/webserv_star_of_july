@@ -26,15 +26,4 @@ std::string utility::toString(T& val) {
   return ss.str();
 }
 
-template< class InputIt, class T >
-InputIt utility::myFind(InputIt first, InputIt last, const T& value)
-{
-	for (; first != last; ++first) {
-		if (*first == value) {
-			return first;
-		}
-	}
-	return last;
-}
-
 #endif /* UTILITY_HPP */
