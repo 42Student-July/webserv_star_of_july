@@ -65,3 +65,14 @@ int utility::hexStringToInt(const std::string& hex_str) {
   }
   return num;
 }
+
+void utility::freeArrays(char** arrays) {
+  size_t idx = 0;
+
+  if (!arrays) return;
+  while (arrays[idx]) {
+    free(arrays[idx]);
+    idx += 1;
+  }
+  free(arrays);
+}

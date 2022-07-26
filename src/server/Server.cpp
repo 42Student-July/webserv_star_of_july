@@ -53,6 +53,7 @@ void Server::destroyConnectionSockets() {
         it++;
         delete tmp_it->second;
         fd2socket_.erase(tmp_it);
+		it--;
       }
     }
   }

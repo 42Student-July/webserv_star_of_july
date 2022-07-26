@@ -287,6 +287,12 @@ std::string HttpResponseBuilder::getReasonPhrase(std::string httpStatus)
 		return "";
 }
 
+//3つのcgiからのヘッダーをいれる必要あり
+void HttpResponseBuilder::updateHeader()
+{
+	header_.status_code = HttpStatus::OK;
+	header_.content_type = TEXT_HTML;
+}
 
 void HttpResponseBuilder::doCGI(HttpRequestDTO &req)
 {
@@ -295,11 +301,13 @@ void HttpResponseBuilder::doCGI(HttpRequestDTO &req)
 	cgi_.run(req, conf_, path);
 	std::string cgi_response = cgi_.getResponseFromCGI();
 	cgi_parser_.parse(cgi_response);
-	buildHeader(req);
-	//TODO: このあとcgiによるupdateHeaderを実行
-	
 	//bodyの作成
 	res_body_str_ << cgi_parser_.getBodyStr();	
+
+	buildHeader(req);
+	//TODO: このあとcgiによるupdateHeaderを実行
+	updateHeader();
+	
 }
 
 void HttpResponseBuilder::buildErrorHeader(HttpRequestDTO &req, int httpStatus, std::string body_str)

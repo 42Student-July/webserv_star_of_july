@@ -16,6 +16,7 @@ NAME = libutility.a
 
 CXX = c++
 CXXFLAGS = -Wall -Werror -Wextra -Wshadow -std=c++98 -pedantic
+DEBUG			:= -fsanitize=address
 
 HEADERS = . \
 		  $(NULL)
@@ -38,6 +39,10 @@ $(NAME):$(OBJS)
 
 %.o: %.cpp
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
+
+.PHONY: debug
+debug:			CXXFLAGS += $(DEBUG)
+debug:			re
 
 run: $(OBJS) main.o
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) main.o -MMD -MP -o test
