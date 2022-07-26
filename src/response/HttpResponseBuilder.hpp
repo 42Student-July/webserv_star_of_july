@@ -78,6 +78,7 @@ public:
 	void readFile(std::string fullpath);
 	void readErrorFile(std::string fullpath);
 	void buildHeader(HttpRequestDTO &req);
+	void updateHeader();
 	void buildErrorHeader(HttpRequestDTO &req, int httpStatus, std::string body_str);
 	void findIndexFilepath(std::string dir, LocationConfig location);
 	std::string buildDate();

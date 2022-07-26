@@ -48,7 +48,7 @@ class ConfigParser {
   void parseLocation(LocationConfig &location,
                      std::vector<std::string>::iterator &it,
                      std::vector<std::string>::iterator &ite);
-  void parseLocationCGIPath(LocationConfig &location,
+  void parseLocationCGIExtension(LocationConfig &location,
                             std::vector<std::string>::iterator &it);
   void parseLocationAutoindexes(LocationConfig &location,
                                 std::vector<std::string>::iterator &it, unsigned int &l_exist_flag);
