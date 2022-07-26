@@ -42,9 +42,17 @@ void RequestLineParser::validateRequestLine(const RequestLine& request_line) {
   validateHttpVersion(request_line.version);
 }
 
+// 405は返さない。knownなメソッドは3つだけ
+// rfc7231 6.5.4
+// The 405 (Method Not Allowed) status code indicates that the method received
+// in the request-line is known by the origin server but not supported by the
+// target resource.
 void RequestLineParser::validateMethod(const std::string& method) {
   if (method.empty()) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No Method");
+  }
+  if (method != "GET" && method != "POST" && method != "DELETE") {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "Invalid Method");
   }
 }
 
