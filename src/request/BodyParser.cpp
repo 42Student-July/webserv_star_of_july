@@ -26,15 +26,15 @@ std::string BodyParser::parseBody(const std::string& buffer,
     return "";
   }
   if (exists_content_length) {
+    if (buffer.size() < content_length) {
+      throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
+                               "body length is less than content_length");
+    }
     return buffer.substr(0, content_length);
   }
   size_t body_len = buffer.find(CRLF);
   if (body_len == std::string::npos) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No body_len");
-  }
-  if (exists_content_length && body_len < content_length) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
-                             "body length is less than content_length");
   }
   return buffer.substr(0, body_len);
 }

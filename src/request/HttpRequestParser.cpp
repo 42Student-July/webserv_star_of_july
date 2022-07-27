@@ -17,7 +17,7 @@ HttpRequest *HttpRequestParser::parse(const std::string buffer,
     req->name_value_map = parseHeaderField(buffer, &offset);
     body_buffer_ = buffer.substr(offset);
     setContentLengthInfo(req->name_value_map, req);
-    // req->body = parseBody(buffer, offset);
+    req->body = parseBody(buffer, offset);
   } catch (const ParseErrorExeption &e) {
     req->response_status_code = e.getErrorStatus();
     std::cerr << e.what() << std::endl;
