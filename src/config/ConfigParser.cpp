@@ -144,6 +144,9 @@ void ConfigParser::serverValidate(const ServerConfig &server,
   if (!isValidStatus(server.error_pages)) {
     throw std::runtime_error("Error: Config: Invalid error_page");
   }
+  if (!isValidErrorPages(server.error_pages)) {
+    throw std::runtime_error("Error: Config: Invalid error_page");
+  }
   if (!isValidRoot(server.root)) {
     throw std::runtime_error("Error: Config: Invalid root");
   }
@@ -312,6 +315,16 @@ bool ConfigParser::isDupLocation(const ServerConfig &server) {
     }
   }
   return false;
+}
+
+bool ConfigParser::isValidErrorPages(const std::map<int, std::string> &error_pages) {
+  std::map<int, std::string>::const_iterator it = error_pages.begin();
+  for (; it != error_pages.end(); ++it) {
+	  if (it->second.at(0) != '/') {
+		  return false;
+	  }
+  }
+  return true;
 }
 
 bool ConfigParser::isValidStatus(const std::map<int, std::string> &config_map) {
