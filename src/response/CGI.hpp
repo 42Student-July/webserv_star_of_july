@@ -33,9 +33,6 @@ class CGI {
   void makeCGIResponseLines(std::string cgi_body_);
   std::string getResponseFromCGI() const;
 
-  CGI(CGI const &other);
-  CGI &operator=(CGI const &other);
-
  private:
   static const int BUF_SIZE = 8192;
   static const std::map<std::string, std::string> EXEC_COMMANDS;
@@ -55,6 +52,10 @@ class CGI {
   int pipe_c2p_[2];
   int pipe_p2c_[2];
   // pid_t child_pid_;
+
+  //使わない関数
+  CGI(CGI const &other);
+  CGI &operator=(CGI const &other);
 };
 
 #endif
