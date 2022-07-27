@@ -255,7 +255,7 @@ TEST(Error, InvalidAutoIndex) {
   }
 }
 
-TEST(Error, InvalidErrorPages) {
+TEST(Error, InvalidErrorPagesInt) {
   try {
     ASSERT_THROW(
         ConfigParser configparser(
@@ -263,6 +263,32 @@ TEST(Error, InvalidErrorPages) {
         std::runtime_error);
     ConfigParser configparser(
         "./TestConfigs/ErrorCases/invalid_error_pages.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid error_page", e.what());
+  }
+}
+
+TEST(Error, InvalidErrorPagesSlash) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_error_pages_slash.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_error_pages_slash.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid error_page", e.what());
+  }
+}
+
+TEST(Error, InvalidErrorPagesSlash2) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_error_pages_slash2.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_error_pages_slash2.conf");
   } catch (std::exception &e) {
     ASSERT_STREQ("Error: Config: Invalid error_page", e.what());
   }

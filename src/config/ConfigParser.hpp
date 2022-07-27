@@ -88,6 +88,7 @@ class ConfigParser {
                      const std::vector<std::string> valid_vec);
   bool isDupLocation(const ServerConfig &server);
   bool isValidRoot(const std::string &root);
+  bool isValidErrorPages(const std::map<int, std::string> &error_pages);
 
   // token化のためのutils
   std::string readFile(std::string const file);
