@@ -22,10 +22,8 @@ std::string BodyParser::parse(const std::string& buffer, bool is_chunked,
 std::string BodyParser::parseBody(const std::string& buffer,
                                   bool exists_content_length,
                                   size_t content_length) {
-  if (!exists_content_length && content_length == 0) {
-    return "";
-  } else if (!exists_content_length) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "Needs content_length");
+  if (!exists_content_length) {
+    content_length = 0;
   }
   if (buffer.size() < content_length) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST,

@@ -38,7 +38,10 @@ TEST_F(BodyParserTest, ContentLength_0) {
 // 0だとバグるので暫定的に
 TEST_F(BodyParserTest, NoContentLengthAndNoTransferEncoding) {
   std::string buffer = "12345";
-  EXPECT_THROW(parser.parse(buffer, false, false, -1), std::runtime_error);
+  std::string body = parser.parse(buffer, false, false, 0);
+
+  EXPECT_EQ("", body);
+  // EXPECT_THROW(parser.parse(buffer, false, false, 0), std::runtime_error);
 }
 
 TEST_F(BodyParserTest, Chunk_NoChunk) {
