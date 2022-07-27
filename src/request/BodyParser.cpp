@@ -7,6 +7,11 @@ BodyParser::~BodyParser() {}
 std::string BodyParser::parse(const std::string& buffer, bool is_chunked,
                               bool exists_content_length,
                               size_t content_length) {
+  // std::cerr << "buffer:" << buffer << std::endl
+  //           << "is_chunked:" << is_chunked << std::endl
+  //           << "exists_content_length:" << exists_content_length << std::endl
+  //           << "content_length:" << content_length << std::endl
+  //           << std::endl;
   if (is_chunked) {
     return parseChunkedBody(buffer);
   } else {
@@ -19,6 +24,9 @@ std::string BodyParser::parseBody(const std::string& buffer,
                                   size_t content_length) {
   if (!exists_content_length && content_length == 0) {
     return "";
+  }
+  if (exists_content_length) {
+    return buffer.substr(0, content_length);
   }
   size_t body_len = buffer.find(CRLF);
   if (body_len == std::string::npos) {

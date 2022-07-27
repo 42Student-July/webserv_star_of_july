@@ -16,7 +16,6 @@ HttpRequest *HttpRequestParser::parse(const std::string buffer,
     req->request_line = parseRequestLine(buffer, &offset);
     req->name_value_map = parseHeaderField(buffer, &offset);
     body_buffer_ = buffer.substr(offset);
-    std::cerr << "From rq_parser\n" << body_buffer_ << std::endl;
     setContentLengthInfo(req->name_value_map, req);
     // req->body = parseBody(buffer, offset);
   } catch (const ParseErrorExeption &e) {
@@ -104,12 +103,11 @@ std::string HttpRequestParser::getLine(const std::string &buffer,
 // 動かすために.あとでどこのメソッドにするかふくめ、リファクタする
 void HttpRequestParser::setContentLengthInfo(HeaderFieldMap &headerfield_map,
                                              HttpRequest *req) {
-  if (headerfield_map.find("content_length") != headerfield_map.end()) {
+  if (headerfield_map.find("content-length") != headerfield_map.end()) {
     // validateしてない
-    req->content_length = utility::stoi(headerfield_map["content_length"]);
+    req->content_length = utility::stoi(headerfield_map["content-length"]);
     req->has_content_length = true;
   } else {
-    // printf("[\x1b[32mPASS\x1b[39m]\n");
     req->content_length = body_buffer_.size();
     req->has_content_length = false;
   }
