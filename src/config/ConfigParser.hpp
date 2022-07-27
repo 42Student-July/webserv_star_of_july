@@ -93,6 +93,7 @@ class ConfigParser {
   // utils
   static int ft_stoi(std::string const &str);
   bool isDupLocation(const ServerConfig &server);
+  int countContents(std::vector<std::string>::iterator it);
 
   // 使わない関数
   ConfigParser(ConfigParser const &other);

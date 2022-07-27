@@ -8,8 +8,8 @@ const unsigned int ConfigParser::BIT_FLAG_BODY_LIMIT = (1 << 2); // 0000 0000 00
 const unsigned int ConfigParser::BIT_FLAG_LOC_ROOT = (1 << 3);  // 0000 0000 0001 0000
 const unsigned int ConfigParser::BIT_FLAG_AUTOINDEX = (1 << 4); // 0000 0000 0010 0000
 
+// 定数のセット
 const std::vector<std::string> ConfigParser::VALID_METHODS = ConfigParser::setValidMethods();
-
 std::vector<std::string> ConfigParser::setValidMethods() {
 	std::vector<std::string> valid_methods;
 
@@ -20,27 +20,109 @@ std::vector<std::string> ConfigParser::setValidMethods() {
 	return valid_methods;
 }
 
-template <typename T>
-void print_vector(std::vector<T> vec) {
-  typename std::vector<T>::iterator it = vec.begin();
-  int i = 0;
-  for (; it < vec.end(); it++) {
-    i++;
-    std::cout << i << "] " << *it << std::endl;
-  }
+ConfigParser::ConfigParser() {}
+ConfigParser::~ConfigParser() {}
+
+// parseやvalidateをして最終configをgetできるように
+std::vector<ServerConfig> ConfigParser::getServerConfigs() const {
+  return (serverconfigs_);
 }
 
-ConfigParser::ConfigParser() {}
-
+// parseしたいconfigファイルの受け渡し
 ConfigParser::ConfigParser(std::string file) {
   std::string file_content = readFile(file);
+
+  //文字列を全てスペースで分割してトークン化
   std::vector<std::string> tokens = isspaceSplit(file_content);
 
   parseTokens(tokens);
 }
 
-std::vector<ServerConfig> ConfigParser::getServerConfigs() const {
-  return (serverconfigs_);
+// スペースで分割されたトークンをparse
+void ConfigParser::parseTokens(std::vector<std::string> tokens) {
+  std::vector<std::string>::iterator it = tokens.begin();
+  std::vector<std::string>::iterator ite = tokens.end();
+  for (; it < tokens.end(); it++) {
+    if (*it == "server" && *(++it) == "{") {
+      ServerConfig server;
+
+	  //サーバーごとに必須項目が設定されているか確認するためのフラグ
+    unsigned int exist_flag = 0;
+
+    parseServer(server, ++it, ite, exist_flag);
+	  serverValidate(server, exist_flag);
+
+    serverconfigs_.push_back(server);
+
+    } else {
+      throw std::runtime_error("Error: Config: Wrong syntax");
+    }
+  }
+}
+
+void ConfigParser::parseServer(ServerConfig &server,
+                               std::vector<std::string>::iterator &it,
+                               std::vector<std::string>::iterator &ite,
+                               unsigned int &exist_flag) {
+  bool finished_with_bracket = false;
+  for (; it != ite; ++it) {
+    if (*it == "listen") {
+      parseListen(server, ++it, exist_flag);
+    } else if (*it == "server_name") {
+      parseServerName(server, ++it);
+    } else if (*it == "root") {
+      parseRoot(server, ++it, exist_flag);
+    } else if (*it == "error_page") {
+      parseErrorPages(server, ++it);
+    } else if (*it == "client_body_size_limit") {
+      parseClientBodySizeLimit(server, ++it, exist_flag);
+    } else if (*it == "location") {
+	  
+      LocationConfig location;
+      parseLocation(location, ++it, ite);
+	  locationValidate(location);
+
+      server.locations.push_back(location);
+
+    } else if (*it == "}") {
+      finished_with_bracket = true;
+      break;
+    } else {
+      throw std::runtime_error("Error: Config: Wrong syntax");
+    }
+  }
+  if (finished_with_bracket == false) {
+    throw std::runtime_error("Error: Config: Need to be closed by brackets");
+  }
+}
+
+void ConfigParser::parseLocation(LocationConfig &location,
+                                 std::vector<std::string>::iterator &it,
+                                 std::vector<std::string>::iterator &ite) {
+  unsigned int l_exist_flag = 0;
+  location.location = *it;
+  if (*(++it) == "{") {
+	it++;
+    for (; it != ite; ++it) {
+      if (*it == "root") {
+        parseLocationRoot(location, ++it, l_exist_flag);
+      } else if (*it == "allowed_method") {
+        parseLocationAllowedMethods(location, ++it);
+      } else if (*it == "index") {
+        parseLocationIndexes(location, ++it);
+      } else if (*it == "autoindex") {
+        parseLocationAutoindexes(location, ++it, l_exist_flag);
+      } else if (*it == "cgi_extension") {
+        parseLocationCGIExtension(location, ++it);
+      } else if (*it == "return") {
+        parseLocationRedirect(location, ++it);
+      } else if (*it == "}") {
+        break;
+      } else {
+      	throw std::runtime_error("Error: Config: Syntax error.");
+      }
+    }
+  }
 }
 
 void ConfigParser::serverValidate(const ServerConfig &server, const int &exist_flag) {
@@ -58,63 +140,16 @@ void ConfigParser::serverValidate(const ServerConfig &server, const int &exist_f
   }
 }
 
-//このやり方で良いのか要検討
-//it_x++の部分
-bool ConfigParser::isDupLocation(const ServerConfig &server) {
-	std::vector<LocationConfig>::const_iterator it_x = server.locations.begin();
-	std::vector<LocationConfig>::const_iterator it_y = server.locations.begin();
-	it_x++;
-	for (;it_y != server.locations.end(); it_y++) {
-		for (; it_x != server.locations.end(); it_x++) {
-			if (it_x->location == it_y->location) {
-				return true;
-			}
-		}
+void ConfigParser::locationValidate(const LocationConfig &location) {
+	if (!isValidVector(location.allowed_methods, VALID_METHODS)) {
+		throw std::runtime_error("Error: Config: Invalid allowed_method");
 	}
-	return false;
-}
-
-bool ConfigParser::isValidStatus(const std::map<int, std::string> &config_map) {
-	std::map<int, std::string>::const_iterator it = config_map.begin();
-	for (; it != config_map.end(); ++it) {
-		if (it->first <= 100 || it->first >=600) {
-			return false;
-		}
+	if (!isValidStatus(location.redirect)) {
+		throw std::runtime_error("Error: Config: Invalid return");
 	}
-	return true;
 }
 
-ConfigParser::~ConfigParser() {}
-
-void ConfigParser::parseTokens(std::vector<std::string> tokens) {
-  std::vector<std::string>::iterator it = tokens.begin();
-  std::vector<std::string>::iterator ite = tokens.end();
-  for (; it < tokens.end(); it++) {
-    if (*it == "server" && *(++it) == "{") {
-      ServerConfig server;
-
-	  //サーバーごとに必須項目が設定されているか確認するためのフラグ
-      unsigned int exist_flag = 0;
-
-      parseServer(server, ++it, ite, exist_flag);
-	  serverValidate(server, exist_flag);
-
-      serverconfigs_.push_back(server);
-
-    } else {
-      throw std::runtime_error("Error: Config: Wrong syntax");
-    }
-  }
-}
-
-int countContents(std::vector<std::string>::iterator it) {
-  int num = 1;
-  for (; it->find(";") == std::string::npos; ++it) {
-    num++;
-  }
-  return num;
-}
-
+// parseServer関連関数
 void ConfigParser::parseListen(ServerConfig &server,
                                std::vector<std::string>::iterator &it,
                                unsigned int &exist_flag) {
@@ -172,6 +207,7 @@ void ConfigParser::parseClientBodySizeLimit(
   server.client_body_size_limit = ft_stoi(*it);
 }
 
+// parseLocation関連関数
 void ConfigParser::parseLocationRoot(LocationConfig &location,
                                      std::vector<std::string>::iterator &it, unsigned int &l_exist_flag) {
   if (l_exist_flag & BIT_FLAG_LOC_ROOT) {
@@ -244,34 +280,31 @@ void ConfigParser::parseLocationRedirect(
   location.redirect.insert(std::pair<int, std::string>(status_code, str));
 }
 
-// ToDo:それぞれ1回ずつしか入力できないようにする
-void ConfigParser::parseLocation(LocationConfig &location,
-                                 std::vector<std::string>::iterator &it,
-                                 std::vector<std::string>::iterator &ite) {
-  unsigned int l_exist_flag = 0;
-  location.location = *it;
-  if (*(++it) == "{") {
-	it++;
-    for (; it != ite; ++it) {
-      if (*it == "root") {
-        parseLocationRoot(location, ++it, l_exist_flag);
-      } else if (*it == "allowed_method") {
-        parseLocationAllowedMethods(location, ++it);
-      } else if (*it == "index") {
-        parseLocationIndexes(location, ++it);
-      } else if (*it == "autoindex") {
-        parseLocationAutoindexes(location, ++it, l_exist_flag);
-      } else if (*it == "cgi_extension") {
-        parseLocationCGIExtension(location, ++it);
-      } else if (*it == "return") {
-        parseLocationRedirect(location, ++it);
-      } else if (*it == "}") {
-        break;
-      } else {
-      	throw std::runtime_error("Error: Config: Syntax error.");
-      }
-    }
-  }
+// validate関連の関数
+//このやり方で良いのか要検討
+//it_x++の部分
+bool ConfigParser::isDupLocation(const ServerConfig &server) {
+	std::vector<LocationConfig>::const_iterator it_x = server.locations.begin();
+	std::vector<LocationConfig>::const_iterator it_y = server.locations.begin();
+	it_x++;
+	for (;it_y != server.locations.end(); it_y++) {
+		for (; it_x != server.locations.end(); it_x++) {
+			if (it_x->location == it_y->location) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool ConfigParser::isValidStatus(const std::map<int, std::string> &config_map) {
+	std::map<int, std::string>::const_iterator it = config_map.begin();
+	for (; it != config_map.end(); ++it) {
+		if (it->first <= 100 || it->first >=600) {
+			return false;
+		}
+	}
+	return true;
 }
 
 bool ConfigParser::isValidVector(const std::vector<std::string> vec_to_check, const std::vector<std::string> valid_vec) {
@@ -279,51 +312,13 @@ bool ConfigParser::isValidVector(const std::vector<std::string> vec_to_check, co
                         vec_to_check.end());
 }
 
-void ConfigParser::locationValidate(const LocationConfig &location) {
-	if (!isValidVector(location.allowed_methods, VALID_METHODS)) {
-		throw std::runtime_error("Error: Config: Invalid allowed_method");
-	}
-	if (!isValidStatus(location.redirect)) {
-		throw std::runtime_error("Error: Config: Invalid return");
-	}
-	
-}
-
-// ToDo:それぞれ1回ずつしか入力できないようにする
-void ConfigParser::parseServer(ServerConfig &server,
-                               std::vector<std::string>::iterator &it,
-                               std::vector<std::string>::iterator &ite,
-                               unsigned int &exist_flag) {
-  bool finished_with_bracket = false;
-  for (; it != ite; ++it) {
-    if (*it == "listen") {
-      parseListen(server, ++it, exist_flag);
-    } else if (*it == "server_name") {
-      parseServerName(server, ++it);
-    } else if (*it == "root") {
-      parseRoot(server, ++it, exist_flag);
-    } else if (*it == "error_page") {
-      parseErrorPages(server, ++it);
-    } else if (*it == "client_body_size_limit") {
-      parseClientBodySizeLimit(server, ++it, exist_flag);
-    } else if (*it == "location") {
-	  
-      LocationConfig location;
-      parseLocation(location, ++it, ite);
-	  locationValidate(location);
-
-      server.locations.push_back(location);
-
-    } else if (*it == "}") {
-      finished_with_bracket = true;
-      break;
-    } else {
-      throw std::runtime_error("Error: Config: Wrong syntax");
-    }
+// その他utils
+int ConfigParser::countContents(std::vector<std::string>::iterator it) {
+  int num = 1;
+  for (; it->find(";") == std::string::npos; ++it) {
+    num++;
   }
-  if (finished_with_bracket == false) {
-    throw std::runtime_error("Error: Config: Need to be closed by brackets");
-  }
+  return num;
 }
 
 std::string ConfigParser::readFile(std::string const file) {
@@ -339,7 +334,6 @@ std::string ConfigParser::readFile(std::string const file) {
   return ss.str();
 }
 
-// syamaさんのやり方参考
 std::vector<std::string> ConfigParser::isspaceSplit(std::string const str) {
   std::vector<std::string> tokens;
   size_t i = 0;

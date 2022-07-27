@@ -14,6 +14,9 @@ void freeArrays(char** arrays);
 template <typename T>
 std::string toString(T& val);
 
+template <typename T>
+void print_vector(std::vector<T> vec);
+
 //  <algorithm>のstd::all_of(c++11)を再実装
 template <class InputIt, class UnaryPredicate>
 bool all_of(InputIt first, InputIt last, UnaryPredicate p);
@@ -36,6 +39,16 @@ bool utility::all_of(InputIt first, InputIt last, UnaryPredicate p) {
     }
   }
   return true;
+}
+
+template <typename T>
+void utility::print_vector(std::vector<T> vec) {
+  typename std::vector<T>::iterator it = vec.begin();
+  int i = 0;
+  for (; it < vec.end(); it++) {
+    i++;
+    std::cout << i << "] " << *it << std::endl;
+  }
 }
 
 #endif /* UTILITY_HPP */
