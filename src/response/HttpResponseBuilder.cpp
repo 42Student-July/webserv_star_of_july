@@ -323,7 +323,7 @@ void HttpResponseBuilder::buildErrorHeader(HttpRequestDTO &req, int httpStatus, 
 	header_.reason_phrase = getReasonPhrase(header_.status_code);
 	header_.date = buildDate();
 	header_.content_length = body_str.size();
-	header_.content_type = TEXT_HTML;
+	header_.content_type = getContentTypeByExtension();
 	header_.connection = "keep-alive";
 }
 
