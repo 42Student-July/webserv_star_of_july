@@ -26,9 +26,10 @@ INCLUDE_PATH = . \
 
 INCLUDES = $(addprefix -I, $(INCLUDE_PATH))
 
-SRCS = $(shell find . -maxdepth 1 -name '*.cpp' -not -name 'main.cpp')
+SRCS = $(notdir $(shell find . -maxdepth 1 -name '*.cpp' -not -name 'main.cpp'))
 
-OBJS = $(SRCS:.cpp=.o)
+OBJSDIR	= ./obj
+OBJS 	= $(addprefix $(OBJSDIR)/, $(SRCS:.cpp=.o))
 
 DEPS = $(OBJS:.o=.d)
 
@@ -40,11 +41,14 @@ all: $(NAME)
 
 -include $(DEPS)
 
-$(NAME):$(OBJS)
+$(NAME): $(OBJSDIR) $(OBJS)
 	@ar rc $(NAME) $(OBJS)
 
-%.o: %.cpp
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
+$(OBJSDIR):
+	mkdir -p $(OBJSDIR)
+
+$(OBJSDIR)/%.o : %.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
 
 .PHONY: run
 run: $(OBJS) main.o $(LIB_UTILITY)
