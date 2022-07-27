@@ -10,19 +10,16 @@
 #include <string>
 
 #include "ASocket.hpp"
+#include "BodyParser.hpp"
+#include "ConfigConverter.hpp"
+#include "HttpRequestConverter.hpp"
 #include "HttpRequestDTO.hpp"
 #include "HttpRequestParser.hpp"
-#include "HttpRequestConverter.hpp"
 #include "response.h"
-#include "ConfigConverter.hpp"
 
 class ConnectionSocket : public ASocket {
  public:
-  enum State {
-    READ,
-    WRITE,
-    CLOSE
-  };
+  enum State { READ, WRITE, CLOSE };
 
   ConnectionSocket(int accepted_fd, const ServerConfig &serverconfig);
   ~ConnectionSocket();

@@ -24,6 +24,8 @@ struct HttpRequest {
   std::string body;
   ServerConfig server_config;
   std::string response_status_code;
+  size_t content_length;
+  bool has_content_length;
 };
 
 std::ostream& operator<<(std::ostream& stream, const HttpRequest& rhs);

@@ -6,7 +6,7 @@ HttpRequestParser::HttpRequestParser() {}
 HttpRequestParser::~HttpRequestParser() {}
 
 // 2つの引数はコンストラクタで渡した方が読みやすいかも。
-HttpRequest *HttpRequestParser::parse(const char *buffer,
+HttpRequest *HttpRequestParser::parse(const std::string buffer,
                                       const ServerConfig &server_config) {
   HttpRequest *req = new HttpRequest(server_config);
   StringPos offset = 0;
@@ -15,7 +15,10 @@ HttpRequest *HttpRequestParser::parse(const char *buffer,
     validateRequestLength(buffer);
     req->request_line = parseRequestLine(buffer, &offset);
     req->name_value_map = parseHeaderField(buffer, &offset);
-    req->body = parseBody(buffer, offset);
+    body_buffer_ = buffer.substr(offset);
+    std::cerr << "From rq_parser\n" << body_buffer_ << std::endl;
+    setContentLengthInfo(req->name_value_map, req);
+    // req->body = parseBody(buffer, offset);
   } catch (const ParseErrorExeption &e) {
     req->response_status_code = e.getErrorStatus();
     std::cerr << e.what() << std::endl;
@@ -26,6 +29,10 @@ HttpRequest *HttpRequestParser::parse(const char *buffer,
     std::cerr << e.what() << std::endl;
   }
   return req;
+}
+
+const std::string &HttpRequestParser::getBodyBuffer() const {
+  return body_buffer_;
 }
 
 // http://nginx.org/en/docs/http/ngx_http_core_module.html#client_header_buffer_size
@@ -91,4 +98,19 @@ std::string HttpRequestParser::getLine(const std::string &buffer,
   std::string line = buffer.substr(*offset, crlf_pos - *offset);
   *offset = crlf_pos + 2;
   return line;
+}
+
+#include <cstdio>
+// 動かすために.あとでどこのメソッドにするかふくめ、リファクタする
+void HttpRequestParser::setContentLengthInfo(HeaderFieldMap &headerfield_map,
+                                             HttpRequest *req) {
+  if (headerfield_map.find("content_length") != headerfield_map.end()) {
+    // validateしてない
+    req->content_length = utility::stoi(headerfield_map["content_length"]);
+    req->has_content_length = true;
+  } else {
+    // printf("[\x1b[32mPASS\x1b[39m]\n");
+    req->content_length = body_buffer_.size();
+    req->has_content_length = false;
+  }
 }
