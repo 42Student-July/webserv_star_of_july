@@ -344,3 +344,18 @@ TEST(MIMETest, end_is_dot)
 	
 	EXPECT_EQ(res->ContentType(), "application/octet-stream");
 }
+
+// CGIとのコネクションのために追加させていただきました
+/* TEST(CGI, ConnectionEstablished) */
+/* { */
+/* 	ConfigDTO conf; */
+/* 	LocationConfig loc; */
+/* 	HttpRequestDTO req; */
+/* 	setReqPath(req, std::string("/tohoho.pl?hello=world")); */
+/* 	setRoot(conf, std::string("../../www/cgi-bin")); */
+
+/* 	HttpResponseBuilder builder = HttpResponseBuilder(conf); */
+/* 	HttpResponse *ret = builder.build(req); */
+	
+/* 	ret->printResponse(); */
+/* } */
