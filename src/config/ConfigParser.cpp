@@ -1,23 +1,31 @@
 #include "ConfigParser.hpp"
+
 #include <stdexcept>
+
 #include "ServerConfig.hpp"
 
-const unsigned int ConfigParser::BIT_FLAG_LISTEN = (1 << 0);  // 0000 0000 0000 0001
-const unsigned int ConfigParser::BIT_FLAG_ROOT = (1 << 1);  // 0000 0000 0000 0010
-const unsigned int ConfigParser::BIT_FLAG_BODY_LIMIT = (1 << 2); // 0000 0000 0000 0100
-const unsigned int ConfigParser::BIT_FLAG_LOC_ROOT = (1 << 3);  // 0000 0000 0001 0000
-const unsigned int ConfigParser::BIT_FLAG_AUTOINDEX = (1 << 4); // 0000 0000 0010 0000
+const unsigned int ConfigParser::BIT_FLAG_LISTEN =
+    (1 << 0);  // 0000 0000 0000 0001
+const unsigned int ConfigParser::BIT_FLAG_ROOT =
+    (1 << 1);  // 0000 0000 0000 0010
+const unsigned int ConfigParser::BIT_FLAG_BODY_LIMIT =
+    (1 << 2);  // 0000 0000 0000 0100
+const unsigned int ConfigParser::BIT_FLAG_LOC_ROOT =
+    (1 << 3);  // 0000 0000 0001 0000
+const unsigned int ConfigParser::BIT_FLAG_AUTOINDEX =
+    (1 << 4);  // 0000 0000 0010 0000
 
 // 定数のセット
-const std::vector<std::string> ConfigParser::VALID_METHODS = ConfigParser::setValidMethods();
+const std::vector<std::string> ConfigParser::VALID_METHODS =
+    ConfigParser::setValidMethods();
 std::vector<std::string> ConfigParser::setValidMethods() {
-	std::vector<std::string> valid_methods;
+  std::vector<std::string> valid_methods;
 
-	valid_methods.push_back("GET");
-	valid_methods.push_back("POST");
-	valid_methods.push_back("DELETE");
+  valid_methods.push_back("GET");
+  valid_methods.push_back("POST");
+  valid_methods.push_back("DELETE");
 
-	return valid_methods;
+  return valid_methods;
 }
 
 ConfigParser::ConfigParser() {}
@@ -46,13 +54,13 @@ void ConfigParser::parseTokens(std::vector<std::string> tokens) {
     if (*it == "server" && *(++it) == "{") {
       ServerConfig server;
 
-	  //サーバーごとに必須項目が設定されているか確認するためのフラグ
-    unsigned int exist_flag = 0;
+      //サーバーごとに必須項目が設定されているか確認するためのフラグ
+      unsigned int exist_flag = 0;
 
-    parseServer(server, ++it, ite, exist_flag);
-	  serverValidate(server, exist_flag);
+      parseServer(server, ++it, ite, exist_flag);
+      serverValidate(server, exist_flag);
 
-    serverconfigs_.push_back(server);
+      serverconfigs_.push_back(server);
 
     } else {
       throw std::runtime_error("Error: Config: Wrong syntax");
@@ -77,10 +85,9 @@ void ConfigParser::parseServer(ServerConfig &server,
     } else if (*it == "client_body_size_limit") {
       parseClientBodySizeLimit(server, ++it, exist_flag);
     } else if (*it == "location") {
-	  
       LocationConfig location;
       parseLocation(location, ++it, ite);
-	  locationValidate(location);
+      locationValidate(location);
 
       server.locations.push_back(location);
 
@@ -102,7 +109,7 @@ void ConfigParser::parseLocation(LocationConfig &location,
   unsigned int l_exist_flag = 0;
   location.location = *it;
   if (*(++it) == "{") {
-	it++;
+    it++;
     for (; it != ite; ++it) {
       if (*it == "root") {
         parseLocationRoot(location, ++it, l_exist_flag);
@@ -119,34 +126,35 @@ void ConfigParser::parseLocation(LocationConfig &location,
       } else if (*it == "}") {
         break;
       } else {
-      	throw std::runtime_error("Error: Config: Syntax error.");
+        throw std::runtime_error("Error: Config: Syntax error.");
       }
     }
   }
 }
 
-void ConfigParser::serverValidate(const ServerConfig &server, const int &exist_flag) {
+void ConfigParser::serverValidate(const ServerConfig &server,
+                                  const int &exist_flag) {
   // 必須項目が設定されていなかったらエラー
   if (!(exist_flag & BIT_FLAG_LISTEN)) {
-	throw std::runtime_error("Error: Config: Need listen setting");
+    throw std::runtime_error("Error: Config: Need listen setting");
   }
 
   if (isDupLocation(server)) {
-	throw std::runtime_error("Error: Config: Duplicated location");
+    throw std::runtime_error("Error: Config: Duplicated location");
   }
 
   if (!isValidStatus(server.error_pages)) {
-	  throw std::runtime_error("Error: Config: Invalid error_page");
+    throw std::runtime_error("Error: Config: Invalid error_page");
   }
 }
 
 void ConfigParser::locationValidate(const LocationConfig &location) {
-	if (!isValidVector(location.allowed_methods, VALID_METHODS)) {
-		throw std::runtime_error("Error: Config: Invalid allowed_method");
-	}
-	if (!isValidStatus(location.redirect)) {
-		throw std::runtime_error("Error: Config: Invalid return");
-	}
+  if (!isValidVector(location.allowed_methods, VALID_METHODS)) {
+    throw std::runtime_error("Error: Config: Invalid allowed_method");
+  }
+  if (!isValidStatus(location.redirect)) {
+    throw std::runtime_error("Error: Config: Invalid return");
+  }
 }
 
 // parseServer関連関数
@@ -182,9 +190,10 @@ void ConfigParser::parseServerName(ServerConfig &server,
 }
 
 void ConfigParser::parseRoot(ServerConfig &server,
-                             std::vector<std::string>::iterator &it, unsigned int &exist_flag) {
+                             std::vector<std::string>::iterator &it,
+                             unsigned int &exist_flag) {
   if (exist_flag & BIT_FLAG_ROOT) {
-	  throw std::runtime_error("Error: Config: Duplicated root");
+    throw std::runtime_error("Error: Config: Duplicated root");
   }
   exist_flag |= BIT_FLAG_ROOT;
   server.root = it->substr(0, it->find(";"));
@@ -199,9 +208,11 @@ void ConfigParser::parseErrorPages(ServerConfig &server,
 }
 
 void ConfigParser::parseClientBodySizeLimit(
-    ServerConfig &server, std::vector<std::string>::iterator &it, unsigned int &exist_flag) {
+    ServerConfig &server, std::vector<std::string>::iterator &it,
+    unsigned int &exist_flag) {
   if (exist_flag & BIT_FLAG_BODY_LIMIT) {
-	  throw std::runtime_error("Error: Config: Duplicated client_body_size_limit");
+    throw std::runtime_error(
+        "Error: Config: Duplicated client_body_size_limit");
   }
   exist_flag |= BIT_FLAG_BODY_LIMIT;
   server.client_body_size_limit = ft_stoi(*it);
@@ -209,9 +220,10 @@ void ConfigParser::parseClientBodySizeLimit(
 
 // parseLocation関連関数
 void ConfigParser::parseLocationRoot(LocationConfig &location,
-                                     std::vector<std::string>::iterator &it, unsigned int &l_exist_flag) {
+                                     std::vector<std::string>::iterator &it,
+                                     unsigned int &l_exist_flag) {
   if (l_exist_flag & BIT_FLAG_LOC_ROOT) {
-	  throw std::runtime_error("Error: Config: Duplicated root in location");
+    throw std::runtime_error("Error: Config: Duplicated root in location");
   }
   l_exist_flag |= BIT_FLAG_LOC_ROOT;
   location.root = it->substr(0, it->find(";"));
@@ -244,12 +256,13 @@ void ConfigParser::parseLocationIndexes(
 }
 
 void ConfigParser::parseLocationAutoindexes(
-  LocationConfig &location, std::vector<std::string>::iterator &it, unsigned int &l_exist_flag) {
+    LocationConfig &location, std::vector<std::string>::iterator &it,
+    unsigned int &l_exist_flag) {
   if (l_exist_flag & BIT_FLAG_AUTOINDEX) {
-	  throw std::runtime_error("Error: Config: Duplicated autoindex");
+    throw std::runtime_error("Error: Config: Duplicated autoindex");
   }
   l_exist_flag |= BIT_FLAG_AUTOINDEX;
-  
+
   if (it->substr(0, it->find(";")) == "on") {
     location.autoindex = true;
   } else if (it->substr(0, it->find(";")) == "off") {
@@ -260,7 +273,7 @@ void ConfigParser::parseLocationAutoindexes(
 }
 
 void ConfigParser::parseLocationCGIExtension(
-  LocationConfig &location, std::vector<std::string>::iterator &it) {
+    LocationConfig &location, std::vector<std::string>::iterator &it) {
   int num = countContents(it);
   for (int i = 0; i < num; ++i, ++it) {
     if (it->find(";") != std::string::npos) {
@@ -282,34 +295,35 @@ void ConfigParser::parseLocationRedirect(
 
 // validate関連の関数
 //このやり方で良いのか要検討
-//it_x++の部分
+// it_x++の部分
 bool ConfigParser::isDupLocation(const ServerConfig &server) {
-	std::vector<LocationConfig>::const_iterator it_x = server.locations.begin();
-	std::vector<LocationConfig>::const_iterator it_y = server.locations.begin();
-	it_x++;
-	for (;it_y != server.locations.end(); it_y++) {
-		for (; it_x != server.locations.end(); it_x++) {
-			if (it_x->location == it_y->location) {
-				return true;
-			}
-		}
-	}
-	return false;
+  std::vector<LocationConfig>::const_iterator it_x = server.locations.begin();
+  std::vector<LocationConfig>::const_iterator it_y = server.locations.begin();
+  it_x++;
+  for (; it_y != server.locations.end(); it_y++) {
+    for (; it_x != server.locations.end(); it_x++) {
+      if (it_x->location == it_y->location) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 bool ConfigParser::isValidStatus(const std::map<int, std::string> &config_map) {
-	std::map<int, std::string>::const_iterator it = config_map.begin();
-	for (; it != config_map.end(); ++it) {
-		if (it->first <= 100 || it->first >=600) {
-			return false;
-		}
-	}
-	return true;
+  std::map<int, std::string>::const_iterator it = config_map.begin();
+  for (; it != config_map.end(); ++it) {
+    if (it->first <= 100 || it->first >= 600) {
+      return false;
+    }
+  }
+  return true;
 }
 
-bool ConfigParser::isValidVector(const std::vector<std::string> vec_to_check, const std::vector<std::string> valid_vec) {
-  return std::includes(valid_vec.begin(), valid_vec.end(), vec_to_check.begin(),                                                       
-                        vec_to_check.end());
+bool ConfigParser::isValidVector(const std::vector<std::string> vec_to_check,
+                                 const std::vector<std::string> valid_vec) {
+  return std::includes(valid_vec.begin(), valid_vec.end(), vec_to_check.begin(),
+                       vec_to_check.end());
 }
 
 // その他utils

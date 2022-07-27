@@ -6,6 +6,24 @@
 
 const std::map<std::string, std::string> CGI::EXEC_COMMANDS = CGI::setExecuteCommands();
 const std::map<std::string, std::string> CGI::EXEC_PATHS = CGI::setExecutePaths();
+std::string CGI::getResponseFromCGI() const { return cgi_response_; }
+
+std::map<std::string, std::string> CGI::setExecutePaths() {
+	std::map<std::string, std::string> exec_paths;
+
+	exec_paths[".py"] = "/usr/bin/python3";
+	exec_paths[".pl"] = "/usr/bin/perl";
+
+	return exec_paths;
+}
+std::map<std::string, std::string> CGI::setExecuteCommands() {
+	std::map<std::string, std::string> exec_commands;
+
+	exec_commands[".py"] = "python3";
+	exec_commands[".pl"] = "perl";
+
+	return exec_commands;
+}
 
 CGI::CGI() {}
 CGI::~CGI() {}
@@ -29,25 +47,6 @@ void CGI::run(HttpRequestDTO &req, ConfigDTO &conf, Path &path) {
   utility::freeArrays(exec_envs);
 }
 
-std::string CGI::getResponseFromCGI() const { return cgi_response_; }
-
-std::map<std::string, std::string> CGI::setExecutePaths() {
-	std::map<std::string, std::string> exec_paths;
-
-	exec_paths[".py"] = "/usr/bin/python3";
-	exec_paths[".pl"] = "/usr/bin/perl";
-
-	return exec_paths;
-}
-
-std::map<std::string, std::string> CGI::setExecuteCommands() {
-	std::map<std::string, std::string> exec_commands;
-
-	exec_commands[".py"] = "python3";
-	exec_commands[".pl"] = "perl";
-
-	return exec_commands;
-}
 
 char *CGI::allocStr(const std::string &str) {
   char *ret = strdup(str.c_str());

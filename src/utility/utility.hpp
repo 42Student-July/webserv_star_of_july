@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace utility {
 std::string trimCopyIf(const std::string& str, const std::string& set);
