@@ -2,6 +2,7 @@
 #define SRC_HTTPPARSER_HPP_
 
 #include "HttpRequest.hpp"
+#include "utility.hpp"
 
 class HttpParser {
  public:

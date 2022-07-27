@@ -174,6 +174,15 @@ TEST_F(HttpRequestParserTest, NoHttpVersion) {
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
+TEST_F(HttpRequestParserTest, InvalidMethod) {
+  std::string file_name = "invalid_method.crlf";
+  HttpRequest *req = buildRequest(file_dir + file_name, config);
+
+  checkBody("", req->body);
+  ASSERT_EQ(0, req->name_value_map.size());
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
+}
+
 TEST_F(HttpRequestParserTest, InvalidProtocol) {
   std::string file_name = "invalid_protocol.crlf";
   HttpRequest *req = buildRequest(file_dir + file_name, config);
