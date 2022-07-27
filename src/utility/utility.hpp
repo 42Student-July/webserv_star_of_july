@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <string.h>
 
 namespace utility {
 std::string trimCopyIf(const std::string& str, const std::string& set);
