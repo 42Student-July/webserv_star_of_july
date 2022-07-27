@@ -8,6 +8,7 @@
 #include "../CGI.hpp"
 #include "../CGIParser.hpp"
 #include "../Path.hpp"
+#include "../HttpResponseBuilder.hpp"
 
 void setReqForConfTest(HttpRequestDTO &req)
 {
@@ -28,6 +29,18 @@ void setReqPath(HttpRequestDTO &req, std::string path)
 std::string ReadIndexHtml()
 {
 	std::ifstream ifs("./html/index.html");
+	std::string line;
+	std::stringstream res;
+	
+	while (std::getline(ifs, line)){
+        res << line << "\r\n";
+    }
+	return res.str();
+}
+
+std::string Read(std::string path)
+{
+	std::ifstream ifs(path.c_str());
 	std::string line;
 	std::stringstream res;
 	
@@ -343,6 +356,262 @@ TEST(MIMETest, end_is_dot)
 	HttpResponse *res = builder.build(req);
 	
 	EXPECT_EQ(res->ContentType(), "application/octet-stream");
+}
+
+TEST(LocationTest, found_in_second_location)
+{
+	ConfigDTO conf_;
+	LocationConfig loc_1;
+	LocationConfig loc_2;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/index.html"));
+
+	loc_1.root = "html";
+	loc_1.location = "/upload/";
+	conf_.locations.push_back(loc_1);
+
+	loc_2.root = "html";
+	loc_2.location = "/";
+	conf_.locations.push_back(loc_2);
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), ReadIndexHtml());
+}
+
+TEST(LocationTest, found_in_third_location)
+{
+	ConfigDTO conf_;
+	LocationConfig loc_1;
+	LocationConfig loc_2;
+	LocationConfig loc_3;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/upload/sample.txt"));
+
+	loc_1.root = "html";
+	loc_1.location = "/img/";
+	conf_.locations.push_back(loc_1);
+
+	loc_2.root = "/";
+	loc_2.location = "/";
+	conf_.locations.push_back(loc_2);
+	
+	loc_3.root = "html";
+	loc_3.location = "/upload/";
+	conf_.locations.push_back(loc_3);
+	
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), Read(std::string("./html/upload/sample.txt")));
+}
+
+
+TEST(IndexTest, default_html)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/"));
+	setRoot(conf_, std::string("html"));
+	
+	conf_.root = "html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), ReadIndexHtml());
+}
+
+TEST(IndexTest, location_conf_first_html)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/"));
+	
+	conf_.root = "html/index";
+	loc.location = "/";
+	loc.indexes.push_back(std::string("hello.html"));
+	conf_.locations.push_back(loc);
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), Read(std::string("./html/index/hello.html")));
+}
+
+TEST(IndexTest, location_conf_second_html)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/"));
+	
+	conf_.root = "html/index";
+	loc.location = "/";
+	loc.indexes.push_back(std::string("hey.html"));
+	loc.indexes.push_back(std::string("hello.html"));
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), Read(std::string("./html/index/hello.html")));
+}
+
+TEST(ErrorTest, error_pages_exists)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/error_page"));
+	
+	conf_.root = "html";
+	conf_.error_pages[404] = "/40x.html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), Read(std::string("./html/40x.html")));
+}
+
+static std::string toString(size_t val) {
+  std::stringstream ss;
+
+  ss << val;
+  return ss.str();
+}
+
+std::string BuildDefault404Error(int httpStatus, ConfigDTO &conf_)
+{
+	const std::string CRLF = "\r\n";
+	const std::string SP = " ";
+	std::string status_code = toString(httpStatus);
+	std::stringstream res_body_str_;
+	res_body_str_	<< "<html>" << CRLF
+					<< "<head><title>" << status_code << SP << "Not Found" << "</title><head>" << CRLF
+					<< "<body>" << CRLF
+					<< "<center><h1>" << status_code << SP << "Not Found" << "</h1></center>" << CRLF
+					<< "</body>" << CRLF
+					<< "<hr><center>" << conf_.server << "</center>" << CRLF
+					<< "</body>" << CRLF
+					<< "</html>" << CRLF
+					<< CRLF;
+	return res_body_str_.str();
+}
+
+TEST(ErrorTest, error_pages_not_exist)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/error_page"));
+	
+	conf_.root = "html";
+	conf_.server = "webserv";
+	conf_.error_pages[404] = "/405.html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+
+	EXPECT_EQ(res->Body(), BuildDefault404Error(404, conf_));
+}
+
+TEST(ErrorTest, double_error_pages_exist_in_first)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/error_page"));
+	
+	conf_.root = "html";
+	conf_.server = "webserv";
+	conf_.error_pages[404] = "/40x.html";
+	conf_.error_pages[504] = "/40x.html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+
+	EXPECT_EQ(res->Body(), Read(std::string("./html/40x.html")));
+}
+
+TEST(ErrorTest, double_error_pages_not_exist_in_first)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/error_page"));
+	
+	conf_.root = "html";
+	conf_.server = "webserv";
+	conf_.error_pages[404] = "/405.html";
+	conf_.error_pages[504] = "/40x.html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+
+	EXPECT_EQ(res->Body(), BuildDefault404Error(404, conf_));
+}
+
+TEST(ErrorTest, double_error_pages_exist_in_second)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/error_page"));
+	
+	conf_.root = "html";
+	conf_.server = "webserv";
+	conf_.error_pages[504] = "/40x.html";
+	conf_.error_pages[404] = "/40x.html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+
+	EXPECT_EQ(res->Body(), Read(std::string("./html/40x.html")));
+}
+
+TEST(ErrorTest, double_error_pages_not_exist_in_second)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/error_page"));
+	
+	conf_.root = "html";
+	conf_.server = "webserv";
+	conf_.error_pages[504] = "/40x.html";
+	conf_.error_pages[404] = "/405.html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+
+	EXPECT_EQ(res->Body(), BuildDefault404Error(404, conf_));
 }
 
 // CGIとのコネクションのために追加させていただきました

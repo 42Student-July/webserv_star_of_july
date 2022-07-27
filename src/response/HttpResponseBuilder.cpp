@@ -279,6 +279,8 @@ std::string HttpResponseBuilder::getReasonPhrase(std::string httpStatus)
 		return HttpStatus::ReasonPhrase::UNAUTHORIZED;
 	else if (httpStatus == HttpStatus::FORBIDDEN)
 		return HttpStatus::ReasonPhrase::FORBIDDEN;
+	else if (httpStatus == HttpStatus::NOT_FOUND)
+		return HttpStatus::ReasonPhrase::NOT_FOUND;
 	else if (httpStatus == HttpStatus::INTERNAL_SERVER_ERROR)
 		return HttpStatus::ReasonPhrase::INTERNAL_SERVER_ERROR;
 	else if (httpStatus == HttpStatus::SERVICE_UNAVAILABLE)
@@ -361,11 +363,17 @@ HttpResponse *HttpResponseBuilder::buildErrorResponse(int httpstatus, HttpReques
 		return buildDefaultErrorPage(httpstatus, req);
 	try
 	{
-		readFile(found_location_.root + error_page);
-		buildHeader(req);
+		if (filepath_.exists){
+			if (!found_location_.root.empty())
+				readFile(found_location_.root + error_page);
+		} else {
+			readFile(default_root_ + error_page);
+		}
+		buildErrorHeader(req, httpstatus, res_body_str_.str());
 	}
 	catch(const std::runtime_error& e)
 	{
+		std::cerr << e.what() << std::endl;
 		return buildDefaultErrorPage(httpstatus, req);
 	}
 	
