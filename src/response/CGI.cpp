@@ -104,7 +104,7 @@ char ** CGI::createEnvs(Path &path) {
   map_env["SERVER_PROTOCOL"] = "HTTP/1.1";
   map_env["SERVER_SOFTWARE"] = "webserv/1.0";
 
-  char ** exec_envs = map2Array(map_env, "=");
+  char ** exec_envs = utility::map2Array(map_env, "=");
   return exec_envs;
 }
 
@@ -189,21 +189,7 @@ char *CGI::allocStr(const std::string &str) {
   return ret;
 }
 
-char **map2Array(std::map<std::string, std::string> map_env,
-                 std::string connector) {
-  char **array_env = NULL;
-  array_env = new char *[map_env.size() + 1];
-  size_t i = 0;
-  std::map<std::string, std::string>::const_iterator it = map_env.begin();
-  for (; it != map_env.end(); it++, i++) {
-    std::string env_str = it->first + connector + it->second;
-    array_env[i] = strdup(env_str.c_str());
-  }
-  array_env[i] = NULL;
-  return array_env;
-}
-
-void throwclose(int fd) {
+void CGI::throwclose(int fd) {
   if (close(fd) == -1) {
     throw -1;
   }

@@ -6,11 +6,14 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <map>
 
 namespace utility {
 std::string trimCopyIf(const std::string& str, const std::string& set);
 std::string toLower(const std::string& str);
 void freeArrays(char** arrays);
+char **map2Array(std::map<std::string, std::string> map_env,
+                 std::string connector);
 
 template <typename T>
 std::string toString(T& val);
