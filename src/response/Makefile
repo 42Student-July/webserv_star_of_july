@@ -6,7 +6,7 @@
 #    By: mhirabay <mhirabay@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/13 18:47:47 by mhirabay          #+#    #+#              #
-#    Updated: 2022/07/20 17:06:57 by mhirabay         ###   ########.fr        #
+#    Updated: 2022/07/25 13:18:18 by user42           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,11 +18,13 @@ SRCS			:=	HttpResponse.cpp \
 					HttpResponsePlainText.cpp \
 					MIMEType.cpp \
 					CGI.cpp \
+					CGIParser.cpp\
 					Path.cpp
 
 CXX				:= c++
 RM				:= rm -rf
 INC				:= -I . \
+				   -I ../utility
 
 CXXFLAGS		:= -Wall -Wextra -Werror -std=c++98 $(INC) -pedantic -Wshadow
 DEBUG			:= -fsanitize=address
@@ -33,6 +35,9 @@ OBJS 	:= $(addprefix $(OBJSDIR), $(SRCS:%.cpp=%.o))
 DEPS	:= $(OBJS:.o=.d)
 
 SRCSDIR := ./
+
+UTILITY_DIR := ../utility
+LIB_UTILITY := $(UTILITY_DIR)/libutility.a
 
 all:			$(NAME)
 
@@ -68,49 +73,64 @@ debug:			re
 
 .PHONY:			all clean fclean re run
 
-#cgiをgoogleテストで追加
-gtestdir	=	./cgitest
-gtest		=	$(gtestdir)/gtest $(gtestdir)/googletest-release-1.11.0
+$(LIB_UTILITY): dummy
+	@$(MAKE) -C $(UTILITY_DIR)
 
-testdir = ./gtest
+.PHONY: dummy
+dummy:
 
-$(gtest):
-	curl -OL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
-	tar -xvzf release-1.11.0.tar.gz googletest-release-1.11.0
-	$(RM) -rf release-1.11.0.tar.gz
-	python3 googletest-release-1.11.0/googletest/scripts/fuse_gtest_files.py $(gtestdir)
-	mv googletest-release-1.11.0 $(gtestdir)
+error_status_grep = grep 'HttpStatus::' $(shell find ../request -maxdepth 1 -name '*.cpp') \
+					| grep -v OK \
+					| cut -d : -f 4 \
+					| cut -d , -f 1 \
+					| sort \
+					| uniq
+# リクエストパース中に発生するエラーステータス一覧を表示する
+.PHONY: parse_error_status
+parse_error_status:
+	@$(error_status_grep)
+	@echo "###"
+	@echo -n "種類は"
+	@$(error_status_grep) | wc -l
+	@echo "###"
 
-test_compile = clang++ -std=c++11 HttpResponse.cpp \
-					CGI.cpp \
-					CGIParser.cpp\
-					HttpResponseBuilder.cpp \
-					HttpResponseSerializer.cpp \
-					HttpResponsePlainText.cpp \
-					Path.cpp \
-					MIMEType.cpp \
-	$(testdir)/gtest.cpp \
-	$(gtestdir)/googletest-release-1.11.0/googletest/src/gtest_main.cc $(gtestdir)/gtest/gtest-all.cc \
-	-I$(gtestdir) -I$(includes) -lpthread -o tester
-	
-res_test_compile = clang++ -std=c++11 HttpResponse.cpp \
-					CGI.cpp \
-					CGIParser.cpp\
-					HttpResponseBuilder.cpp \
-					HttpResponseSerializer.cpp \
-					HttpResponsePlainText.cpp \
-					MIMEType.cpp \
-					Path.cpp \
-	$(testdir)/response_test.cpp \
-	$(gtestdir)/googletest-release-1.11.0/googletest/src/gtest_main.cc $(gtestdir)/gtest/gtest-all.cc \
-	-I$(gtestdir) -I$(includes) -lpthread -o res_tester
+# Googleテスト
+ROOT_DIR = ../..
+GTEST_DIR = $(ROOT_DIR)/tests/googletest-release-1.12.1
 
-.PHONY: cgitest
-cgitest: $(gtest)
-	$(test_compile)
-	./tester # --gtest_filter=Vector.other
+TEST_RESPONSE_SRCS = gtest/response_test.cpp
+TEST_CGI_SRCS = gtest/gtest.cpp
+
+LDFLAGS = -L$(GTEST_DIR)/lib \
+		  -L. \
+		  -L$(UTILITY_DIR) \
+		  $(NULL)
+
+LDLIBS = -lgtest \
+		 -lgtest_main \
+		 -lpthread \
+		 $(NAME) \
+		 $(LIB_UTILITY) \
+		 $(NULL)
+
+$(GTEST_DIR):
+	$(MAKE) -C $(ROOT_DIR) setup_gtest
+
+.PHONY: test
+test: restest cgitest
 
 .PHONY: restest
-restest: $(gtest)
-	$(res_test_compile)
-	./res_tester # --gtest_filter=Vector.other
+restest: INC += -I$(GTEST_DIR)/googletest/include
+restest: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
+	clang++ -std=c++11 $(INC) $(TEST_RESPONSE_SRCS) $(LDFLAGS) $(LDLIBS) -o tester
+	-@./tester
+	@$(RM) tester
+
+
+.PHONY: cgitest
+cgitest: INC += -I$(GTEST_DIR)/googletest/include
+cgitest: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
+	clang++ -std=c++11 $(INC) $(TEST_CGI_SRCS) $(LDFLAGS) $(LDLIBS) -o tester
+	-@./tester
+	@$(RM) tester
+

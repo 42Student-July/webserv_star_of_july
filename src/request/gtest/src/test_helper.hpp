@@ -3,14 +3,19 @@
 
 #include "ConfigDTO.hpp"
 #include "HttpRequest.hpp"
+#include "HttpRequestConverter.hpp"
 #include "HttpRequestDTO.hpp"
 #include "HttpRequestParser.hpp"
 #include "ServerConfig.hpp"
 
-void compareString(const std::string &expected, const std::string &actual);
-ServerConfig initServerCongig();
+const std::string file_dir = "gtest/request/";
+
 ServerConfig initServerConfigWithLocation();
 std::string readFile(const char *filepath);
+HttpRequest *buildRequest(const std::string &filepath,
+                          const ServerConfig config);
+HttpRequestDTO *buildDTO(const std::string &filepath,
+                         const ServerConfig config);
 void checkRequestline(const std::string &method, const std::string &uri,
                       const std::string &version, HttpRequest *request);
 void checkRequestline(const std::string &method, const std::string &uri,

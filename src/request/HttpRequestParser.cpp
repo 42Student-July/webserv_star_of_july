@@ -1,219 +1,94 @@
 #include "HttpRequestParser.hpp"
+#include "utility.hpp"
 
-const std::string HttpRequestParser::CRLF = "\r\n";
-const std::string HttpRequestParser::WS = " \t";
-const std::string HttpRequestParser::Delimiters = "\"(),/:;<=>?@[\\]{}";
-
-HttpRequestParser::HttpRequestParser() : raw_buffer_(""), offset_(0) {}
+HttpRequestParser::HttpRequestParser() {}
 
 HttpRequestParser::~HttpRequestParser() {}
 
-HttpRequestParser::ParseErrorExeption::ParseErrorExeption(
-    const std::string& error_status, const std::string& reason)
-    : std::runtime_error(reason), error_status_(error_status) {}
-
-HttpRequestParser::ParseErrorExeption::~ParseErrorExeption() throw() {}
-
-const std::string& HttpRequestParser::ParseErrorExeption::getErrorStatus()
-    const {
-  return error_status_;
-}
-
 // 2つの引数はコンストラクタで渡した方が読みやすいかも。
-HttpRequest* HttpRequestParser::parse(const char* request_str,
-                                      const ServerConfig& server_config) {
-  raw_buffer_ = request_str;
-  HttpRequest* request = new HttpRequest(server_config);
+HttpRequest *HttpRequestParser::parse(const char *buffer,
+                                      const ServerConfig &server_config) {
+  HttpRequest *req = new HttpRequest(server_config);
+  StringPos offset = 0;
 
   try {
-    parseRequestLine(request);
-    parseHeaderField(request);
-    parseBody(request);
-  } catch (const ParseErrorExeption& e) {
-    request->response_status_code = e.getErrorStatus();
+    validateRequestLength(buffer);
+    req->request_line = parseRequestLine(buffer, &offset);
+    req->name_value_map = parseHeaderField(buffer, &offset);
+    req->body = parseBody(buffer, offset);
+  } catch (const ParseErrorExeption &e) {
+    req->response_status_code = e.getErrorStatus();
+    std::cerr << e.what() << std::endl;
+  } catch (
+      const std::exception &
+          e) {  // (...)ですべての例外をキャッチした方がいいかも。でもe.what()でエラーメッセージを見たいのでこちらで対応
+    req->response_status_code = HttpStatus::INTERNAL_SERVER_ERROR;
     std::cerr << e.what() << std::endl;
   }
-  return request;
+  return req;
 }
 
-void HttpRequestParser::parseRequestLine(HttpRequest* request) {
-  StringPos offset = 0;
-  std::string line = getLine();
-
-  offset = parseMethod(line, request);
-  offset = parseUri(line, request, offset);
-  offset = parseHttpVersion(line, request, offset);
-  validateRequestLine(request);
-}
-
-HttpRequestParser::StringPos HttpRequestParser::parseMethod(
-    const std::string& request_line, HttpRequest* request) {
-  StringPos method_end = request_line.find_first_of(" ");
-
-  request->method = request_line.substr(0, method_end);
-  return method_end;
-}
-
-HttpRequestParser::StringPos HttpRequestParser::parseUri(
-    const std::string& request_line, HttpRequest* request, StringPos offset) {
-  StringPos uri_begin = request_line.find_first_not_of(" ", offset);
-  // StringPos uri_end = request_line.find_last_of(" ");
-  StringPos uri_end = request_line.find_first_of(" ", uri_begin);
-
-  request->uri = request_line.substr(uri_begin, uri_end - uri_begin);
-  return uri_end;
-}
-
-HttpRequestParser::StringPos HttpRequestParser::parseHttpVersion(
-    const std::string& request_line, HttpRequest* request, StringPos offset) {
-  request->version = request_line.substr(offset + 1);
-  return std::string::npos;
-}
-
-void HttpRequestParser::validateRequestLine(HttpRequest* request) {
-  if (request->method.empty()) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No Method");
+// http://nginx.org/en/docs/http/ngx_http_core_module.html#client_header_buffer_size
+void HttpRequestParser::validateRequestLength(const std::string &buffer) {
+  StringPos header_end = buffer.find(CRLF + CRLF);
+  if (header_end == std::string::npos) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No header_end");
   }
-  if (request->uri.empty()) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No Uri");
+  if (header_end > kMaxHeaderLength) {
+    throw ParseErrorExeption(HttpStatus::REQUEST_HEADER_FIELD_TOO_LARGE,
+                             "request is too long");
   }
-  if (request->version.empty()) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No Version");
-  }
-  // httpversion
-  if (request->version.size() != 8) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
-                             "HttpVersion length error");
-  }
-  if (request->version.compare(0, 4, "HTTP") != 0) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "Invalid Protocol");
-  }
-  if (request->version.compare(4, 1, "/") != 0) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "/ is not found");
-  }
-
-  std::string version_num = request->version.substr(5);
-  if (version_num[1] != '.') {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, ". is not found");
-  }
-  if (!isdigit(version_num[0]) || !isdigit(version_num[2])) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
-                             "version has other than digit");
-  }
-  if (version_num[0] != '1' || version_num[2] != '1') {
-    throw ParseErrorExeption(HttpStatus::HTTP_VERSION_NOT_SUPPORTED,
-                             "version is not supported");
+  size_t body_len = buffer.size() - header_end;
+  if (body_len > kMaxBodyLength) {
+    throw ParseErrorExeption(HttpStatus::PAYLOAD_TOO_LARGE, "body is too long");
   }
 }
 
-void HttpRequestParser::parseHeaderField(HttpRequest* request) {
-  for (std::string line = getLine(); line.size() != 0; line = getLine()) {
-    HeaderFieldPair name_value_pair = makeHeaderFieldPair(line);
+RequestLine HttpRequestParser::parseRequestLine(const std::string &buffer,
+                                                StringPos *offset) {
+  RequestLineParser rl_parser;
+  RequestLine request_line = rl_parser.parse(getLine(buffer, offset));
 
-    validateHeaderField(name_value_pair);
-    request->name_value_map.insert(name_value_pair);
-  }
-  validateHeaderFields(request->name_value_map);
+  return request_line;
 }
 
-void HttpRequestParser::validateHeaderFields(const HeaderFieldMap& headers) {
-  HeaderFieldMap::const_iterator it = headers.find("Host");
-  if (it == headers.end()){
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
-                             "no host");
+HttpRequest::HeaderFieldMap HttpRequestParser::parseHeaderField(
+    const std::string &buffer, StringPos *offset) {
+  StringVector headerfield_vec;
+  HeaderFieldParser hf_parser;
+  HeaderFieldMap headerfield_map;
+
+  for (std::string line = getLine(buffer, offset); line.size() != 0;
+       line = getLine(buffer, offset)) {
+    headerfield_vec.push_back(line);
   }
+  headerfield_map = hf_parser.parse(headerfield_vec);
+  return headerfield_map;
 }
 
-bool isWS(int c) { return (c == ' ' || c == '\t'); }
-
-bool HttpRequestParser::isHeaderDelimiter(int c) {
-  return Delimiters.find(c) != std::string::npos;
-}
-
-bool HttpRequestParser::isHeaderTokenChar(int c) {
-  if (isHeaderDelimiter(c) || c == ' ') {
-    return false;
-  }
-  return isprint(c);
-}
-
-bool HttpRequestParser::isHeaderToken(const std::string& str) {
-  if (str.empty()) {
-    return false;
-  }
-  for (StringPos pos = 0; pos <= str.size() - 1; ++pos) {
-    if (!isHeaderTokenChar(str[pos])) {
-      return false;
-    }
-  }
-  return true;
-}
-
-std::string HttpRequestParser::trimCopyIf(const std::string& str,
-                                          const std::string& set) {
-  if (str.empty() || set.empty()) {
-    return str;
-  }
-  StringPos begin = str.find_first_not_of(set);
-  StringPos end = str.find_last_not_of(set);
-  size_t len = end - begin + 1;
-  if (begin == std::string::npos) {
+std::string HttpRequestParser::parseBody(const std::string &buffer,
+                                         StringPos offset) {
+  // bodyがないケース
+  if (offset == buffer.size()) {
     return "";
   }
 
-  return str.substr(begin, len);
-}
-
-void HttpRequestParser::validateHeaderField(HeaderFieldPair headerfield_pair) {
-  std::string field_name = headerfield_pair.first;
-  std::string field_value = headerfield_pair.second;
-
-  if (field_name.empty()) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
-                             "header has no field name");
+  StringPos body_end = buffer.find(CRLF, offset);
+  if (body_end == std::string::npos) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No body_end");
   }
-  if (isWS(field_name[field_name.size() - 1])) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
-                             "header has space before colon");
-  }
-  if (!isHeaderToken(field_name)) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
-                             "field_name is not header token");
-  }
-}
-
-// 変数宣言と初期化を同時にするとなんか読みにくい。
-HttpRequestParser::HeaderFieldPair HttpRequestParser::makeHeaderFieldPair(
-    const std::string& line) {
-  StringPos name_end = line.find_first_of(":");
-  if (name_end == std::string::npos) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "header has no colon");
-  }
-  std::string name = line.substr(0, name_end);
-  std::string value = trimCopyIf(line.substr(name_end + 1), WS);
-
-  return HeaderFieldPair(name, value);
-}
-
-void HttpRequestParser::parseBody(HttpRequest* request) {
-  // bodyがないケース
-  if (offset_ == raw_buffer_.size()) {
-    return;
-  }
-  for (std::string line = getLine(); line.size() != 0; line = getLine()) {
-    request->body += line;
-    request->body += "\n";
-  }
+  return buffer.substr(offset, body_end - offset);
 }
 
 // 変数宣言と初期化を同時にするとなんか読みにくい。
 // 現在のオフセットから一行読み取る関数。読み取ったら次の行頭にoffsetを進める
-std::string HttpRequestParser::getLine() {
-  StringPos crlf_pos = raw_buffer_.find(CRLF, offset_);
+std::string HttpRequestParser::getLine(const std::string &buffer,
+                                       StringPos *offset) {
+  StringPos crlf_pos = buffer.find(CRLF, *offset);
   if (crlf_pos == std::string::npos) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "getLine() error");
   }
-  std::string line = raw_buffer_.substr(offset_, crlf_pos - offset_);
-  offset_ = crlf_pos + 2;
+  std::string line = buffer.substr(*offset, crlf_pos - *offset);
+  *offset = crlf_pos + 2;
   return line;
 }

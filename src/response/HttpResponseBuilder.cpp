@@ -1,5 +1,6 @@
 #include "HttpResponseBuilder.hpp"
 #include "HttpRequestDTO.hpp"
+#include "utility.hpp"
 
 const std::string HttpResponseBuilder::CRLF = "\r\n";
 const std::string HttpResponseBuilder::ACCEPT_RANGES = "none";
@@ -212,13 +213,6 @@ std::string HttpResponseBuilder::buildLastModified()
 	return mod_time;
 }
 
-static std::string toString(size_t val) {
-  std::stringstream ss;
-
-  ss << val;
-  return ss.str();
-}
-
 std::string HttpResponseBuilder::getContentTypeByExtension()
 {
 	MIMEType mime;
@@ -252,7 +246,7 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 	// とりあえずブラウザから見れるようにしました。
 	header_.content_type = getContentTypeByExtension();
 	size_t  content_length = res_body_str_.str().size();
-	header_.content_length = toString(content_length);
+	header_.content_length = utility::toString(content_length);
 	header_.last_modified = buildLastModified();
 	header_.connection = req.connection;
 	// 特にこういうふうにしろみたいな指定があるわけでもなさそう RFC7232
@@ -295,15 +289,28 @@ std::string HttpResponseBuilder::getReasonPhrase(std::string httpStatus)
 		return "";
 }
 
+//3つのcgiからのヘッダーをいれる必要あり
+void HttpResponseBuilder::updateHeader()
+{
+	header_.status_code = HttpStatus::OK;
+	header_.content_type = TEXT_HTML;
+}
 
-void HttpResponseBuilder::doCGI(HttpRequestDTO req)
+void HttpResponseBuilder::doCGI(HttpRequestDTO &req)
 {
 	//TODO: ここにCGIの処理を追加
-	(void)req;
-	/* Path path(req.path); */
-	/* cgi_.run(req, conf_, path); */
-	/* std::string cgi_response = cgi_.getResponseFromCGI(); */
-	/* std::cout << cgi_response << std::endl; */
+	Path path(req.path, conf_);
+	
+	cgi_.run(req, conf_, path);
+	std::string cgi_response = cgi_.getResponseFromCGI();
+	cgi_parser_.parse(cgi_response);
+	//bodyの作成
+	res_body_str_ << cgi_parser_.getBodyStr();	
+
+	buildHeader(req);
+	//TODO: このあとcgiによるupdateHeaderを実行
+	updateHeader();
+	
 }
 
 void HttpResponseBuilder::buildErrorHeader(HttpRequestDTO &req, int httpStatus, std::string body_str)
@@ -312,7 +319,7 @@ void HttpResponseBuilder::buildErrorHeader(HttpRequestDTO &req, int httpStatus, 
 	if (body_str.empty())
 		throw std::runtime_error("body uncreated");
 	header_.version = req.version;
-	header_.status_code = toString(httpStatus);
+	header_.status_code = utility::toString(httpStatus);
 	header_.reason_phrase = getReasonPhrase(header_.status_code);
 	header_.date = buildDate();
 	header_.content_length = body_str.size();
@@ -322,7 +329,7 @@ void HttpResponseBuilder::buildErrorHeader(HttpRequestDTO &req, int httpStatus, 
 
 void HttpResponseBuilder::buildDefaultErrorBody(int httpStatus)
 {
-	std::string status_code = toString(httpStatus);
+	std::string status_code = utility::toString(httpStatus);
 	
 	res_body_str_	<< "<html>" << CRLF
 					<< "<head><title>" << status_code << SP << getReasonPhrase(status_code) << "</title><head>" << CRLF
@@ -343,14 +350,10 @@ HttpResponse *HttpResponseBuilder::buildDefaultErrorPage(int httpStatus, HttpReq
 }
 
 // http requestのpathをdirの部分とfileの部分に分解
-void HttpResponseBuilder::parseRequestPath(std::string req_path)
+void HttpResponseBuilder::parseRequestPath(const Path &path)
 {
-	size_t last_slash_pos = req_path.find_last_of('/');
-	if (last_slash_pos == std::string::npos) {
-		throw std::runtime_error("no slash found in request path");
-    }
-	path_dir_ = req_path.substr(0, last_slash_pos + 1);
-	path_file_ = req_path.substr(last_slash_pos + 1);
+	path_dir_ = path.getPathDir();
+	path_file_ = path.getPathFile();
 }
 
 HttpResponse *HttpResponseBuilder::buildErrorResponse(int httpstatus, HttpRequestDTO &req)
@@ -414,7 +417,8 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 	try
 	{
 		setDefaultRoot();
-		parseRequestPath(req.path);
+		Path path(req.path, conf_);
+		parseRequestPath(path);
 		findFileInServer();
 		reflectLocationStatus();
 		if (is_file_cgi)

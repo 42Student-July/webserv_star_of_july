@@ -6,6 +6,7 @@
 #include <string>
 
 #include "HttpStatus.hpp"
+#include "RequestLine.hpp"
 #include "ServerConfig.hpp"
 
 struct HttpRequest {
@@ -15,9 +16,10 @@ struct HttpRequest {
   HttpRequest(const ServerConfig& server_conf);
   ~HttpRequest();
 
-  std::string method;
-  std::string uri;
-  std::string version;
+  // std::string method;
+  // std::string uri;
+  // std::string version;
+  RequestLine request_line;
   HeaderFieldMap name_value_map;
   std::string body;
   ServerConfig server_config;

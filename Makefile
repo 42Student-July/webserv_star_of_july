@@ -1,6 +1,9 @@
 NAME = webserv
 
+SHELL = /bin/bash
+
 CXX = c++
+DEBUG			:= -fsanitize=address
 CXXFLAGS = -Wall -Werror -Wextra -Wshadow -std=c++98 -pedantic
 
 SRCS_DIR = ./src
@@ -8,10 +11,12 @@ CONFIG_DIR = $(SRCS_DIR)/config
 SERVER_DIR = $(SRCS_DIR)/server
 REQUEST_DIR = $(SRCS_DIR)/request
 RESPONSE_DIR = $(SRCS_DIR)/response
+UTILITY_DIR = $(SRCS_DIR)/utility
 MODULE_DIRS = $(CONFIG_DIR) \
 			  $(SERVER_DIR) \
 			  $(REQUEST_DIR) \
 			  $(RESPONSE_DIR) \
+			  $(UTILITY_DIR) \
 			  $(NULL)
 
 SRCS = $(SRCS_DIR)/main.cpp
@@ -24,10 +29,12 @@ LIB_CONFIG = $(CONFIG_DIR)/libconfig.a
 LIB_SERVER = $(SERVER_DIR)/libserver.a
 LIB_REQUEST = $(REQUEST_DIR)/librequest.a
 LIB_RESPONSE = $(RESPONSE_DIR)/libresponse.a
+LIB_UTILITY = $(UTILITY_DIR)/libutility.a
 LIBS = $(LIB_SERVER) \
 	   $(LIB_CONFIG) \
 	   $(LIB_REQUEST) \
 	   $(LIB_RESPONSE) \
+	   $(LIB_UTILITY) \
 	   $(NULL)
 
 %.o: %.cpp
@@ -42,6 +49,15 @@ $(NAME): $(OBJS) $(LIBS)
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) $(LIBS) -o $@
 	@printf "$(GREEN)Compile done:)\n$(END)"
 
+.PHONY: debug
+debug: $(OBJS) 
+	for dir in $(MODULE_DIRS); do $(MAKE) -C $$dir debug; done
+	$(CXX) $(DEBUG) $(CXXFLAGS) $(INCLUDES) $(OBJS) $(LIBS) -o $(NAME)
+	printf "$(GREEN)Compile with -g flag done:)\n$(END)"
+
+$(LIB_DEBUG): dummy
+	@$(MAKE) -C $(SERVER_DIR)
+
 $(LIB_SERVER): dummy
 	@$(MAKE) -C $(SERVER_DIR)
 
@@ -53,6 +69,9 @@ $(LIB_REQUEST): dummy
 
 $(LIB_RESPONSE): dummy
 	@$(MAKE) -C $(RESPONSE_DIR)
+
+$(LIB_UTILITY): dummy
+	@$(MAKE) -C $(UTILITY_DIR)
 
 .PHONY: dummy
 dummy:
@@ -70,11 +89,31 @@ fclean: clean
 .PHONY: re
 re: fclean all
 
+
+## Test
+TEST_DIRS = $(CONFIG_DIR) \
+			$(REQUEST_DIR) \
+			$(RESPONSE_DIR) \
+			$(NULL)
+
 .PHONY: unit_test
 unit_test:
-	@$(MAKE) -C $(CONFIG_DIR) test
-	@$(MAKE) -C $(REQUEST_DIR) test
+	@for dir in $(TEST_DIRS); do $(MAKE) -C $$dir test; done
 
+GTEST_DIR = tests/googletest-release-1.12.1
+
+.PHONY:setup_gtest
+setup_gtest: $(GTEST_DIR)
+
+$(GTEST_DIR):
+	mkdir -p tests
+	curl -OL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.tar.gz
+	tar -xvzf release-1.12.1.tar.gz
+	rm -rf release-1.12.1.tar.gz
+	(cd googletest-release-1.12.1 && \
+	cmake . && \
+	make)
+	mv googletest-release-1.12.1 tests
 
 ## Color
 END		= \e[0m

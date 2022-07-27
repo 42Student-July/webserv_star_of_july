@@ -84,12 +84,20 @@ void Path::createArgs() {
 }
 
 void Path::setExtension() {
+  if (path_file_.find(".py") != std::string::npos) {
+	  extension_ = ".py";
+  } else if (path_file_.find(".pl") != std::string::npos) {
+	  extension_ = ".pl";
+  } else {
+	  //後ほどエラー処理考える
+	  std::cout << path_file_ << std::endl;
+	  std::cout << "not cgi" << std::endl;
+  }
   /* std::vector<std::string>::iterator it = vec_path_.begin(); */
   /* for (;it != vec_path_.end(); ++it) { */
   /* } */
 
   //修正する
-  extension_ = ".pl";
 }
 
 // todo: localhost/test.cgi/arg1/arg2の時の対処検討

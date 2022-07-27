@@ -18,9 +18,9 @@ HttpRequest::~HttpRequest() {}
 std::ostream &operator<<(std::ostream &stream, const HttpRequest &rhs) {
   stream << "###Parsed Request###" << std::endl
          << "#RequestLine" << std::endl
-         << "method: " << rhs.method << std::endl
-         << "uri: " << rhs.uri << std::endl
-         << "version: " << rhs.version << std::endl
+         << "method: " << rhs.request_line.method << std::endl
+         << "uri: " << rhs.request_line.uri << std::endl
+         << "version: " << rhs.request_line.version << std::endl
          << std::endl
          << "#HeaderFields" << std::endl
          << rhs.name_value_map << std::endl

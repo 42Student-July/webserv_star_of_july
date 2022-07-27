@@ -5,64 +5,34 @@
 #include <map>
 #include <string>
 
+#include "HeaderFieldParser.hpp"
+#include "HttpParser.hpp"
 #include "HttpRequest.hpp"
 #include "HttpStatus.hpp"
+#include "RequestLineParser.hpp"
 #include "ServerConfig.hpp"
 
-class HttpRequestParser {
+class HttpRequestParser : public HttpParser {
  public:
   HttpRequestParser();
   ~HttpRequestParser();
   // 2つの引数はコンストラクタで渡した方が読みやすいかも。
-  HttpRequest* parse(const char* request_str,
-                     const ServerConfig& server_config);
+  static HttpRequest *parse(const char *buffer,
+                            const ServerConfig &server_config);
 
  private:
-  // 型
-  typedef HttpRequest::HeaderFieldPair HeaderFieldPair;
-  typedef HttpRequest::HeaderFieldMap HeaderFieldMap;
-  typedef std::string::size_type StringPos;
+  static const size_t kMaxHeaderLength = 1 << 10;
+  static const size_t kMaxBodyLength = 1 << 20;
 
-  class ParseErrorExeption : public std::runtime_error {
-   public:
-    ParseErrorExeption(const std::string& error_status,
-                       const std::string& reason = "Undefined Error");
-    ~ParseErrorExeption() throw();
-    const std::string& getErrorStatus() const;
-
-   private:
-    std::string error_status_;
-  };
-
-  // 定数
-  static const std::string CRLF;
-  static const std::string WS;
-  static const std::string Delimiters;
-
-  // メソッド
-  HttpRequestParser(const HttpRequestParser& other);
-  HttpRequestParser& operator=(const HttpRequestParser& other);
-  void parseRequestLine(HttpRequest* request);
-  void parseHeaderField(HttpRequest* request);
-  void parseBody(HttpRequest* request);
-  StringPos parseMethod(const std::string& request_line, HttpRequest* request);
-  StringPos parseUri(const std::string& request_line, HttpRequest* request,
-                     StringPos offset);
-  StringPos parseHttpVersion(const std::string& request_line,
-                             HttpRequest* request, StringPos offset);
-  void validateRequestLine(HttpRequest* request);
-  static HeaderFieldPair makeHeaderFieldPair(const std::string& line);
-  static void validateHeaderField(HeaderFieldPair headerfield_pair);
-  static void validateHeaderFields(const HeaderFieldMap& headers);
-  static std::string trimCopyIf(const std::string& str, const std::string& set);
-  static bool isHeaderDelimiter(int c);
-  static bool isHeaderTokenChar(int c);
-  static bool isHeaderToken(const std::string& str);
-  std::string getLine();
-
-  // メンバ変数
-  std::string raw_buffer_;
-  StringPos offset_;
+  HttpRequestParser(const HttpRequestParser &other);
+  HttpRequestParser &operator=(const HttpRequestParser &other);
+  static void validateRequestLength(const std::string &buffer);
+  static RequestLine parseRequestLine(const std::string &buffer,
+                                      StringPos *offset);
+  static HeaderFieldMap parseHeaderField(const std::string &buffer,
+                                         StringPos *offset);
+  static std::string parseBody(const std::string &buffer, StringPos offset);
+  static std::string getLine(const std::string &buffer, StringPos *offset);
 };
 
 #endif  // SRC_HTTPREQUESTPARSER_HPP_

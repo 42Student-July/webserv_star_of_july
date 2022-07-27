@@ -16,11 +16,13 @@ NAME = libserver.a
 
 CXX = c++
 CXXFLAGS = -Wall -Werror -Wextra -Wshadow -std=c++98 -pedantic
+DEBUG			:= -fsanitize=address
 
 HEADERS = . \
 		  ../config \
 		  ../request \
 		  ../response \
+		  ../utility \
 		  $(NULL)
 
 INCLUDES = $(addprefix -I, $(HEADERS))
@@ -38,6 +40,10 @@ all: $(NAME)
 
 $(NAME):$(OBJS)
 	@ar rc $(NAME) $(OBJS)
+
+.PHONY: debug
+debug:			CXXFLAGS += $(DEBUG)
+debug:			re
 
 %.o: %.cpp
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@

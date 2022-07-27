@@ -32,7 +32,7 @@ int main() {
 
   HttpRequestParser parser;
   std::string file_content =
-      readFile("tests/gtest/request/dto_one_header_field.crlf");
+      readFile("gtest/request/dto_one_header_field.crlf");
   HttpRequest *request = parser.parse(file_content.c_str(), server_config);
 
   std::cout << *request;

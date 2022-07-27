@@ -16,19 +16,24 @@ NAME = librequest.a
 
 CXX = c++
 CXXFLAGS = -Wall -Werror -Wextra -Wshadow -std=c++98 -pedantic
+DEBUG			:= -fsanitize=address
 
-HEADERS = . \
+INCLUDE_PATH = . \
 		  ../config \
 		  ../response \
+		  ../utility \
 		  $(NULL)
 
-INCLUDES = $(addprefix -I, $(HEADERS))
+INCLUDES = $(addprefix -I, $(INCLUDE_PATH))
 
 SRCS = $(shell find . -maxdepth 1 -name '*.cpp' -not -name 'main.cpp')
 
 OBJS = $(SRCS:.cpp=.o)
 
 DEPS = $(OBJS:.o=.d)
+
+UTILITY_DIR = ../utility
+LIB_UTILITY = $(UTILITY_DIR)/libutility.a
 
 .PHONY: all
 all: $(NAME)
@@ -41,10 +46,15 @@ $(NAME):$(OBJS)
 %.o: %.cpp
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
 
-run: $(OBJS) main.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) main.o -MMD -MP -o test
+.PHONY: run
+run: $(OBJS) main.o $(LIB_UTILITY)
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) $(LIB_UTILITY) main.o -MMD -MP -o test
 	@./test
 	@$(RM) test
+
+.PHONY: debug
+debug:			CXXFLAGS += $(DEBUG)
+debug:			re
 
 .PHONY: clean
 clean:
@@ -57,12 +67,47 @@ fclean: clean
 .PHONY: re
 re: fclean all
 
-# テスト
-TEST_DIR = gtest
+$(LIB_UTILITY): dummy
+	@$(MAKE) -C $(UTILITY_DIR)
+
+.PHONY: dummy
+dummy:
+
+# Googleテスト
+ROOT_DIR = ../..
+GTEST_DIR = $(ROOT_DIR)/tests/googletest-release-1.12.1
+
+TEST_SRCS = $(shell find gtest/src -name '*.cpp')
+
+LDFLAGS = -L$(GTEST_DIR)/lib \
+		  -L. \
+		  -L$(UTILITY_DIR) \
+		  $(NULL)
+
+LDLIBS = -lgtest \
+		 -lgtest_main \
+		 -lpthread \
+		 $(NAME) \
+		 $(LIB_UTILITY) \
+		 $(NULL)
+
+$(GTEST_DIR):
+	$(MAKE) -C $(ROOT_DIR) setup_gtest
 
 .PHONY: test
-test:
-	@$(MAKE) -C $(TEST_DIR) test
+test: INCLUDES += -I$(GTEST_DIR)/googletest/include
+test: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
+	clang++ -std=c++11 $(INCLUDES) $(TEST_SRCS) $(LDFLAGS) $(LDLIBS) -o test
+	-@./test
+	@$(RM) test
 
+.PHONY: test
+body_test: TEST_SRCS = gtest/src/body_parser_test.cpp
+body_test: test
+
+# test: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
+# 	$(CXX) -std=c++11 $(INCLUDES) $(TEST_SRCS) $(NAME) $(LIB_UTILITY) -L$(GTEST_LIB_DIR) $(LDLIBS) -o test
+# 	-@./test
+# 	@$(RM) test
 
 #endif /* MAKEFILE */

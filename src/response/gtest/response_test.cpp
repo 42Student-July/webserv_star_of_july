@@ -613,3 +613,18 @@ TEST(ErrorTest, double_error_pages_not_exist_in_second)
 
 	EXPECT_EQ(res->Body(), BuildDefault404Error(404, conf_));
 }
+
+// CGIとのコネクションのために追加させていただきました
+/* TEST(CGI, ConnectionEstablished) */
+/* { */
+/* 	ConfigDTO conf; */
+/* 	LocationConfig loc; */
+/* 	HttpRequestDTO req; */
+/* 	setReqPath(req, std::string("/tohoho.pl?hello=world")); */
+/* 	setRoot(conf, std::string("../../www/cgi-bin")); */
+
+/* 	HttpResponseBuilder builder = HttpResponseBuilder(conf); */
+/* 	HttpResponse *ret = builder.build(req); */
+	
+/* 	ret->printResponse(); */
+/* } */
