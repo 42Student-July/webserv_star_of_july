@@ -65,3 +65,17 @@ void utility::freeArrays(char** arrays) {
   }
   free(arrays);
 }
+
+char **utility::map2Array(std::map<std::string, std::string> map_env,
+                 std::string connector) {
+  char **array_env = NULL;
+  array_env = new char *[map_env.size() + 1];
+  size_t i = 0;
+  std::map<std::string, std::string>::const_iterator it = map_env.begin();
+  for (; it != map_env.end(); it++, i++) {
+    std::string env_str = it->first + connector + it->second;
+    array_env[i] = strdup(env_str.c_str());
+  }
+  array_env[i] = NULL;
+  return array_env;
+}

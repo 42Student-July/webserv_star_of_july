@@ -30,6 +30,12 @@ TEST(ConfigParserServersTests, CanParseRoot) {
   ASSERT_EQ("/var/www/html", serverconfig[0].root);
 }
 
+TEST(ConfigParserServersTests, CanParseDotfileRoot) {
+  ConfigParser configparser("./TestConfigs/dotfile_root.conf");
+  std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
+  ASSERT_EQ(".www/html", serverconfig[0].root);
+}
+
 TEST(ConfigParserServersTests, CanParseDualServers) {
   ConfigParser configparser("./TestConfigs/dual_servers.conf");
   std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
@@ -71,6 +77,12 @@ TEST(ConfigParserLocationsTests, CanParseLocationRoot) {
   ConfigParser configparser("./TestConfigs/location_root.conf");
   std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
   ASSERT_EQ("/var/www/html/locationroot", serverconfig[0].locations[0].root);
+}
+
+TEST(ConfigParserLocationsTests, CanParseLocationDotRoot) {
+  ConfigParser configparser("./TestConfigs/location_dot_root.conf");
+  std::vector<ServerConfig> serverconfig = configparser.getServerConfigs();
+  ASSERT_EQ(".var/www/html/locationroot", serverconfig[0].locations[0].root);
 }
 
 TEST(ConfigParserLocationsTests, CanParseLocationAllowedMethod) {
@@ -243,7 +255,7 @@ TEST(Error, InvalidAutoIndex) {
   }
 }
 
-TEST(Error, InvalidErrorPages) {
+TEST(Error, InvalidErrorPagesInt) {
   try {
     ASSERT_THROW(
         ConfigParser configparser(
@@ -251,6 +263,32 @@ TEST(Error, InvalidErrorPages) {
         std::runtime_error);
     ConfigParser configparser(
         "./TestConfigs/ErrorCases/invalid_error_pages.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid error_page", e.what());
+  }
+}
+
+TEST(Error, InvalidErrorPagesSlash) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_error_pages_slash.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_error_pages_slash.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid error_page", e.what());
+  }
+}
+
+TEST(Error, InvalidErrorPagesSlash2) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_error_pages_slash2.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_error_pages_slash2.conf");
   } catch (std::exception &e) {
     ASSERT_STREQ("Error: Config: Invalid error_page", e.what());
   }
@@ -292,6 +330,45 @@ TEST(Error, InvalidRedirect2) {
         "./TestConfigs/ErrorCases/invalid_location_redirect2.conf");
   } catch (std::exception &e) {
     ASSERT_STREQ("Error: Config: Invalid return", e.what());
+  }
+}
+
+TEST(Error, InvalidDotRoot) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_dot_root.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_dot_root.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid root", e.what());
+  }
+}
+
+TEST(Error, InvalidDotRoot2) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_dot_root2.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_dot_root2.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid root", e.what());
+  }
+}
+
+TEST(Error, InvalidLocationDotRoot) {
+  try {
+    ASSERT_THROW(
+        ConfigParser configparser(
+            "./TestConfigs/ErrorCases/invalid_location_dot_root.conf"),
+        std::runtime_error);
+    ConfigParser configparser(
+        "./TestConfigs/ErrorCases/invalid_location_dot_root.conf");
+  } catch (std::exception &e) {
+    ASSERT_STREQ("Error: Config: Invalid root", e.what());
   }
 }
 

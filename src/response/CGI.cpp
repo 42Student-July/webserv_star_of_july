@@ -6,6 +6,24 @@
 
 const std::map<std::string, std::string> CGI::EXEC_COMMANDS = CGI::setExecuteCommands();
 const std::map<std::string, std::string> CGI::EXEC_PATHS = CGI::setExecutePaths();
+std::string CGI::getResponseFromCGI() const { return cgi_response_; }
+
+std::map<std::string, std::string> CGI::setExecutePaths() {
+	std::map<std::string, std::string> exec_paths;
+
+	exec_paths[".py"] = "/usr/bin/python3";
+	exec_paths[".pl"] = "/usr/bin/perl";
+
+	return exec_paths;
+}
+std::map<std::string, std::string> CGI::setExecuteCommands() {
+	std::map<std::string, std::string> exec_commands;
+
+	exec_commands[".py"] = "python3";
+	exec_commands[".pl"] = "perl";
+
+	return exec_commands;
+}
 
 CGI::CGI() {}
 CGI::~CGI() {}
@@ -27,52 +45,6 @@ void CGI::run(HttpRequestDTO &req, ConfigDTO &conf, Path &path) {
   // free
   utility::freeArrays(exec_args);
   utility::freeArrays(exec_envs);
-}
-
-std::string CGI::getResponseFromCGI() const { return cgi_response_; }
-
-std::map<std::string, std::string> CGI::setExecutePaths() {
-	std::map<std::string, std::string> exec_paths;
-
-	exec_paths[".py"] = "/usr/bin/python3";
-	exec_paths[".pl"] = "/usr/bin/perl";
-
-	return exec_paths;
-}
-
-std::map<std::string, std::string> CGI::setExecuteCommands() {
-	std::map<std::string, std::string> exec_commands;
-
-	exec_commands[".py"] = "python3";
-	exec_commands[".pl"] = "perl";
-
-	return exec_commands;
-}
-
-char *CGI::allocStr(const std::string &str) {
-  char *ret = strdup(str.c_str());
-  if (ret == NULL) {
-    throw -1;
-  }
-  return ret;
-}
-
-void print_char(char **c) {
-  for (int i = 0; c[i]; i++) printf("%s\n", c[i]);
-}
-
-char **map2Array(std::map<std::string, std::string> map_env,
-                 std::string connector) {
-  char **array_env = NULL;
-  array_env = new char *[map_env.size() + 1];
-  size_t i = 0;
-  std::map<std::string, std::string>::const_iterator it = map_env.begin();
-  for (; it != map_env.end(); it++, i++) {
-    std::string env_str = it->first + connector + it->second;
-    array_env[i] = strdup(env_str.c_str());
-  }
-  array_env[i] = NULL;
-  return array_env;
 }
 
 char ** CGI::createArgs(Path &path) {
@@ -132,23 +104,8 @@ char ** CGI::createEnvs(Path &path) {
   map_env["SERVER_PROTOCOL"] = "HTTP/1.1";
   map_env["SERVER_SOFTWARE"] = "webserv/1.0";
 
-  char ** exec_envs = map2Array(map_env, "=");
+  char ** exec_envs = utility::map2Array(map_env, "=");
   return exec_envs;
-}
-
-void CGI::createPipe() {
-  if (pipe(pipe_p2c_) < 0) {
-    throw -1;
-  }
-  if (pipe(pipe_c2p_) < 0) {
-    throw -1;
-  }
-}
-
-void throwclose(int fd) {
-  if (close(fd) == -1) {
-    throw -1;
-  }
 }
 
 std::string CGI::buildCGIResponse(const char *exec_command_path, char **exec_args, char **exec_envs) {
@@ -207,16 +164,33 @@ std::string CGI::buildCGIResponse(const char *exec_command_path, char **exec_arg
 /*   // close(STDOUT_FILENO); */
 /* } */
 
+
+//CGI utils
+void CGI::createPipe() {
+  if (pipe(pipe_p2c_) < 0) {
+    throw -1;
+  }
+  if (pipe(pipe_c2p_) < 0) {
+    throw -1;
+  }
+}
+
 void CGI::dupFd(int oldfd, int newfd) {
   if (dup2(oldfd, newfd) < 0) {
     throw -1;
   }
 }
 
-CGI::CGI(CGI const &other) { *this = other; }
-
-CGI &CGI::operator=(CGI const &other) {
-  if (this != &other) {
+char *CGI::allocStr(const std::string &str) {
+  char *ret = strdup(str.c_str());
+  if (ret == NULL) {
+    throw -1;
   }
-  return *this;
+  return ret;
+}
+
+void CGI::throwclose(int fd) {
+  if (close(fd) == -1) {
+    throw -1;
+  }
 }
