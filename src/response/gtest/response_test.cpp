@@ -530,7 +530,49 @@ TEST(ErrorTest, error_pages_not_exist)
 	EXPECT_EQ(res->Body(), BuildDefault404Error(404, conf_));
 }
 
-TEST(ErrorTest, double_error_pages_exist)
+TEST(ErrorTest, double_error_pages_exist_in_first)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/error_page"));
+	
+	conf_.root = "html";
+	conf_.server = "webserv";
+	conf_.error_pages[404] = "/40x.html";
+	conf_.error_pages[504] = "/40x.html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+
+	EXPECT_EQ(res->Body(), Read(std::string("./html/40x.html")));
+}
+
+TEST(ErrorTest, double_error_pages_not_exist_in_first)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/error_page"));
+	
+	conf_.root = "html";
+	conf_.server = "webserv";
+	conf_.error_pages[404] = "/405.html";
+	conf_.error_pages[504] = "/40x.html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+
+	EXPECT_EQ(res->Body(), BuildDefault404Error(404, conf_));
+}
+
+TEST(ErrorTest, double_error_pages_exist_in_second)
 {
 	ConfigDTO conf_;
 	LocationConfig loc;
@@ -551,7 +593,7 @@ TEST(ErrorTest, double_error_pages_exist)
 	EXPECT_EQ(res->Body(), Read(std::string("./html/40x.html")));
 }
 
-TEST(ErrorTest, double_error_pages_not_exist)
+TEST(ErrorTest, double_error_pages_not_exist_in_second)
 {
 	ConfigDTO conf_;
 	LocationConfig loc;
