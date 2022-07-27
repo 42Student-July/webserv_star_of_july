@@ -83,11 +83,11 @@ class ConfigParser {
   // validation
   void serverValidate(const ServerConfig &server, const int &exist_flag);
   bool isValidStatus(const std::map<int, std::string> &config_map);
-
   void locationValidate(const LocationConfig &location);
-
   bool isValidVector(const std::vector<std::string> vec_to_check,
                      const std::vector<std::string> valid_vec);
+  bool isDupLocation(const ServerConfig &server);
+  bool isValidRoot(const std::string &root);
 
   // token化のためのutils
   std::string readFile(std::string const file);
@@ -95,7 +95,6 @@ class ConfigParser {
 
   // utils
   static int ft_stoi(std::string const &str);
-  bool isDupLocation(const ServerConfig &server);
   int countContents(std::vector<std::string>::iterator it);
 
   // 使わない関数
