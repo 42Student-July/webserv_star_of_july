@@ -323,7 +323,7 @@ void HttpResponseBuilder::buildErrorHeader(HttpRequestDTO &req, int httpStatus, 
 	header_.reason_phrase = getReasonPhrase(header_.status_code);
 	header_.date = buildDate();
 	header_.content_length = body_str.size();
-	header_.content_type = TEXT_HTML;
+	header_.content_type = getContentTypeByExtension();
 	header_.connection = "keep-alive";
 }
 
@@ -443,8 +443,7 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 	{
 		// 500を返すようにする
 		std::cerr << e.what() << '\n';
-		// TODO:直す
-		std::exit(1);
+		return buildErrorResponse(500, req);
 	}
 	return new HttpResponse(header_, res_body_str_.str());
 }
