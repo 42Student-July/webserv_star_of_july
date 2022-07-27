@@ -416,11 +416,11 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 {
 	try
 	{
-		if (req.response_status_code != HttpStatus::OK)
-			return buildErrorResponse(utility::toInt(req.response_status_code), req);
 		setDefaultRoot();
 		Path path(req.path, conf_);
 		parseRequestPath(path);
+		if (req.response_status_code != HttpStatus::OK)
+			return buildErrorResponse(utility::toInt(req.response_status_code), req);
 		findFileInServer();
 		reflectLocationStatus();
 		if (is_file_cgi)
