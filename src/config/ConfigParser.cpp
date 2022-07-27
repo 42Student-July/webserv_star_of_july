@@ -138,13 +138,14 @@ void ConfigParser::serverValidate(const ServerConfig &server,
   if (!(exist_flag & BIT_FLAG_LISTEN)) {
     throw std::runtime_error("Error: Config: Need listen setting");
   }
-
   if (isDupLocation(server)) {
     throw std::runtime_error("Error: Config: Duplicated location");
   }
-
   if (!isValidStatus(server.error_pages)) {
     throw std::runtime_error("Error: Config: Invalid error_page");
+  }
+  if (!isValidRoot(server.root)) {
+    throw std::runtime_error("Error: Config: Invalid root");
   }
 }
 
@@ -154,6 +155,9 @@ void ConfigParser::locationValidate(const LocationConfig &location) {
   }
   if (!isValidStatus(location.redirect)) {
     throw std::runtime_error("Error: Config: Invalid return");
+  }
+  if (!isValidRoot(location.root)) {
+    throw std::runtime_error("Error: Config: Invalid root");
   }
 }
 
@@ -318,6 +322,10 @@ bool ConfigParser::isValidStatus(const std::map<int, std::string> &config_map) {
     }
   }
   return true;
+}
+
+bool ConfigParser::isValidRoot(const std::string &root) {
+	return (root.find("./") == std::string::npos);
 }
 
 bool ConfigParser::isValidVector(const std::vector<std::string> vec_to_check,
