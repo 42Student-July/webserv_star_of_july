@@ -704,6 +704,45 @@ TEST(AllowMethod, GET)
 	EXPECT_EQ(res->Body(), ReadIndexHtml());
 }
 
+TEST(AllowMethod, requestはGETでallowはPOST)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/"));
+	req.response_status_code = "200";
+	
+	conf_.root = "html";
+	loc.location = "/";
+	loc.allowed_methods.push_back(std::string("POST"));
+	conf_.locations.push_back(loc);
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), BuildDefaultError(403, conf_));
+}
+
+TEST(AllowMethod, requestはPOSTでallowはGET)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/"));
+	req.response_status_code = "200";
+	req.method = "POST";
+	
+	conf_.root = "html";
+	loc.location = "/";
+	loc.allowed_methods.push_back(std::string("GET"));
+	conf_.locations.push_back(loc);
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), BuildDefaultError(403, conf_));
+}
+
 TEST(AllowMethod, POSTはCGIしかうけつけない)
 {
 	ConfigDTO conf_;
