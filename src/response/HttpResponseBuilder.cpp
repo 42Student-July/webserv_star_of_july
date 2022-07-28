@@ -285,13 +285,23 @@ bool HttpResponseBuilder::isAllowedMethod(HttpRequestDTO &req)
 	return false;
 }
 
-void HttpResponseBuilder::reflectConfigAttr(HttpRequestDTO &req)
+bool HttpResponseBuilder::isFileReadable()
+{
+	if (access(filepath_.path.c_str(), R_OK) == -1)
+		return false;
+	return true;
+}
+
+
+// 設定されたオプションをチェックする
+void HttpResponseBuilder::checkOptions(HttpRequestDTO &req)
 {
 	if (isCGI(path_file_))
 		is_file_cgi = true;
 	if (!isAllowedMethod(req))
 		throw ResponseException("not allowed method", 403);
-	
+	if (!isFileReadable())
+		throw ResponseException("file does not have permission", 403);
 }
 
 std::string HttpResponseBuilder::getReasonPhrase(std::string httpStatus)
@@ -459,7 +469,7 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 		if (req.response_status_code != HttpStatus::OK)
 			return buildErrorResponse(utility::toInt(req.response_status_code), req);
 		findFileInServer();
-		reflectConfigAttr(req);
+		checkOptions(req);
 		if (is_file_cgi)
 		{
 			doCGI(req);
@@ -474,7 +484,8 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 	}
 	catch(const ResponseException &re)
 	{
-		std::cout << "re.GetHttpStatus: " << re.GetHttpStatus() << std::endl;
+		std::cerr << "error msg: " << re.what() << std::endl;
+		std::cerr << "error status: " << re.GetHttpStatus() << std::endl;
 		return buildErrorResponse(re.GetHttpStatus(), req);
 	}
 	catch(const std::exception& e)

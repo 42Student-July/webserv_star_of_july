@@ -68,6 +68,7 @@ private:
 	std::string getContentTypeByExtension();
 	bool isAllowedMethod(HttpRequestDTO &req);
 	void deleteFile(std::string filepath);
+	bool isFileReadable();
 public:
 	HttpResponseBuilder();
 	bool IsFileCGI();
@@ -88,7 +89,7 @@ public:
 	std::string buildDate();
 	std::string buildLastModified();
 	void parseRequestPath(const Path &path);
-	void reflectConfigAttr(HttpRequestDTO &req);
+	void checkOptions(HttpRequestDTO &req);
 	bool isCGI(std::string file);
 	void doCGI(HttpRequestDTO &req);
 	std::string getReasonPhrase(std::string httpStatus);
