@@ -24,7 +24,7 @@ class CGI {
   char **createEnvs(Path &path);
   char **createArgs(Path &path);
   void createPipe();
-  std::string buildCGIResponse(const char *exec_command_path, char **exec_args, char **exec_envs);
+  std::string buildCGIResponse(const char *exec_command_path, char *const *exec_args, char *const *exec_envs);
   void dupIO();
   void dupFd(int oldfd, int newfd);
   void readCGI();

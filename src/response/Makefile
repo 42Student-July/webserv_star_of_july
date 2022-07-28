@@ -132,5 +132,5 @@ cgitest: INC += -I$(GTEST_DIR)/googletest/include
 cgitest: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
 	clang++ -std=c++11 $(INC) $(TEST_CGI_SRCS) $(LDFLAGS) $(LDLIBS) -o tester
 	-@./tester
-	@$(RM) tester
+	# @$(RM) tester
 
