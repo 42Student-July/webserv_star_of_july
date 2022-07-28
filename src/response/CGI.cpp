@@ -108,7 +108,7 @@ char ** CGI::createEnvs(Path &path) {
   return exec_envs;
 }
 
-std::string CGI::buildCGIResponse(const char *exec_command_path, char **exec_args, char **exec_envs) {
+std::string CGI::buildCGIResponse(const char *exec_command_path, char *const *exec_args, char *const *exec_envs) {
   char buf[BUF_SIZE];
   memset(buf, 0, sizeof(buf));
   // リファクターする
