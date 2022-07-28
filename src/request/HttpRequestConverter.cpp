@@ -18,7 +18,11 @@ HttpRequestDTO* HttpRequestConverter::toDTO(const HttpRequest& req) {
 
   dto->method = request_line.method;
   dto->path = request_line.uri;
-  dto->version = request_line.version.substr(sizeof("HTTP/") - 1);
+  if (request_line.version.find("HTTP/") != std::string::npos) {
+    dto->version = request_line.version.substr(sizeof("HTTP/") - 1);
+  } else {
+    dto->version = "";
+  }
   dto->body = req.body;
 
   dto->connection = searchFieldValue(headers, "connection");

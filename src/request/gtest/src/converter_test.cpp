@@ -102,3 +102,16 @@ TEST_F(HttpConverterTest, StoreServerConfig) {
   ASSERT_EQ("nop", dto->servernames[0]);
   ASSERT_EQ("cluster", dto->servernames[1]);
 }
+
+TEST_F(HttpConverterTest, NoHttpVersion) {
+  std::string file_name = "no_http_version.crlf";
+  HttpRequestDTO *dto = buildDTO(file_dir + file_name, config);
+
+  checkRequestline("", "", "", dto);
+  checkBody("", dto->body);
+  ASSERT_EQ(HttpStatus::BAD_REQUEST, dto->response_status_code);
+  ASSERT_EQ(4242, dto->port);
+  ASSERT_EQ("42tokyo", dto->host);
+  ASSERT_EQ("nop", dto->servernames[0]);
+  ASSERT_EQ("cluster", dto->servernames[1]);
+}
