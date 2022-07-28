@@ -1,12 +1,12 @@
-#include "BodyParser.hpp"
+#include "MessageBodyParser.hpp"
 
-BodyParser::BodyParser() {}
+MessageBodyParser::MessageBodyParser() {}
 
-BodyParser::~BodyParser() {}
+MessageBodyParser::~MessageBodyParser() {}
 
-std::string BodyParser::parse(const std::string& buffer, bool is_chunked,
-                              bool exists_content_length,
-                              size_t content_length) {
+std::string MessageBodyParser::parse(const std::string& buffer, bool is_chunked,
+                                     bool exists_content_length,
+                                     size_t content_length) {
   // std::cerr << "buffer:" << buffer << std::endl
   //           << "is_chunked:" << is_chunked << std::endl
   //           << "exists_content_length:" << exists_content_length << std::endl
@@ -19,9 +19,9 @@ std::string BodyParser::parse(const std::string& buffer, bool is_chunked,
   }
 }
 
-std::string BodyParser::parseBody(const std::string& buffer,
-                                  bool exists_content_length,
-                                  size_t content_length) {
+std::string MessageBodyParser::parseBody(const std::string& buffer,
+                                         bool exists_content_length,
+                                         size_t content_length) {
   if (!exists_content_length) {
     content_length = 0;
   }
@@ -32,7 +32,7 @@ std::string BodyParser::parseBody(const std::string& buffer,
   return buffer.substr(0, content_length);
 }
 
-std::string BodyParser::parseChunkedBody(const std::string& buffer) {
+std::string MessageBodyParser::parseChunkedBody(const std::string& buffer) {
   std::string body;
   StringPos offset = 0;
 
@@ -51,7 +51,8 @@ std::string BodyParser::parseChunkedBody(const std::string& buffer) {
   return body;
 }
 
-std::string BodyParser::getLine(const std::string& buffer, StringPos* offset) {
+std::string MessageBodyParser::getLine(const std::string& buffer,
+                                       StringPos* offset) {
   StringPos crlf_pos = buffer.find(CRLF, *offset);
   if (crlf_pos == std::string::npos) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "getLine() error");

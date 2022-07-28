@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 
-#include "BodyParser.hpp"
+#include "MessageBodyParser.hpp"
 #include "test_helper.hpp"
 
 class BodyParserTest : public ::testing::Test {
  protected:
   virtual void SetUp() {}
-  BodyParser parser;
+  MessageBodyParser parser;
 };
 
 TEST_F(BodyParserTest, ContentLengthIsJustBufferSize) {

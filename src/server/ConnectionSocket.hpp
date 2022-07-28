@@ -10,11 +10,11 @@
 #include <string>
 
 #include "ASocket.hpp"
-#include "BodyParser.hpp"
 #include "ConfigConverter.hpp"
 #include "HttpRequestConverter.hpp"
 #include "HttpRequestDTO.hpp"
 #include "HttpRequestParser.hpp"
+#include "MessageBodyParser.hpp"
 #include "response.h"
 
 class ConnectionSocket : public ASocket {

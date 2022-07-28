@@ -51,7 +51,7 @@ ssize_t ConnectionSocket::recvFromClient() {
 }
 
 void ConnectionSocket::generateRequest(ssize_t recv_size) {
-  BodyParser body_parser;
+  MessageBodyParser body_parser;
   recv_buffer_[recv_size] = '\0';
   current_request_ = request_parser_.parse(recv_buffer_, serverconfig_);
   // std::cerr << "Body buffer: " << std::endl
