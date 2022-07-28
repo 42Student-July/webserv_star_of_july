@@ -20,6 +20,7 @@ std::string MessageBodyParser::parseBody(const std::string& buffer,
   return buffer.substr(0, content_length);
 }
 
+// #include <cstdio>
 std::string MessageBodyParser::parseChunkedBody(const std::string& buffer) {
   std::string body;
   StringPos offset = 0;

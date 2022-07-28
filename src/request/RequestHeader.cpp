@@ -57,8 +57,7 @@ std::ostream& operator<<(std::ostream& stream, const RequestLine& rhs) {
   stream << "#RequestLine" << std::endl
          << "method: " << rhs.method << std::endl
          << "uri: " << rhs.uri << std::endl
-         << "version: " << rhs.version << std::endl
-         << std::endl;
+         << "version: " << rhs.version << std::endl;
   return stream;
 }
 

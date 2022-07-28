@@ -37,6 +37,8 @@ class HttpParser {
   static bool isHeaderToken(const std::string& str);
   static std::string getLine(const std::string& unparsed_str,
                              StringPos* offset);
+  static std::string fetchUnparsedHeader(const std::string& unparsed_request);
+  static std::string fetchUnparsedBody(const std::string& unparsed_request);
 
  private:
   HttpParser(const HttpParser& other);

@@ -37,15 +37,18 @@ class HttpRequestParser : public HttpParser {
   HttpRequestParser(const HttpRequestParser &other);
   HttpRequestParser &operator=(const HttpRequestParser &other);
   RequestHeader parseRequestHeader(const std::string &unparsed_str);
-  std::string parseBody(size_t content_length);
+  std::string parseBody(const std::string &unparsed_str, size_t content_length);
   std::string parseChunkedBody(const std::string &unparsed_str);
   void changeStatus(Status next_status);
   void clear();
+  static StringPos findHeaderEnd(const std::string &unparsed_req);
+  static std::string fetchUnparsedHeader(const std::string &unparsed_req);
+  static std::string fetchUnparsedBody(const std::string &unparsed_req);
 
   Status parse_status_;
   RequestHeader parsed_header_;
   std::string parsed_body_;
-  std::string unparsed_body_;
+  std::string chunked_request_;
   std::string error_code_;
 };
 
