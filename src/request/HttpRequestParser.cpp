@@ -16,14 +16,11 @@ HttpRequest *HttpRequestParser::parse(const std::string unparsed_str,
   try {
     validateRequestLength(unparsed_str);
     req->header = parseRequestHeader(unparsed_str);
-    setContentLengthInfo(req->header.name_value_map, req);
-    req->body = parseMessageBody(unparsed_str, req);
+    req->body = parseMessageBody(unparsed_str, req->header);
   } catch (const ParseErrorExeption &e) {
     req->response_status_code = e.getErrorStatus();
     std::cerr << e.what() << std::endl;
-  } catch (
-      const std::exception &
-          e) {  // (...)ですべての例外をキャッチした方がいいかも。でもe.what()でエラーメッセージを見たいのでこちらで対応
+  } catch (const std::exception &e) {
     req->response_status_code = HttpStatus::INTERNAL_SERVER_ERROR;
     std::cerr << e.what() << std::endl;
   }
@@ -56,16 +53,14 @@ RequestHeader HttpRequestParser::parseRequestHeader(
 }
 
 std::string HttpRequestParser::parseMessageBody(const std::string &unparsed_str,
-                                                const HttpRequest *request) {
+                                                const RequestHeader &header) {
   StringPos body_begin = unparsed_str.find(CRLF + CRLF) + 4;
   std::string unparsed_body = unparsed_str.substr(body_begin);
   if (unparsed_body.empty()) {
     return "";
   }
   MessageBodyParser mb_parser;
-  return mb_parser.parse(unparsed_body, false, request->has_content_length,
-                         request->content_length);
-  // return "";
+  return mb_parser.parse(unparsed_body, false, header.contentLength());
 }
 
 // 変数宣言と初期化を同時にするとなんか読みにくい。
@@ -79,18 +74,4 @@ std::string HttpRequestParser::getLine(const std::string &unparsed_str,
   std::string line = unparsed_str.substr(*offset, crlf_pos - *offset);
   *offset = crlf_pos + 2;
   return line;
-}
-
-#include <cstdio>
-// 動かすために.あとでどこのメソッドにするかふくめ、リファクタする
-void HttpRequestParser::setContentLengthInfo(HeaderFieldMap &headerfield_map,
-                                             HttpRequest *req) {
-  if (headerfield_map.find("content-length") != headerfield_map.end()) {
-    // validateしてない
-    req->content_length = utility::stoi(headerfield_map["content-length"]);
-    req->has_content_length = true;
-  } else {
-    req->content_length = 0;
-    req->has_content_length = false;
-  }
 }

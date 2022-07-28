@@ -5,7 +5,6 @@ MessageBodyParser::MessageBodyParser() {}
 MessageBodyParser::~MessageBodyParser() {}
 
 std::string MessageBodyParser::parse(const std::string& buffer, bool is_chunked,
-                                     bool exists_content_length,
                                      size_t content_length) {
   // std::cerr << "buffer:" << buffer << std::endl
   //           << "is_chunked:" << is_chunked << std::endl
@@ -15,16 +14,13 @@ std::string MessageBodyParser::parse(const std::string& buffer, bool is_chunked,
   if (is_chunked) {
     return parseChunkedBody(buffer);
   } else {
-    return parseBody(buffer, exists_content_length, content_length);
+    return parseBody(buffer, content_length);
   }
 }
 
 std::string MessageBodyParser::parseBody(const std::string& buffer,
-                                         bool exists_content_length,
                                          size_t content_length) {
-  if (!exists_content_length) {
-    content_length = 0;
-  }
+  std::cerr << buffer.size() << ", conte: " << content_length << std::endl;
   if (buffer.size() < content_length) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
                              "body length is less than content_length");

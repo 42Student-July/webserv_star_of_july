@@ -13,8 +13,8 @@ std::string HttpRequestConverter::searchFieldValue(
 
 HttpRequestDTO* HttpRequestConverter::toDTO(const HttpRequest& req) {
   HttpRequestDTO* dto = new HttpRequestDTO;
-  const RequestLine& request_line = req.header.request_line;
-  const HeaderFieldMap& headers = req.header.name_value_map;
+  const RequestLine& request_line = req.header.requestLine();
+  const HeaderFieldMap& headers = req.header.headerMap();
 
   dto->method = request_line.method;
   dto->path = request_line.uri;

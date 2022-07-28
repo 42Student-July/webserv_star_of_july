@@ -6,13 +6,13 @@ RequestHeaderParser::RequestHeaderParser() {}
 RequestHeaderParser::~RequestHeaderParser() {}
 
 RequestHeader RequestHeaderParser::parse(const std::string &unparsed_str) {
-  RequestHeader header;
+  // RequestHeader header;
   StringPos offset = 0;
 
   validateRequestLength(unparsed_str);
-  header.request_line = parseRequestLine(unparsed_str, &offset);
-  header.name_value_map = parseHeaderField(unparsed_str, &offset);
-  return header;
+  RequestLine request_line = parseRequestLine(unparsed_str, &offset);
+  HeaderFieldMap header_map = parseHeaderField(unparsed_str, &offset);
+  return RequestHeader(request_line, header_map);
   //　try-catchは呼び出し元でやる(暫定)
   //
   // try {

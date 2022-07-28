@@ -30,10 +30,9 @@ class HttpRequestParser : public HttpParser {
   static RequestHeader parseRequestHeader(const std::string &unparsed_str);
   std::string parseBody(const std::string &unparsed_str);
   std::string parseMessageBody(const std::string &unparsed_str,
-                               const HttpRequest *request);
+                               const RequestHeader &header);
   static std::string getLine(const std::string &unparsed_str,
                              StringPos *offset);
-  void setContentLengthInfo(HeaderFieldMap &headerfield_map, HttpRequest *req);
 };
 
 #endif  // SRC_HTTPREQUESTPARSER_HPP_

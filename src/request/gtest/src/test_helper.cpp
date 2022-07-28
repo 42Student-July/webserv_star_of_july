@@ -49,7 +49,7 @@ HttpRequestDTO *buildDTO(const std::string &filepath,
 
 void checkRequestline(const std::string &method, const std::string &uri,
                       const std::string &version, HttpRequest *request) {
-  const RequestLine &request_line = request->header.request_line;
+  const RequestLine &request_line = request->header.requestLine();
   ASSERT_EQ(method, request_line.method);
   ASSERT_EQ(uri, request_line.uri);
   ASSERT_EQ(version, request_line.version);

@@ -35,10 +35,10 @@ TEST_F(HttpRequestParserTest, StoreHeaderFieldWithCurl) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkRequestline("GET", "/", "HTTP/1.1", req);
-  checkHeaderField("host", "localhost:4242", req->header.name_value_map);
-  checkHeaderField("user-agent", "curl/7.68.0", req->header.name_value_map);
-  checkHeaderField("accept", "*/*", req->header.name_value_map);
-  ASSERT_EQ(3, req->header.name_value_map.size());
+  checkHeaderField("host", "localhost:4242", req->header.headerMap());
+  checkHeaderField("user-agent", "curl/7.68.0", req->header.headerMap());
+  checkHeaderField("accept", "*/*", req->header.headerMap());
+  ASSERT_EQ(3, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
 
@@ -47,37 +47,35 @@ TEST_F(HttpRequestParserTest, StoreHeaderFieldWithChrome) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkRequestline("GET", "/", "HTTP/1.1", req);
-  checkHeaderField("host", "localhost:4242", req->header.name_value_map);
-  checkHeaderField("connection", "keep-alive", req->header.name_value_map);
-  checkHeaderField("cache-control", "max-age=0", req->header.name_value_map);
+  checkHeaderField("host", "localhost:4242", req->header.headerMap());
+  checkHeaderField("connection", "keep-alive", req->header.headerMap());
+  checkHeaderField("cache-control", "max-age=0", req->header.headerMap());
   checkHeaderField("sec-ch-ua",
                    "\".Not/A)Brand\";v=\"99\", \"Google "
                    "Chrome\";v=\"103\", \"Chromium\";v=\"103\"",
-                   req->header.name_value_map);
-  checkHeaderField("sec-ch-ua-mobile", "?0", req->header.name_value_map);
-  checkHeaderField("sec-ch-ua-platform", "\"Linux\"",
-                   req->header.name_value_map);
-  checkHeaderField("upgrade-insecure-requests", "1",
-                   req->header.name_value_map);
+                   req->header.headerMap());
+  checkHeaderField("sec-ch-ua-mobile", "?0", req->header.headerMap());
+  checkHeaderField("sec-ch-ua-platform", "\"Linux\"", req->header.headerMap());
+  checkHeaderField("upgrade-insecure-requests", "1", req->header.headerMap());
   checkHeaderField("user-agent",
                    "Mozilla/5.0 (X11; Linux x86_64) "
                    "AppleWebKit/537.36 (KHTML, "
                    "like Gecko) Chrome/103.0.0.0 Safari/537.36",
-                   req->header.name_value_map);
+                   req->header.headerMap());
   checkHeaderField(
       "accept",
       "text/html,application/xhtml+xml,application/xml;q=0.9,image/"
       "avif,image/"
       "webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-      req->header.name_value_map);
-  checkHeaderField("sec-fetch-site", "none", req->header.name_value_map);
-  checkHeaderField("sec-fetch-mode", "navigate", req->header.name_value_map);
-  checkHeaderField("sec-fetch-dest", "document", req->header.name_value_map);
+      req->header.headerMap());
+  checkHeaderField("sec-fetch-site", "none", req->header.headerMap());
+  checkHeaderField("sec-fetch-mode", "navigate", req->header.headerMap());
+  checkHeaderField("sec-fetch-dest", "document", req->header.headerMap());
   checkHeaderField("accept-encoding", "gzip, deflate, br",
-                   req->header.name_value_map);
+                   req->header.headerMap());
   checkHeaderField("accept-language", "ja,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
-                   req->header.name_value_map);
-  ASSERT_EQ(15, req->header.name_value_map.size());
+                   req->header.headerMap());
+  ASSERT_EQ(15, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
 
@@ -86,10 +84,10 @@ TEST_F(HttpRequestParserTest, StoreOneLineToBody) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkRequestline("POST", "/", "HTTP/1.1", req);
-  checkHeaderField("host", "localhost:80", req->header.name_value_map);
-  checkHeaderField("content-length", "23", req->header.name_value_map);
+  checkHeaderField("host", "localhost:80", req->header.headerMap());
+  checkHeaderField("content-length", "23", req->header.headerMap());
   checkBody("name=hoge&comment=hoge\n", req->body);
-  ASSERT_EQ(2, req->header.name_value_map.size());
+  ASSERT_EQ(2, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
 
@@ -98,10 +96,10 @@ TEST_F(HttpRequestParserTest, StoreMultiLinesToBody) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkRequestline("POST", "/", "HTTP/1.1", req);
-  checkHeaderField("host", "localhost:80", req->header.name_value_map);
-  checkHeaderField("content-length", "24", req->header.name_value_map);
+  checkHeaderField("host", "localhost:80", req->header.headerMap());
+  checkHeaderField("content-length", "24", req->header.headerMap());
   checkBody("1stline\n2ndline\n3rdline\n", req->body);
-  ASSERT_EQ(2, req->header.name_value_map.size());
+  ASSERT_EQ(2, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
 
@@ -110,13 +108,12 @@ TEST_F(HttpRequestParserTest, StoreJsonToBody) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkRequestline("POST", "/", "HTTP/1.1", req);
-  checkHeaderField("host", "localhost:80", req->header.name_value_map);
-  checkHeaderField("content-type", "application/json",
-                   req->header.name_value_map);
-  checkHeaderField("content-length", "46", req->header.name_value_map);
+  checkHeaderField("host", "localhost:80", req->header.headerMap());
+  checkHeaderField("content-type", "application/json", req->header.headerMap());
+  checkHeaderField("content-length", "46", req->header.headerMap());
   checkBody("{\n\t\"asa-gohan\":\"misosiru\",\n\t\"oyatsu\":\"karl\"\n}\n",
             req->body);
-  ASSERT_EQ(3, req->header.name_value_map.size());
+  ASSERT_EQ(3, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
 
@@ -126,7 +123,7 @@ TEST_F(HttpRequestParserTest, StoreServerConfig) {
 
   checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
-  ASSERT_EQ(2, req->header.name_value_map.size());
+  ASSERT_EQ(2, req->header.headerMap().size());
   ASSERT_EQ(4242, req->server_config.port);
   ASSERT_EQ("42tokyo", req->server_config.host);
   ASSERT_EQ("nop", req->server_config.server[0]);
@@ -141,7 +138,7 @@ TEST_F(HttpRequestParserTest, InvalidHttpVersion) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -150,7 +147,7 @@ TEST_F(HttpRequestParserTest, NoRequestLine) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -159,7 +156,7 @@ TEST_F(HttpRequestParserTest, NoMethod) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -168,7 +165,7 @@ TEST_F(HttpRequestParserTest, NoUri) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -177,7 +174,7 @@ TEST_F(HttpRequestParserTest, NoHttpVersion) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -186,7 +183,7 @@ TEST_F(HttpRequestParserTest, InvalidMethod) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -195,7 +192,7 @@ TEST_F(HttpRequestParserTest, InvalidProtocol) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -204,7 +201,7 @@ TEST_F(HttpRequestParserTest, VersionHasNoSlash) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -213,7 +210,7 @@ TEST_F(HttpRequestParserTest, VersionHasNoPeriod) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -222,7 +219,7 @@ TEST_F(HttpRequestParserTest, VersionHasOtherThanDigit) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -231,7 +228,7 @@ TEST_F(HttpRequestParserTest, VersionIsNotSupported) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::HTTP_VERSION_NOT_SUPPORTED, req->response_status_code);
 }
 
@@ -240,7 +237,7 @@ TEST_F(HttpRequestParserTest, HeaderHasNoColon) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -249,7 +246,7 @@ TEST_F(HttpRequestParserTest, HeaderHasSpaceBeforeColon) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -258,7 +255,7 @@ TEST_F(HttpRequestParserTest, HeaderHasNoFieldName) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -268,8 +265,8 @@ TEST_F(HttpRequestParserTest, CheckFieldValueIsTrimmedByWS) {
 
   checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
-  checkHeaderField("host", "admin", req->header.name_value_map);
-  ASSERT_EQ(2, req->header.name_value_map.size());
+  checkHeaderField("host", "admin", req->header.headerMap());
+  ASSERT_EQ(2, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
 
@@ -279,8 +276,8 @@ TEST_F(HttpRequestParserTest, FieldValueHasOnlyWS) {
 
   checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
-  checkHeaderField("host", "admin", req->header.name_value_map);
-  ASSERT_EQ(2, req->header.name_value_map.size());
+  checkHeaderField("host", "admin", req->header.headerMap());
+  ASSERT_EQ(2, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
 
@@ -289,7 +286,7 @@ TEST_F(HttpRequestParserTest, FieldNameHasOnlyWS) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -298,7 +295,7 @@ TEST_F(HttpRequestParserTest, FieldNameHasInvalidChar) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -307,7 +304,7 @@ TEST_F(HttpRequestParserTest, FieldNameLastIsInvalidChar) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -316,7 +313,7 @@ TEST_F(HttpRequestParserTest, NoHost) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -325,7 +322,7 @@ TEST_F(HttpRequestParserTest, NoHostEmpty) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -334,7 +331,7 @@ TEST_F(HttpRequestParserTest, TwoHost) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -344,9 +341,9 @@ TEST_F(HttpRequestParserTest, SameHeaderFieldName) {
 
   checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
-  checkHeaderField("host", "admin", req->header.name_value_map);
-  checkHeaderField("user-agent", "agent1,agent2", req->header.name_value_map);
-  ASSERT_EQ(2, req->header.name_value_map.size());
+  checkHeaderField("host", "admin", req->header.headerMap());
+  checkHeaderField("user-agent", "agent1,agent2", req->header.headerMap());
+  ASSERT_EQ(2, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
 
@@ -356,10 +353,10 @@ TEST_F(HttpRequestParserTest, FieldNameCaseInsesitive) {
 
   checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
-  checkHeaderField("host", "admin", req->header.name_value_map);
-  checkHeaderField("user-agent", "agent1", req->header.name_value_map);
-  checkHeaderField("accept", "text/html", req->header.name_value_map);
-  ASSERT_EQ(3, req->header.name_value_map.size());
+  checkHeaderField("host", "admin", req->header.headerMap());
+  checkHeaderField("user-agent", "agent1", req->header.headerMap());
+  checkHeaderField("accept", "text/html", req->header.headerMap());
+  ASSERT_EQ(3, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
 
@@ -368,7 +365,7 @@ TEST_F(HttpRequestParserTest, NoCrRequestLine) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -377,7 +374,7 @@ TEST_F(HttpRequestParserTest, NoCrHeaderField) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -386,7 +383,7 @@ TEST_F(HttpRequestParserTest, NoCrHeaderEnd) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(0, req->header.name_value_map.size());
+  ASSERT_EQ(0, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
 }
 
@@ -395,6 +392,6 @@ TEST_F(HttpRequestParserTest, NoCrBodyEnd) {
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
   checkBody("", req->body);
-  ASSERT_EQ(2, req->header.name_value_map.size());
+  ASSERT_EQ(2, req->header.headerMap().size());
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
