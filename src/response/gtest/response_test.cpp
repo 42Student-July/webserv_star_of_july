@@ -494,16 +494,25 @@ static std::string toString(size_t val) {
   return ss.str();
 }
 
-std::string BuildDefault404Error(int httpStatus, ConfigDTO &conf_)
+std::string BuildDefaultError(int httpStatus, ConfigDTO &conf_)
 {
 	const std::string CRLF = "\r\n";
 	const std::string SP = " ";
 	std::string status_code = toString(httpStatus);
+	std::string reason_phrase;
+	
+	if (status_code == "404")
+		reason_phrase = "Not Found";
+	else if (status_code == "403")
+	{
+		reason_phrase = "Forbidden";
+	}
+	
 	std::stringstream res_body_str_;
 	res_body_str_	<< "<html>" << CRLF
-					<< "<head><title>" << status_code << SP << "Not Found" << "</title><head>" << CRLF
+					<< "<head><title>" << status_code << SP << reason_phrase << "</title><head>" << CRLF
 					<< "<body>" << CRLF
-					<< "<center><h1>" << status_code << SP << "Not Found" << "</h1></center>" << CRLF
+					<< "<center><h1>" << status_code << SP << reason_phrase << "</h1></center>" << CRLF
 					<< "</body>" << CRLF
 					<< "<hr><center>" << conf_.server << "</center>" << CRLF
 					<< "</body>" << CRLF
@@ -529,7 +538,7 @@ TEST(ErrorTest, error_pages_not_exist)
 	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
 	HttpResponse *res = builder.build(req);
 
-	EXPECT_EQ(res->Body(), BuildDefault404Error(404, conf_));
+	EXPECT_EQ(res->Body(), BuildDefaultError(404, conf_));
 }
 
 TEST(ErrorTest, double_error_pages_exist_in_first)
@@ -571,7 +580,7 @@ TEST(ErrorTest, double_error_pages_not_exist_in_first)
 	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
 	HttpResponse *res = builder.build(req);
 
-	EXPECT_EQ(res->Body(), BuildDefault404Error(404, conf_));
+	EXPECT_EQ(res->Body(), BuildDefaultError(404, conf_));
 }
 
 TEST(ErrorTest, double_error_pages_exist_in_second)
@@ -613,7 +622,7 @@ TEST(ErrorTest, double_error_pages_not_exist_in_second)
 	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
 	HttpResponse *res = builder.build(req);
 
-	EXPECT_EQ(res->Body(), BuildDefault404Error(404, conf_));
+	EXPECT_EQ(res->Body(), BuildDefaultError(404, conf_));
 }
 
 TEST(RequestErrorTest, 200)
@@ -653,7 +662,7 @@ TEST(RequestErrorTest, 404_default)
 	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
 	HttpResponse *res = builder.build(req);
 	
-	EXPECT_EQ(res->Body(), BuildDefault404Error(404, conf_));
+	EXPECT_EQ(res->Body(), BuildDefaultError(404, conf_));
 }
 
 TEST(RequestErrorTest, 404_custom)
@@ -673,7 +682,106 @@ TEST(RequestErrorTest, 404_custom)
 	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
 	HttpResponse *res = builder.build(req);
 	
-	EXPECT_EQ(res->Body(), BuildDefault404Error(404, conf_));
+	EXPECT_EQ(res->Body(), BuildDefaultError(404, conf_));
+}
+
+TEST(AllowMethod, GET)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/"));
+	req.response_status_code = "200";
+	
+	conf_.root = "html";
+	loc.location = "/";
+	loc.allowed_methods.push_back(std::string("GET"));
+	conf_.locations.push_back(loc);
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), ReadIndexHtml());
+}
+
+TEST(AllowMethod, requestはGETでallowはPOST)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/"));
+	req.response_status_code = "200";
+	
+	conf_.root = "html";
+	loc.location = "/";
+	loc.allowed_methods.push_back(std::string("POST"));
+	conf_.locations.push_back(loc);
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), BuildDefaultError(403, conf_));
+}
+
+TEST(AllowMethod, requestはPOSTでallowはGET)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/"));
+	req.response_status_code = "200";
+	req.method = "POST";
+	
+	conf_.root = "html";
+	loc.location = "/";
+	loc.allowed_methods.push_back(std::string("GET"));
+	conf_.locations.push_back(loc);
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), BuildDefaultError(403, conf_));
+}
+
+TEST(AllowMethod, POSTはCGIしかうけつけない)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/"));
+	req.response_status_code = "200";
+	req.method = "POST";
+	
+	conf_.root = "html";
+	loc.location = "/";
+	loc.allowed_methods.push_back(std::string("POST"));
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), BuildDefaultError(403, conf_));
+}
+
+TEST(AllowMethod, allowed_methodがないときにデフォルトのGETになるか)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/"));
+	req.response_status_code = "200";
+	req.method = "GET";
+	
+	conf_.root = "html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), ReadIndexHtml());
 }
 
 // CGIとのコネクションのために追加させていただきました

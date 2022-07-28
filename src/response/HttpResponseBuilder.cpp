@@ -18,10 +18,12 @@ HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf)
 	conf_ = conf;
 	filepath_.exists = false;
 	is_file_cgi = false;
+	is_delete = false;
 	// builder初期化時に現在時刻を更新
 	time(&now_);
 	loc_it_ = conf_.locations.begin();
 	loc_ite_ = conf_.locations.end();
+
 }
 
 HttpResponseBuilder &HttpResponseBuilder::operator=(
@@ -256,11 +258,40 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 	header_.accept_ranges = ACCEPT_RANGES;
 }
 
-void HttpResponseBuilder::reflectLocationStatus()
+bool HttpResponseBuilder::isDefinedMethod(HttpRequestDTO &req)
+{
+	if (found_location_.allowed_methods.empty())
+	{
+		// GETはallowに入ってなくてもdefaultで許容する
+		if (req.method == "GET")
+			return true;
+		else
+			return false;
+	}
+	std::vector<std::string>::iterator itr = found_location_.allowed_methods.begin();
+	std::vector<std::string>::iterator ite = found_location_.allowed_methods.end();
+	for (; itr != ite; itr++)
+	{
+		if (*itr == req.method)
+		{
+			if (req.method == "DELETE")
+				is_delete = true;
+			// POSTはCGIしか受け付けない
+			if (req.method == "POST" && is_file_cgi == false)
+				return false;
+			return true;
+		}
+	}
+	return false;
+}
+
+void HttpResponseBuilder::reflectConfigAttr(HttpRequestDTO &req)
 {
 	if (isCGI(path_file_))
 		is_file_cgi = true;
-	//TODO: allowed_methodとかはこっちにおく
+	if (!isDefinedMethod(req))
+		throw ResponseException("not allowed method", 403);
+	
 }
 
 std::string HttpResponseBuilder::getReasonPhrase(std::string httpStatus)
@@ -412,6 +443,12 @@ void HttpResponseBuilder::setDefaultRoot()
 		default_root_ = current_path + SLASH + conf_.root;
 }
 
+void HttpResponseBuilder::deleteFile(std::string filepath)
+{
+	(void)filepath;
+}
+
+
 HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 {
 	try
@@ -422,14 +459,15 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 		if (req.response_status_code != HttpStatus::OK)
 			return buildErrorResponse(utility::toInt(req.response_status_code), req);
 		findFileInServer();
-		reflectLocationStatus();
+		reflectConfigAttr(req);
 		if (is_file_cgi)
 		{
 			doCGI(req);
 			// ここにcgi用のbuidlerとかを配置
-		}
-		else
-		{
+		} else if (is_delete) {
+			deleteFile(filepath_.path);
+			buildHeader(req);
+		} else {
 			readFile(filepath_.path);
 			buildHeader(req);
 		}
