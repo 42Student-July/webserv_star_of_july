@@ -870,6 +870,25 @@ TEST(CGITest, allowmethodが許可されていない)
 	EXPECT_EQ(res->Body(), BuildDefaultError(403, conf_));
 }
 
+TEST(StatTest, allowmethodが許可されていない)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/403test.html"));
+	req.response_status_code = "200";
+	
+	conf_.root = "html";
+	loc.location = "/";
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), BuildDefaultError(403, conf_));
+}
+
 // CGIとのコネクションのために追加させていただきました
 /* TEST(CGI, ConnectionEstablished) */
 /* { */
