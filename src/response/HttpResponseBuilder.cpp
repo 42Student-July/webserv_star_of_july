@@ -10,7 +10,6 @@ const std::string HttpResponseBuilder::SP = " ";
 const std::string HttpResponseBuilder::SLASH = "/";
 const int HttpResponseBuilder::DOT_SIZE = 1;
 
-
 HttpResponseBuilder::HttpResponseBuilder() {}
 
 HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf)
@@ -18,10 +17,12 @@ HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf)
 	conf_ = conf;
 	filepath_.exists = false;
 	is_file_cgi = false;
+	is_delete = false;
 	// builder初期化時に現在時刻を更新
 	time(&now_);
 	loc_it_ = conf_.locations.begin();
 	loc_ite_ = conf_.locations.end();
+
 }
 
 HttpResponseBuilder &HttpResponseBuilder::operator=(
@@ -39,10 +40,10 @@ bool HttpResponseBuilder::isCGI(std::string file)
 	for (; it != ite; it++)
 	{
 		extension_pos = file.find(*it);
-		// TODO:拡張子のみのファイル名の場合の処理を検討
-		if (extension_pos != std::string::npos) {
-			std::cout << "is cgi true" << std::endl;
-			return true;
+		if (extension_pos != std::string::npos ) {
+			// ファイル名が隠しファイルのみの場合はfalseとする
+			if (file.size() != (*it).size())
+				return true;
 		}
 	}
 	return false;
@@ -53,7 +54,6 @@ void HttpResponseBuilder::findActualFilepath(std::string dir, std::string file)
 {
 	DIR				*dirp;
 	struct dirent	*ent;
-	std::cout << "fullpath: " << dir << std::endl;
 	
 	dirp = opendir(dir.c_str());
 	if (dirp == NULL)
@@ -64,34 +64,6 @@ void HttpResponseBuilder::findActualFilepath(std::string dir, std::string file)
 		{
 			filepath_.path = dir + file;
 			filepath_.exists = true;
-			break;
-		}
-	}
-	closedir(dirp);
-}
-
-void HttpResponseBuilder::findActualErrorFilepath(std::string dir, std::string file)
-{
-	DIR				*dirp;
-	struct dirent	*ent;
-	char			*cwd;
-	std::string		fullpath;
-	
-	//TODO: default rootを使う
-	cwd = getcwd(NULL, 0);
-	fullpath = std::string(cwd) + dir;
-	std::free(cwd);
-	std::cout << "fullpath: " << fullpath << std::endl;
-	
-	dirp = opendir(fullpath.c_str());
-	if (dirp == NULL)
-		throw std::runtime_error("directory not found");
-	while ((ent = readdir(dirp)) != NULL)
-	{
-		if (std::strcmp(ent->d_name, file.c_str()) == 0)
-		{
-			errorFilepath_.path = fullpath + file;
-			errorFilepath_.exists = true;
 			break;
 		}
 	}
@@ -177,7 +149,7 @@ void HttpResponseBuilder::readErrorFile(std::string fullpath)
 	std::string line;
 	
 	if (ifs.fail())
-		throw std::runtime_error("read error");
+		throw ResponseException("read file error", 500);
     while (std::getline(ifs, line)){
         res_body_str_ << line << CRLF;
     }
@@ -202,10 +174,7 @@ std::string HttpResponseBuilder::buildLastModified()
 	time_t time;
 	
 	if(stat(filepath_.path.c_str(), &s) == -1)
-	{
-		// TODO: forbidden 403のときのハンドリングする
 		throw ResponseException("stat", 500);
-	}
 	time = s.st_mtime;
 	mod_time = asctime(gmtime(&time));
 	mod_time.erase(mod_time.size() - 1);
@@ -242,8 +211,6 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 	header_.reason_phrase = HttpStatus::ReasonPhrase::OK;
 	header_.date = buildDate();
 	header_.server = conf_.server;
-	// header_.content_type = OCTET_STREAM;
-	// とりあえずブラウザから見れるようにしました。
 	header_.content_type = getContentTypeByExtension();
 	size_t  content_length = res_body_str_.str().size();
 	header_.content_length = utility::toString(content_length);
@@ -256,11 +223,50 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 	header_.accept_ranges = ACCEPT_RANGES;
 }
 
-void HttpResponseBuilder::reflectLocationStatus()
+bool HttpResponseBuilder::isAllowedMethod(HttpRequestDTO &req)
+{
+	if (found_location_.allowed_methods.empty())
+	{
+		// GETはallowに入ってなくてもdefaultで許容する
+		if (req.method == "GET")
+			return true;
+		else
+			return false;
+	}
+	std::vector<std::string>::iterator itr = found_location_.allowed_methods.begin();
+	std::vector<std::string>::iterator ite = found_location_.allowed_methods.end();
+	for (; itr != ite; itr++)
+	{
+		if (*itr == req.method)
+		{
+			if (req.method == "DELETE")
+				is_delete = true;
+			// POSTはCGIしか受け付けない
+			if (req.method == "POST" && is_file_cgi == false)
+				return false;
+			return true;
+		}
+	}
+	return false;
+}
+
+bool HttpResponseBuilder::isFileReadable()
+{
+	if (access(filepath_.path.c_str(), R_OK) == -1)
+		return false;
+	return true;
+}
+
+
+// 設定されたオプションをチェックする
+void HttpResponseBuilder::checkOptions(HttpRequestDTO &req)
 {
 	if (isCGI(path_file_))
 		is_file_cgi = true;
-	//TODO: allowed_methodとかはこっちにおく
+	if (!isAllowedMethod(req))
+		throw ResponseException("not allowed method", 403);
+	if (!isFileReadable())
+		throw ResponseException("file does not have permission", 403);
 }
 
 std::string HttpResponseBuilder::getReasonPhrase(std::string httpStatus)
@@ -298,7 +304,6 @@ void HttpResponseBuilder::updateHeader()
 
 void HttpResponseBuilder::doCGI(HttpRequestDTO &req)
 {
-	//TODO: ここにCGIの処理を追加
 	Path path(req.path, conf_);
 	
 	cgi_.run(req, conf_, path);
@@ -412,6 +417,12 @@ void HttpResponseBuilder::setDefaultRoot()
 		default_root_ = current_path + SLASH + conf_.root;
 }
 
+void HttpResponseBuilder::deleteFile(std::string filepath)
+{
+	(void)filepath;
+}
+
+
 HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 {
 	try
@@ -422,26 +433,27 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 		if (req.response_status_code != HttpStatus::OK)
 			return buildErrorResponse(utility::toInt(req.response_status_code), req);
 		findFileInServer();
-		reflectLocationStatus();
+		checkOptions(req);
 		if (is_file_cgi)
 		{
 			doCGI(req);
-			// ここにcgi用のbuidlerとかを配置
-		}
-		else
-		{
+		} else if (is_delete) {
+			deleteFile(filepath_.path);
+			buildHeader(req);
+		} else {
 			readFile(filepath_.path);
 			buildHeader(req);
 		}
 	}
 	catch(const ResponseException &re)
 	{
-		std::cout << "re.GetHttpStatus: " << re.GetHttpStatus() << std::endl;
+		std::cerr << "error msg: " << re.what() << std::endl;
+		std::cerr << "error status: " << re.GetHttpStatus() << std::endl;
 		return buildErrorResponse(re.GetHttpStatus(), req);
 	}
 	catch(const std::exception& e)
 	{
-		// 500を返すようにする
+		// 内部の想定しないエラーは500エラーで対応
 		std::cerr << e.what() << '\n';
 		return buildErrorResponse(500, req);
 	}
@@ -457,3 +469,9 @@ const int &HttpResponseBuilder::ResponseException::GetHttpStatus() const
 {
 	return http_status_;
 }
+
+bool HttpResponseBuilder::IsFileCGI()
+{
+	return is_file_cgi;
+}
+

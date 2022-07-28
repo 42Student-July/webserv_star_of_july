@@ -49,6 +49,7 @@ private:
 	std::vector<LocationConfig>::iterator loc_ite_;
 	LocationConfig found_location_;
 	bool is_file_cgi;
+	bool is_delete;
 	static const std::string CRLF;
 	static const std::string ACCEPT_RANGES;
 	static const std::string OCTET_STREAM;
@@ -65,8 +66,12 @@ private:
 	std::string getActualRoot(LocationConfig location);
 	std::string getCurrentPath();
 	std::string getContentTypeByExtension();
+	bool isAllowedMethod(HttpRequestDTO &req);
+	void deleteFile(std::string filepath);
+	bool isFileReadable();
 public:
 	HttpResponseBuilder();
+	bool IsFileCGI();
 	HttpResponseBuilder(ConfigDTO conf);
 	// ~HttpResponseBuilder();
 	HttpResponseBuilder(const HttpResponseBuilder &other);
@@ -74,7 +79,6 @@ public:
 	HttpResponse *build(HttpRequestDTO &req);
 	void findFileInServer();
 	void findActualFilepath(std::string dir, std::string file);
-	void findActualErrorFilepath(std::string dir, std::string file);
 	void readFile(std::string fullpath);
 	void readErrorFile(std::string fullpath);
 	void buildHeader(HttpRequestDTO &req);
@@ -84,7 +88,7 @@ public:
 	std::string buildDate();
 	std::string buildLastModified();
 	void parseRequestPath(const Path &path);
-	void reflectLocationStatus();
+	void checkOptions(HttpRequestDTO &req);
 	bool isCGI(std::string file);
 	void doCGI(HttpRequestDTO &req);
 	std::string getReasonPhrase(std::string httpStatus);
