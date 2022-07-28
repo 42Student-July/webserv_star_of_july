@@ -72,7 +72,6 @@ void ConnectionSocket::generateResponse() {
   HttpRequestConverter req_converter;
   HttpRequestDTO *req_dto = req_converter.toDTO(*current_request_);
   HttpResponseBuilder builder = HttpResponseBuilder(*conf_dto);
-  std::cerr << "DTO_BODY\n" << req_dto->body << std::endl;
   current_response_ = builder.build(*req_dto);
 }
 
@@ -82,7 +81,7 @@ void ConnectionSocket::sendResponse() const {
   const char *response = plain_txt->Text().c_str();
   size_t response_len = plain_txt->Size();
 
-  std::cerr << response;
+  // std::cerr << response;
 
   if (send(fd_, response, response_len, 0) !=
       static_cast<ssize_t>(response_len)) {
