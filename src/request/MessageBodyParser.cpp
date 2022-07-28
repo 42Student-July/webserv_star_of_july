@@ -4,23 +4,12 @@ MessageBodyParser::MessageBodyParser() {}
 
 MessageBodyParser::~MessageBodyParser() {}
 
-std::string MessageBodyParser::parse(const std::string& buffer, bool is_chunked,
-                                     size_t content_length) {
-  // std::cerr << "buffer:" << buffer << std::endl
-  //           << "is_chunked:" << is_chunked << std::endl
-  //           << "exists_content_length:" << exists_content_length << std::endl
-  //           << "content_length:" << content_length << std::endl
-  //           << std::endl;
-  if (is_chunked) {
-    return parseChunkedBody(buffer);
-  } else {
-    return parseBody(buffer, content_length);
-  }
-}
+// std::cerr << "buffer:" << buffer << std::endl
+//           << "content_length:" << content_length << std::endl
+//           << std::endl;
 
 std::string MessageBodyParser::parseBody(const std::string& buffer,
                                          size_t content_length) {
-  // std::cerr << buffer.size() << ", conte: " << content_length << std::endl;
   if (content_length > kMaxBodyLength) {
     throw ParseErrorExeption(HttpStatus::PAYLOAD_TOO_LARGE, "body is too long");
   }
