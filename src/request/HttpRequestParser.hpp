@@ -8,6 +8,7 @@
 #include "HttpParser.hpp"
 #include "HttpRequest.hpp"
 #include "HttpStatus.hpp"
+#include "MessageBodyParser.hpp"
 #include "RequestHeaderParser.hpp"
 #include "ServerConfig.hpp"
 
@@ -16,10 +17,8 @@ class HttpRequestParser : public HttpParser {
   HttpRequestParser();
   ~HttpRequestParser();
   // 2つの引数はコンストラクタで渡した方が読みやすいかも。
-  HttpRequest *parse(const std::string buffer,
+  HttpRequest *parse(const std::string unparsed_str,
                      const ServerConfig &server_config);
-  // ここで持つべきじゃないので後で移動
-  const std::string &getBodyBuffer() const;
 
  private:
   static const size_t kMaxHeaderLength = 1 << 10;
@@ -27,14 +26,14 @@ class HttpRequestParser : public HttpParser {
 
   HttpRequestParser(const HttpRequestParser &other);
   HttpRequestParser &operator=(const HttpRequestParser &other);
-  static void validateRequestLength(const std::string &buffer);
-  static RequestHeader parseRequestHeader(const std::string &buffer);
-  static std::string parseBody(const std::string &buffer);
-  static std::string getLine(const std::string &buffer, StringPos *offset);
+  static void validateRequestLength(const std::string &unparsed_str);
+  static RequestHeader parseRequestHeader(const std::string &unparsed_str);
+  std::string parseBody(const std::string &unparsed_str);
+  std::string parseMessageBody(const std::string &unparsed_str,
+                               const HttpRequest *request);
+  static std::string getLine(const std::string &unparsed_str,
+                             StringPos *offset);
   void setContentLengthInfo(HeaderFieldMap &headerfield_map, HttpRequest *req);
-
-  // ここで持つべきじゃないので後で移動
-  std::string body_buffer_;
 };
 
 #endif  // SRC_HTTPREQUESTPARSER_HPP_

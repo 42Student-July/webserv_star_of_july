@@ -87,8 +87,9 @@ TEST_F(HttpRequestParserTest, StoreOneLineToBody) {
 
   checkRequestline("POST", "/", "HTTP/1.1", req);
   checkHeaderField("host", "localhost:80", req->header.name_value_map);
+  checkHeaderField("content-length", "23", req->header.name_value_map);
   checkBody("name=hoge&comment=hoge\n", req->body);
-  ASSERT_EQ(1, req->header.name_value_map.size());
+  ASSERT_EQ(2, req->header.name_value_map.size());
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
 
@@ -98,8 +99,9 @@ TEST_F(HttpRequestParserTest, StoreMultiLinesToBody) {
 
   checkRequestline("POST", "/", "HTTP/1.1", req);
   checkHeaderField("host", "localhost:80", req->header.name_value_map);
+  checkHeaderField("content-length", "24", req->header.name_value_map);
   checkBody("1stline\n2ndline\n3rdline\n", req->body);
-  ASSERT_EQ(1, req->header.name_value_map.size());
+  ASSERT_EQ(2, req->header.name_value_map.size());
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
 
@@ -111,9 +113,10 @@ TEST_F(HttpRequestParserTest, StoreJsonToBody) {
   checkHeaderField("host", "localhost:80", req->header.name_value_map);
   checkHeaderField("content-type", "application/json",
                    req->header.name_value_map);
+  checkHeaderField("content-length", "46", req->header.name_value_map);
   checkBody("{\n\t\"asa-gohan\":\"misosiru\",\n\t\"oyatsu\":\"karl\"\n}\n",
             req->body);
-  ASSERT_EQ(2, req->header.name_value_map.size());
+  ASSERT_EQ(3, req->header.name_value_map.size());
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }
 
@@ -393,5 +396,5 @@ TEST_F(HttpRequestParserTest, NoCrBodyEnd) {
 
   checkBody("", req->body);
   ASSERT_EQ(2, req->header.name_value_map.size());
-  ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
+  ASSERT_EQ(HttpStatus::OK, req->response_status_code);
 }

@@ -40,7 +40,6 @@ void ConnectionSocket::handleWriteEvent() {
 ssize_t ConnectionSocket::recvFromClient() {
   ssize_t recv_size = recv(fd_, recv_buffer_, kRecvBufferSize, 0);
 
-
   if (recv_size < 0) {
     throw std::runtime_error("recv() failed");
   }
@@ -57,14 +56,6 @@ void ConnectionSocket::generateRequest(ssize_t recv_size) {
   MessageBodyParser body_parser;
   recv_buffer_[recv_size] = '\0';
   current_request_ = request_parser_.parse(recv_buffer_, serverconfig_);
-  // std::cerr << "Body buffer: " << std::endl
-  //           << request_parser_.getBodyBuffer() << std::endl;
-  // std::cerr << "ContentLength: " << std::endl
-  //           << current_request_->content_length << std::endl;
-  current_request_->body = body_parser.parse(
-      request_parser_.getBodyBuffer(), false,
-      current_request_->has_content_length, current_request_->content_length);
-
   std::cerr << *current_request_;
 }
 

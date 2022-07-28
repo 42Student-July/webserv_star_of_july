@@ -1,5 +1,6 @@
 POST / HTTP/1.1
 Host: localhost:80
+Content-Length: 24
 
 1stline
 2ndline
