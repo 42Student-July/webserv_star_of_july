@@ -79,7 +79,6 @@ public:
 	HttpResponse *build(HttpRequestDTO &req);
 	void findFileInServer();
 	void findActualFilepath(std::string dir, std::string file);
-	void findActualErrorFilepath(std::string dir, std::string file);
 	void readFile(std::string fullpath);
 	void readErrorFile(std::string fullpath);
 	void buildHeader(HttpRequestDTO &req);
