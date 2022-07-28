@@ -5,11 +5,10 @@
 #include <map>
 #include <string>
 
-#include "HeaderFieldParser.hpp"
 #include "HttpParser.hpp"
 #include "HttpRequest.hpp"
 #include "HttpStatus.hpp"
-#include "RequestLineParser.hpp"
+#include "RequestHeaderParser.hpp"
 #include "ServerConfig.hpp"
 
 class HttpRequestParser : public HttpParser {
@@ -29,10 +28,8 @@ class HttpRequestParser : public HttpParser {
   HttpRequestParser(const HttpRequestParser &other);
   HttpRequestParser &operator=(const HttpRequestParser &other);
   static void validateRequestLength(const std::string &buffer);
-  static RequestLine parseRequestLine(const std::string &buffer,
-                                      StringPos *offset);
-  HeaderFieldMap parseHeaderField(const std::string &buffer, StringPos *offset);
-  static std::string parseBody(const std::string &buffer, StringPos offset);
+  static RequestHeader parseRequestHeader(const std::string &buffer);
+  static std::string parseBody(const std::string &buffer);
   static std::string getLine(const std::string &buffer, StringPos *offset);
   void setContentLengthInfo(HeaderFieldMap &headerfield_map, HttpRequest *req);
 

@@ -232,7 +232,6 @@ TEST_F(HttpRequestParserTest, HeaderHasNoColon) {
   std::string file_name = "header_has_no_colon.crlf";
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
-  checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
   ASSERT_EQ(0, req->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
@@ -242,7 +241,6 @@ TEST_F(HttpRequestParserTest, HeaderHasSpaceBeforeColon) {
   std::string file_name = "header_has_space_before_colon.crlf";
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
-  checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
   ASSERT_EQ(0, req->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
@@ -252,7 +250,6 @@ TEST_F(HttpRequestParserTest, HeaderHasNoFieldName) {
   std::string file_name = "header_has_no_field_name.crlf";
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
-  checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
   ASSERT_EQ(0, req->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
@@ -284,7 +281,6 @@ TEST_F(HttpRequestParserTest, FieldNameHasOnlyWS) {
   std::string file_name = "field_name_has_only_WS.crlf";
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
-  checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
   ASSERT_EQ(0, req->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
@@ -294,7 +290,6 @@ TEST_F(HttpRequestParserTest, FieldNameHasInvalidChar) {
   std::string file_name = "field_name_has_invalid_char.crlf";
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
-  checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
   ASSERT_EQ(0, req->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
@@ -304,7 +299,6 @@ TEST_F(HttpRequestParserTest, FieldNameLastIsInvalidChar) {
   std::string file_name = "field_name_last_is_invalid_char.crlf";
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
-  checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
   ASSERT_EQ(0, req->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
@@ -314,7 +308,6 @@ TEST_F(HttpRequestParserTest, NoHost) {
   std::string file_name = "no_host.crlf";
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
-  checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
   ASSERT_EQ(0, req->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);
@@ -324,7 +317,6 @@ TEST_F(HttpRequestParserTest, NoHostEmpty) {
   std::string file_name = "no_host_empty.crlf";
   HttpRequest *req = buildRequest(file_dir + file_name, config);
 
-  checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
   ASSERT_EQ(0, req->name_value_map.size());
   ASSERT_EQ(HttpStatus::BAD_REQUEST, req->response_status_code);

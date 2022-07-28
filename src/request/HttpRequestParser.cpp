@@ -5,19 +5,23 @@ HttpRequestParser::HttpRequestParser() {}
 
 HttpRequestParser::~HttpRequestParser() {}
 
+#include <cstdio>
+
 // 2つの引数はコンストラクタで渡した方が読みやすいかも。
 HttpRequest *HttpRequestParser::parse(const std::string buffer,
                                       const ServerConfig &server_config) {
   HttpRequest *req = new HttpRequest(server_config);
-  StringPos offset = 0;
+  RequestHeader header;
 
   try {
     validateRequestLength(buffer);
-    req->request_line = parseRequestLine(buffer, &offset);
-    req->name_value_map = parseHeaderField(buffer, &offset);
-    body_buffer_ = buffer.substr(offset);
+    header = parseRequestHeader(buffer);
+    req->request_line = header.request_line;
+    req->name_value_map = header.name_value_map;
+    StringPos body_begin = buffer.find(CRLF + CRLF) + 4;
+    body_buffer_ = buffer.substr(body_begin);
     setContentLengthInfo(req->name_value_map, req);
-    req->body = parseBody(buffer, offset);
+    req->body = parseBody(body_buffer_);
   } catch (const ParseErrorExeption &e) {
     req->response_status_code = e.getErrorStatus();
     std::cerr << e.what() << std::endl;
@@ -50,40 +54,25 @@ void HttpRequestParser::validateRequestLength(const std::string &buffer) {
   }
 }
 
-RequestLine HttpRequestParser::parseRequestLine(const std::string &buffer,
-                                                StringPos *offset) {
-  RequestLineParser rl_parser;
-  RequestLine request_line = rl_parser.parse(getLine(buffer, offset));
+RequestHeader HttpRequestParser::parseRequestHeader(const std::string &buffer) {
+  RequestHeaderParser rh_parser;
+  size_t header_len = buffer.find(CRLF + CRLF) + 4;
+  std::string unparsed_header = buffer.substr(0, header_len);
 
-  return request_line;
+  return rh_parser.parse(unparsed_header);
 }
 
-HttpRequest::HeaderFieldMap HttpRequestParser::parseHeaderField(
-    const std::string &buffer, StringPos *offset) {
-  StringVector headerfield_vec;
-  HeaderFieldParser hf_parser;
-  HeaderFieldMap headerfield_map;
-
-  for (std::string line = getLine(buffer, offset); line.size() != 0;
-       line = getLine(buffer, offset)) {
-    headerfield_vec.push_back(line);
-  }
-  headerfield_map = hf_parser.parse(headerfield_vec);
-  return headerfield_map;
-}
-
-std::string HttpRequestParser::parseBody(const std::string &buffer,
-                                         StringPos offset) {
+std::string HttpRequestParser::parseBody(const std::string &buffer) {
   // bodyがないケース
-  if (offset == buffer.size()) {
+  if (buffer.empty()) {
     return "";
   }
 
-  StringPos body_end = buffer.find(CRLF, offset);
+  StringPos body_end = buffer.find(CRLF);
   if (body_end == std::string::npos) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No body_end");
   }
-  return buffer.substr(offset, body_end - offset);
+  return buffer.substr(0, body_end);
 }
 
 // 変数宣言と初期化を同時にするとなんか読みにくい。
