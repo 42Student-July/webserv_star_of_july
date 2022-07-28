@@ -24,6 +24,8 @@ std::ostream &operator<<(std::ostream &stream, const HttpRequest &rhs) {
          << std::endl
          << "#HeaderFields" << std::endl
          << rhs.name_value_map << std::endl
+         << "#Body" << std::endl
+         << rhs.body << std::endl
          << "#Status" << std::endl
          << "status_code: " << rhs.response_status_code << std::endl
          << "##################" << std::endl

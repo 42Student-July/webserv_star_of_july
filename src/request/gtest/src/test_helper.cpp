@@ -25,6 +25,16 @@ HttpRequest *buildRequest(const std::string &filepath,
   return parser.parse(content.c_str(), config);
 }
 
+RequestHeader buildRequestHeader(const std::string &filepath) {
+  std::string content;
+  std::string unparsed_header;
+  RequestHeaderParser parser;
+
+  content = readFile(filepath.c_str());
+  unparsed_header = content.substr(0, content.find("\r\n\r\n") + 4);
+  return parser.parse(unparsed_header);
+}
+
 HttpRequestDTO *buildDTO(const std::string &filepath,
                          const ServerConfig config) {
   HttpRequestConverter converter;
@@ -37,32 +47,18 @@ HttpRequestDTO *buildDTO(const std::string &filepath,
   return dto;
 }
 
-ServerConfig initServerConfigWithLocation() {
-  ServerConfig server_config;
-  server_config.port = 4242;
-  server_config.host = "42tokyo";
-  server_config.server.push_back("nop");
-  server_config.server.push_back("cluster");
-  server_config.error_pages.insert({0, "error0"});
-  server_config.error_pages.insert({1, "error1"});
-  server_config.root = "www/html";
-  server_config.client_body_size_limit = 65536;
-  LocationConfig locationdemo;
-  locationdemo.location = "location";
-  locationdemo.root = "www/cgi-bin";
-  locationdemo.allowed_methods.push_back("GET");
-  locationdemo.indexes.push_back("index.cgi");
-  locationdemo.autoindex = false;
-  locationdemo.cgi_extensions.push_back(".py");
-  server_config.locations.push_back(locationdemo);
-  return server_config;
-}
-
 void checkRequestline(const std::string &method, const std::string &uri,
                       const std::string &version, HttpRequest *request) {
   ASSERT_EQ(method, request->request_line.method);
   ASSERT_EQ(uri, request->request_line.uri);
   ASSERT_EQ(version, request->request_line.version);
+}
+
+void checkRequestline(const std::string &method, const std::string &uri,
+                      const std::string &version, RequestLine request_line) {
+  ASSERT_EQ(method, request_line.method);
+  ASSERT_EQ(uri, request_line.uri);
+  ASSERT_EQ(version, request_line.version);
 }
 
 void checkRequestline(const std::string &method, const std::string &uri,

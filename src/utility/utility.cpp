@@ -24,18 +24,46 @@ std::string utility::toLower(const std::string& str) {
   return lower_str;
 }
 
-void utility::freeArrays(char **arrays)
-{
-	size_t	idx = 0;
+int utility::stoi(const std::string& str, size_t* endpos, long base) {
+  const char* p = str.c_str();
+  char* end;
+  errno = 0;
+  long num = std::strtol(p, &end, base);
+  if (p == end) {
+    throw std::invalid_argument("stoi");
+  }
+  if (errno == ERANGE || num < std::numeric_limits<int>::min() ||
+      num > std::numeric_limits<int>::max()) {
+    throw std::out_of_range("stoi");
+  }
+  if (endpos != NULL) {
+    *endpos = static_cast<std::size_t>(end - p);
+  }
+  return num;
+}
 
-	if (!arrays)
-		return ;
-	while (arrays[idx])
-	{
-		free(arrays[idx]);
-		idx += 1;
-	}
-	free(arrays);
+static bool consistsOfHexadecimal(const std::string& str) {
+  return utility::all_of(str.begin(), str.end(), isxdigit);
+}
+
+// 16進数の文字列をintに変換する。
+// 0123456789abcdefABCDEF以外の文字を許容しない
+int utility::hexStringToInt(const std::string& hex_str) {
+  if (!consistsOfHexadecimal(hex_str)) {
+    throw std::invalid_argument("stoi");
+  }
+  return utility::stoi(hex_str, NULL, 16);
+}
+
+void utility::freeArrays(char** arrays) {
+  size_t idx = 0;
+
+  if (!arrays) return;
+  while (arrays[idx]) {
+    free(arrays[idx]);
+    idx += 1;
+  }
+  free(arrays);
 }
 
 char **utility::map2Array(std::map<std::string, std::string> map_env,

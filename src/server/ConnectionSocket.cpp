@@ -54,8 +54,16 @@ ssize_t ConnectionSocket::recvFromClient() {
 }
 
 void ConnectionSocket::generateRequest(ssize_t recv_size) {
+  MessageBodyParser body_parser;
   recv_buffer_[recv_size] = '\0';
   current_request_ = request_parser_.parse(recv_buffer_, serverconfig_);
+  // std::cerr << "Body buffer: " << std::endl
+  //           << request_parser_.getBodyBuffer() << std::endl;
+  // std::cerr << "ContentLength: " << std::endl
+  //           << current_request_->content_length << std::endl;
+  current_request_->body = body_parser.parse(
+      request_parser_.getBodyBuffer(), false,
+      current_request_->has_content_length, current_request_->content_length);
 
   std::cerr << *current_request_;
 }
@@ -76,7 +84,7 @@ void ConnectionSocket::sendResponse() const {
   const char *response = plain_txt->Text().c_str();
   size_t response_len = plain_txt->Size();
 
-  std::cerr << response;
+  // std::cerr << response;
 
   if (send(fd_, response, response_len, 0) !=
       static_cast<ssize_t>(response_len)) {

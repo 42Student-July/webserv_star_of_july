@@ -19,7 +19,7 @@ CXXFLAGS = -Wall -Werror -Wextra -Wshadow -std=c++98 -pedantic
 DEBUG			:= -fsanitize=address
 
 HEADERS = . \
-		  ../config \
+		  ../response \
 		  $(NULL)
 
 INCLUDES = $(addprefix -I, $(HEADERS))
