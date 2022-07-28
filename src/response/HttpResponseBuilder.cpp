@@ -10,7 +10,6 @@ const std::string HttpResponseBuilder::SP = " ";
 const std::string HttpResponseBuilder::SLASH = "/";
 const int HttpResponseBuilder::DOT_SIZE = 1;
 
-
 HttpResponseBuilder::HttpResponseBuilder() {}
 
 HttpResponseBuilder::HttpResponseBuilder(ConfigDTO conf)
@@ -55,7 +54,6 @@ void HttpResponseBuilder::findActualFilepath(std::string dir, std::string file)
 {
 	DIR				*dirp;
 	struct dirent	*ent;
-	std::cout << "fullpath: " << dir << std::endl;
 	
 	dirp = opendir(dir.c_str());
 	if (dirp == NULL)
@@ -66,34 +64,6 @@ void HttpResponseBuilder::findActualFilepath(std::string dir, std::string file)
 		{
 			filepath_.path = dir + file;
 			filepath_.exists = true;
-			break;
-		}
-	}
-	closedir(dirp);
-}
-
-void HttpResponseBuilder::findActualErrorFilepath(std::string dir, std::string file)
-{
-	DIR				*dirp;
-	struct dirent	*ent;
-	char			*cwd;
-	std::string		fullpath;
-	
-	//TODO: default rootを使う
-	cwd = getcwd(NULL, 0);
-	fullpath = std::string(cwd) + dir;
-	std::free(cwd);
-	std::cout << "fullpath: " << fullpath << std::endl;
-	
-	dirp = opendir(fullpath.c_str());
-	if (dirp == NULL)
-		throw std::runtime_error("directory not found");
-	while ((ent = readdir(dirp)) != NULL)
-	{
-		if (std::strcmp(ent->d_name, file.c_str()) == 0)
-		{
-			errorFilepath_.path = fullpath + file;
-			errorFilepath_.exists = true;
 			break;
 		}
 	}
@@ -179,7 +149,7 @@ void HttpResponseBuilder::readErrorFile(std::string fullpath)
 	std::string line;
 	
 	if (ifs.fail())
-		throw std::runtime_error("read error");
+		throw ResponseException("read file error", 500);
     while (std::getline(ifs, line)){
         res_body_str_ << line << CRLF;
     }
@@ -204,10 +174,7 @@ std::string HttpResponseBuilder::buildLastModified()
 	time_t time;
 	
 	if(stat(filepath_.path.c_str(), &s) == -1)
-	{
-		// TODO: forbidden 403のときのハンドリングする
 		throw ResponseException("stat", 500);
-	}
 	time = s.st_mtime;
 	mod_time = asctime(gmtime(&time));
 	mod_time.erase(mod_time.size() - 1);
@@ -244,8 +211,6 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 	header_.reason_phrase = HttpStatus::ReasonPhrase::OK;
 	header_.date = buildDate();
 	header_.server = conf_.server;
-	// header_.content_type = OCTET_STREAM;
-	// とりあえずブラウザから見れるようにしました。
 	header_.content_type = getContentTypeByExtension();
 	size_t  content_length = res_body_str_.str().size();
 	header_.content_length = utility::toString(content_length);
@@ -339,7 +304,6 @@ void HttpResponseBuilder::updateHeader()
 
 void HttpResponseBuilder::doCGI(HttpRequestDTO &req)
 {
-	//TODO: ここにCGIの処理を追加
 	Path path(req.path, conf_);
 	
 	cgi_.run(req, conf_, path);
@@ -473,7 +437,6 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 		if (is_file_cgi)
 		{
 			doCGI(req);
-			// ここにcgi用のbuidlerとかを配置
 		} else if (is_delete) {
 			deleteFile(filepath_.path);
 			buildHeader(req);
@@ -490,7 +453,7 @@ HttpResponse *HttpResponseBuilder::build(HttpRequestDTO &req)
 	}
 	catch(const std::exception& e)
 	{
-		// 500を返すようにする
+		// 内部の想定しないエラーは500エラーで対応
 		std::cerr << e.what() << '\n';
 		return buildErrorResponse(500, req);
 	}
