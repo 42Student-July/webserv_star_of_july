@@ -19,6 +19,11 @@ class HttpRequestParser : public HttpParser {
   // 2つの引数はコンストラクタで渡した方が読みやすいかも。
   HttpRequest *parse(const std::string unparsed_str,
                      const ServerConfig &server_config);
+  void parse2(const std::string unparsed_str,
+              const ServerConfig &server_config);
+  HttpRequest *buildRequest(const ServerConfig &server_config);
+  bool errorOccured() const;
+  bool finished() const;
 
  private:
   enum Status {
@@ -35,9 +40,13 @@ class HttpRequestParser : public HttpParser {
   std::string parseBody(size_t content_length);
   std::string parseChunkedBody(const std::string &unparsed_str);
   void changeStatus(Status next_status);
+  void clear();
 
   Status parse_status_;
+  RequestHeader parsed_header_;
+  std::string parsed_body_;
   std::string unparsed_body_;
+  std::string error_code_;
 };
 
 #endif  // SRC_HTTPREQUESTPARSER_HPP_

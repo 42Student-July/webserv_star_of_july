@@ -16,13 +16,23 @@ std::string readFile(const char *filepath) {
   return file_content;
 }
 
+// HttpRequest *buildRequest(const std::string &filepath,
+//                           const ServerConfig config) {
+//   std::string content;
+//   HttpRequestParser parser;
+
+//   content = readFile(filepath.c_str());
+//   return parser.parse(content.c_str(), config);
+// }
+
 HttpRequest *buildRequest(const std::string &filepath,
                           const ServerConfig config) {
   std::string content;
   HttpRequestParser parser;
 
   content = readFile(filepath.c_str());
-  return parser.parse(content.c_str(), config);
+  parser.parse2(content.c_str(), config);
+  return parser.buildRequest(config);
 }
 
 RequestHeader buildRequestHeader(const std::string &filepath) {

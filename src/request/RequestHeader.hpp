@@ -34,6 +34,7 @@ class RequestHeader {
   HeaderFieldMap header_map_;
 };
 
+std::ostream& operator<<(std::ostream& stream, const RequestLine& rhs);
 std::ostream& operator<<(std::ostream& stream, const RequestHeader& rhs);
 
 #endif  // SRC_REQUESTHEADER_HPP_

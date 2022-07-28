@@ -14,6 +14,9 @@ HttpRequest *HttpRequestParser::parse(const std::string unparsed_str,
   RequestHeader header;
 
   try {
+    if (parse_status_ == PARSE_DONE || parse_status_ == PARSE_ERROR) {
+      clear();
+    }
     if (parse_status_ == PARSE_HEADER) {
       req->header = parseRequestHeader(unparsed_str);
     }
@@ -41,6 +44,59 @@ HttpRequest *HttpRequestParser::parse(const std::string unparsed_str,
   }
   return req;
 }
+
+void HttpRequestParser::parse2(const std::string unparsed_str,
+                               const ServerConfig &server_config) {
+  // bodysizelimitまだ
+  (void)server_config;
+  try {
+    if (parse_status_ == PARSE_DONE || parse_status_ == PARSE_ERROR) {
+      clear();
+    }
+    if (parse_status_ == PARSE_HEADER) {
+      parsed_header_ = parseRequestHeader(unparsed_str);
+    }
+    if (parse_status_ == PARSE_BODY) {
+      parsed_body_ = parseBody(parsed_header_.contentLength());
+    }
+    if (parse_status_ == PARSE_CHUNKED_BODY) {
+      unparsed_body_ += unparsed_str;
+      if (unparsed_body_.size() > kMaxBodyLength) {
+        throw ParseErrorExeption(HttpStatus::PAYLOAD_TOO_LARGE,
+                                 "body is too long");
+      }
+      if (unparsed_body_.find("0\r\n\r\n") != std::string::npos) {
+        parsed_body_ = parseChunkedBody(unparsed_body_);
+      }
+    }
+  } catch (const ParseErrorExeption &e) {
+    changeStatus(PARSE_ERROR);
+    error_code_ = e.getErrorStatus();
+    std::cerr << e.what() << std::endl;
+  } catch (const std::exception &e) {
+    changeStatus(PARSE_ERROR);
+    error_code_ = HttpStatus::INTERNAL_SERVER_ERROR;
+    std::cerr << e.what() << std::endl;
+  }
+}
+
+// コンストラクタの引数増やしたい
+// server_configの選択のロジックはまだ
+HttpRequest *HttpRequestParser::buildRequest(
+    const ServerConfig &server_config) {
+  HttpRequest *req = new HttpRequest(server_config);
+
+  req->header = parsed_header_;
+  req->body = parsed_body_;
+  req->response_status_code = (errorOccured()) ? error_code_ : HttpStatus::OK;
+  return req;
+}
+
+bool HttpRequestParser::errorOccured() const {
+  return parse_status_ == PARSE_ERROR;
+}
+
+bool HttpRequestParser::finished() const { return parse_status_ == PARSE_DONE; }
 
 RequestHeader HttpRequestParser::parseRequestHeader(
     const std::string &unparsed_str) {
@@ -77,4 +133,14 @@ std::string HttpRequestParser::parseChunkedBody(
 
 void HttpRequestParser::changeStatus(Status next_status) {
   parse_status_ = next_status;
+}
+
+void HttpRequestParser::clear() {
+  RequestHeader header;
+
+  parsed_header_ = header;
+  parsed_body_ = "";
+  unparsed_body_ = "";
+  error_code_ = "";
+  changeStatus(PARSE_HEADER);
 }

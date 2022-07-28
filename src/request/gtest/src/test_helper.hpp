@@ -15,6 +15,8 @@ ServerConfig initServerConfigWithLocation();
 std::string readFile(const char *filepath);
 HttpRequest *buildRequest(const std::string &filepath,
                           const ServerConfig config);
+HttpRequest *buildRequest2(const std::string &filepath,
+                           const ServerConfig config);
 RequestHeader buildRequestHeader(const std::string &filepath);
 HttpRequestDTO *buildDTO(const std::string &filepath,
                          const ServerConfig config);

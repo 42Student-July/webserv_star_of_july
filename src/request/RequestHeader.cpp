@@ -46,19 +46,23 @@ static std::ostream& operator<<(std::ostream& stream,
                                 const HeaderFieldMap& rhs) {
   HeaderFieldMap::const_iterator it = rhs.begin();
   HeaderFieldMap::const_iterator ite = rhs.end();
+  stream << "#HeaderFields" << std::endl;
   for (; it != ite; ++it) {
     stream << it->first << ": " << it->second << std::endl;
   }
   return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const RequestHeader& rhs) {
+std::ostream& operator<<(std::ostream& stream, const RequestLine& rhs) {
   stream << "#RequestLine" << std::endl
-         << "method: " << rhs.requestLine().method << std::endl
-         << "uri: " << rhs.requestLine().uri << std::endl
-         << "version: " << rhs.requestLine().version << std::endl
-         << std::endl
-         << "#HeaderFields" << std::endl
-         << rhs.headerMap() << std::endl;
+         << "method: " << rhs.method << std::endl
+         << "uri: " << rhs.uri << std::endl
+         << "version: " << rhs.version << std::endl
+         << std::endl;
+  return stream;
+}
+
+std::ostream& operator<<(std::ostream& stream, const RequestHeader& rhs) {
+  stream << rhs.requestLine() << std::endl << rhs.headerMap() << std::endl;
   return stream;
 }

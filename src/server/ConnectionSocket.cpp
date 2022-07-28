@@ -28,8 +28,10 @@ void ConnectionSocket::handleReadEvent() {
     return;
   }
   generateRequest(recv_size);
-  generateResponse();
-  state_ = WRITE;
+  if (request_parser_.finished() || request_parser_.errorOccured()) {
+    generateResponse();
+    state_ = WRITE;
+  }
 }
 
 void ConnectionSocket::handleWriteEvent() {
@@ -48,15 +50,19 @@ ssize_t ConnectionSocket::recvFromClient() {
     return 0;
   }
 
-  std::cout << "recv_buffer_: " << recv_buffer_ << std::endl;
+  // std::cout << "recv_buffer_: " << recv_buffer_ << std::endl;
   return recv_size;
 }
 
 void ConnectionSocket::generateRequest(ssize_t recv_size) {
   MessageBodyParser body_parser;
   recv_buffer_[recv_size] = '\0';
-  current_request_ = request_parser_.parse(recv_buffer_, serverconfig_);
-  std::cerr << *current_request_;
+  request_parser_.parse2(recv_buffer_, serverconfig_);
+  if (request_parser_.finished() || request_parser_.errorOccured()) {
+    current_request_ = request_parser_.buildRequest(serverconfig_);
+  }
+  // current_request_ = request_parser_.parse(recv_buffer_, serverconfig_);
+  std::cerr << current_request_->header.requestLine();
 }
 
 // // GETメソッドのファイル決め打ち
