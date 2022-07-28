@@ -29,12 +29,8 @@ class HttpRequestParser : public HttpParser {
     PARSE_ERROR
   };
 
-  static const size_t kMaxHeaderLength = 1 << 10;
-  static const size_t kMaxBodyLength = 1 << 20;
-
   HttpRequestParser(const HttpRequestParser &other);
   HttpRequestParser &operator=(const HttpRequestParser &other);
-  static void validateRequestLength(const std::string &unparsed_str);
   RequestHeader parseRequestHeader(const std::string &unparsed_str);
   std::string parseBody(size_t content_length);
   std::string parseChunkedBody(const std::string &unparsed_str);

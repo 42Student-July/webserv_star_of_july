@@ -28,6 +28,8 @@ class HttpParser {
   static const std::string CRLF;
   static const std::string OWS;
   static const std::string Delimiters;
+  static const size_t kMaxHeaderLength = 1 << 10;
+  static const size_t kMaxBodyLength = 1 << 20;
   // メソッド
   static bool isOWS(int c);
   static bool isHeaderDelimiter(int c);

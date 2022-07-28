@@ -21,6 +21,9 @@ std::string MessageBodyParser::parse(const std::string& buffer, bool is_chunked,
 std::string MessageBodyParser::parseBody(const std::string& buffer,
                                          size_t content_length) {
   // std::cerr << buffer.size() << ", conte: " << content_length << std::endl;
+  if (content_length > kMaxBodyLength) {
+    throw ParseErrorExeption(HttpStatus::PAYLOAD_TOO_LARGE, "body is too long");
+  }
   if (buffer.size() < content_length) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
                              "body length is less than content_length");
@@ -31,6 +34,10 @@ std::string MessageBodyParser::parseBody(const std::string& buffer,
 std::string MessageBodyParser::parseChunkedBody(const std::string& buffer) {
   std::string body;
   StringPos offset = 0;
+
+  if (buffer.size() > kMaxBodyLength) {
+    throw ParseErrorExeption(HttpStatus::PAYLOAD_TOO_LARGE, "body is too long");
+  }
 
   while (42) {
     std::string chunk_size_str = getLine(buffer, &offset);

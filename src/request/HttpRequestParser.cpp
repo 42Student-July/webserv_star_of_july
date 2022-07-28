@@ -14,7 +14,6 @@ HttpRequest *HttpRequestParser::parse(const std::string unparsed_str,
   RequestHeader header;
 
   try {
-    validateRequestLength(unparsed_str);
     if (parse_status_ == PARSE_HEADER) {
       req->header = parseRequestHeader(unparsed_str);
     }
@@ -23,6 +22,10 @@ HttpRequest *HttpRequestParser::parse(const std::string unparsed_str,
     }
     if (parse_status_ == PARSE_CHUNKED_BODY) {
       unparsed_body_ += unparsed_str;
+      if (unparsed_body_.size() > kMaxBodyLength) {
+        throw ParseErrorExeption(HttpStatus::PAYLOAD_TOO_LARGE,
+                                 "body is too long");
+      }
       if (unparsed_body_.find("0\r\n\r\n") == std::string::npos) {
         req->body = parseChunkedBody(unparsed_body_);
       }
@@ -39,46 +42,37 @@ HttpRequest *HttpRequestParser::parse(const std::string unparsed_str,
   return req;
 }
 
-// http://nginx.org/en/docs/http/ngx_http_core_module.html#client_header_buffer_size
-void HttpRequestParser::validateRequestLength(const std::string &unparsed_str) {
-  StringPos header_end = unparsed_str.find(CRLF + CRLF);
-  if (header_end == std::string::npos) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No header_end");
-  }
-  if (header_end > kMaxHeaderLength) {
-    throw ParseErrorExeption(HttpStatus::REQUEST_HEADER_FIELD_TOO_LARGE,
-                             "request is too long");
-  }
-  size_t body_len = unparsed_str.size() - header_end;
-  if (body_len > kMaxBodyLength) {
-    throw ParseErrorExeption(HttpStatus::PAYLOAD_TOO_LARGE, "body is too long");
-  }
-}
-
 RequestHeader HttpRequestParser::parseRequestHeader(
     const std::string &unparsed_str) {
   RequestHeaderParser rh_parser;
-  size_t header_len = unparsed_str.find(CRLF + CRLF) + 4;
-  std::string unparsed_header = unparsed_str.substr(0, header_len);
+  size_t header_end = unparsed_str.find(CRLF + CRLF);
+  if (header_end == std::string::npos) {
+    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No header_end");
+  }
+  std::string unparsed_header = unparsed_str.substr(0, header_end + 4);
   RequestHeader header = rh_parser.parse(unparsed_header);
   if (header.transferEncodingIsChunked()) {
     changeStatus(PARSE_CHUNKED_BODY);
   } else {
     changeStatus(PARSE_BODY);
   }
-  unparsed_body_ = unparsed_str.substr(header_len);
+  unparsed_body_ = unparsed_str.substr(header_end + 4);
   return header;
 }
 
 std::string HttpRequestParser::parseBody(size_t content_length) {
   MessageBodyParser mb_parser;
-  return mb_parser.parseBody(unparsed_body_, content_length);
+  std::string body = mb_parser.parseBody(unparsed_body_, content_length);
+  changeStatus(PARSE_DONE);
+  return body;
 }
 
 std::string HttpRequestParser::parseChunkedBody(
     const std::string &unparsed_str) {
   MessageBodyParser mb_parser;
-  return mb_parser.parseChunkedBody(unparsed_str);
+  std::string body = mb_parser.parseChunkedBody(unparsed_str);
+  changeStatus(PARSE_DONE);
+  return body;
 }
 
 void HttpRequestParser::changeStatus(Status next_status) {

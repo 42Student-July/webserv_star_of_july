@@ -18,6 +18,7 @@ class MessageBodyParser : public HttpParser {
  private:
   MessageBodyParser(const MessageBodyParser& other);
   MessageBodyParser& operator=(const MessageBodyParser& other);
+  static void validateBodyLength(const std::string& unparsed_str);
   // std::string parseBody(const std::string& buffer, size_t content_length);
   // std::string parseChunkedBody(const std::string& buffer);
 };

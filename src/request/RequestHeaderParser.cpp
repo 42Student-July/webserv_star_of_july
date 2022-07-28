@@ -9,14 +9,14 @@ RequestHeader RequestHeaderParser::parse(const std::string &unparsed_str) {
   // RequestHeader header;
   StringPos offset = 0;
 
-  validateRequestLength(unparsed_str);
+  validateHeaderLength(unparsed_str);
   RequestLine request_line = parseRequestLine(unparsed_str, &offset);
   HeaderFieldMap header_map = parseHeaderField(unparsed_str, &offset);
   return RequestHeader(request_line, header_map);
   //　try-catchは呼び出し元でやる(暫定)
   //
   // try {
-  //   validateRequestLength(unparsed_str);
+  //   validateHeaderLength(unparsed_str);
   //   header.request_line = parseRequestLine(unparsed_str, &offset);
   //   header.name_value_map = parseHeaderField(unparsed_str, &offset);
   // } catch (const ParseErrorExeption &e) {
@@ -31,7 +31,7 @@ RequestHeader RequestHeaderParser::parse(const std::string &unparsed_str) {
 }
 
 // http://nginx.org/en/docs/http/ngx_http_core_module.html#client_header_buffer_size
-void RequestHeaderParser::validateRequestLength(
+void RequestHeaderParser::validateHeaderLength(
     const std::string &unparsed_str) {
   size_t header_len = unparsed_str.size();
   if (header_len == std::string::npos) {
