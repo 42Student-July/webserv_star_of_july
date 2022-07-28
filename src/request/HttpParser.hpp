@@ -9,13 +9,6 @@ class HttpParser {
   HttpParser();
   ~HttpParser();
 
- protected:
-  // 型
-  typedef HttpRequest::HeaderFieldPair HeaderFieldPair;
-  typedef HttpRequest::HeaderFieldMap HeaderFieldMap;
-  typedef std::string::size_type StringPos;
-  typedef std::vector<std::string> StringVector;
-
   class ParseErrorExeption : public std::runtime_error {
    public:
     ParseErrorExeption(const std::string& error_status,
@@ -26,6 +19,14 @@ class HttpParser {
    private:
     std::string error_status_;
   };
+
+ protected:
+  // 型
+  typedef HttpRequest::HeaderFieldPair HeaderFieldPair;
+  typedef HttpRequest::HeaderFieldMap HeaderFieldMap;
+  typedef std::string::size_type StringPos;
+  typedef std::vector<std::string> StringVector;
+
   // 定数
   static const std::string CRLF;
   static const std::string OWS;
