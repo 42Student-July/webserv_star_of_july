@@ -66,10 +66,11 @@ private:
 	std::string getActualRoot(LocationConfig location);
 	std::string getCurrentPath();
 	std::string getContentTypeByExtension();
-	bool isDefinedMethod(HttpRequestDTO &req);
+	bool isAllowedMethod(HttpRequestDTO &req);
 	void deleteFile(std::string filepath);
 public:
 	HttpResponseBuilder();
+	bool IsFileCGI();
 	HttpResponseBuilder(ConfigDTO conf);
 	// ~HttpResponseBuilder();
 	HttpResponseBuilder(const HttpResponseBuilder &other);

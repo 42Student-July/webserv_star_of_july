@@ -784,6 +784,92 @@ TEST(AllowMethod, allowed_methodがないときにデフォルトのGETになる
 	EXPECT_EQ(res->Body(), ReadIndexHtml());
 }
 
+
+TEST(CGITest, default)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/cgi.py"));
+	req.response_status_code = "200";
+	
+	conf_.root = "html";
+	loc.location = "/";
+	loc.cgi_extensions.push_back(std::string(".py"));
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(builder.IsFileCGI(), true);
+}
+
+TEST(CGITest, 拡張子のみ_cgiではない)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/.py"));
+	req.response_status_code = "200";
+	
+	conf_.root = "html";
+	loc.location = "/";
+	loc.cgi_extensions.push_back(std::string(".py"));
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(builder.IsFileCGI(), false);
+}
+
+TEST(CGITest, 拡張子が２つある)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/cgi.py"));
+	req.response_status_code = "200";
+	req.method = "POST";
+	
+	conf_.root = "html";
+	loc.location = "/";
+	loc.allowed_methods.push_back(std::string("GET"));
+	loc.cgi_extensions.push_back(std::string(".php"));
+	loc.cgi_extensions.push_back(std::string(".py"));
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(builder.IsFileCGI(), true);
+}
+
+TEST(CGITest, allowmethodが許可されていない)
+{
+	ConfigDTO conf_;
+	LocationConfig loc;
+	HttpRequestDTO req;
+	setReqPath(req, std::string("/cgi.py"));
+	req.response_status_code = "200";
+	req.method = "POST";
+	
+	conf_.root = "html";
+	loc.location = "/";
+	loc.allowed_methods.push_back(std::string("GET"));
+	loc.cgi_extensions.push_back(std::string(".py"));
+	conf_.locations.push_back(loc);
+
+	// builder
+	HttpResponseBuilder builder = HttpResponseBuilder(conf_);
+	HttpResponse *res = builder.build(req);
+	
+	EXPECT_EQ(res->Body(), BuildDefaultError(403, conf_));
+}
+
 // CGIとのコネクションのために追加させていただきました
 /* TEST(CGI, ConnectionEstablished) */
 /* { */

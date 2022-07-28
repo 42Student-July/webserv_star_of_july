@@ -41,10 +41,10 @@ bool HttpResponseBuilder::isCGI(std::string file)
 	for (; it != ite; it++)
 	{
 		extension_pos = file.find(*it);
-		// TODO:拡張子のみのファイル名の場合の処理を検討
-		if (extension_pos != std::string::npos) {
-			std::cout << "is cgi true" << std::endl;
-			return true;
+		if (extension_pos != std::string::npos ) {
+			// ファイル名が隠しファイルのみの場合はfalseとする
+			if (file.size() != (*it).size())
+				return true;
 		}
 	}
 	return false;
@@ -258,7 +258,7 @@ void HttpResponseBuilder::buildHeader(HttpRequestDTO &req)
 	header_.accept_ranges = ACCEPT_RANGES;
 }
 
-bool HttpResponseBuilder::isDefinedMethod(HttpRequestDTO &req)
+bool HttpResponseBuilder::isAllowedMethod(HttpRequestDTO &req)
 {
 	if (found_location_.allowed_methods.empty())
 	{
@@ -289,7 +289,7 @@ void HttpResponseBuilder::reflectConfigAttr(HttpRequestDTO &req)
 {
 	if (isCGI(path_file_))
 		is_file_cgi = true;
-	if (!isDefinedMethod(req))
+	if (!isAllowedMethod(req))
 		throw ResponseException("not allowed method", 403);
 	
 }
@@ -495,3 +495,9 @@ const int &HttpResponseBuilder::ResponseException::GetHttpStatus() const
 {
 	return http_status_;
 }
+
+bool HttpResponseBuilder::IsFileCGI()
+{
+	return is_file_cgi;
+}
+
