@@ -8,6 +8,16 @@ RequestHeader::RequestHeader(const RequestLine& request_line,
 
 RequestHeader::~RequestHeader() {}
 
+RequestHeader::RequestHeader(const RequestHeader& other) { *this = other; }
+
+RequestHeader& RequestHeader::operator=(const RequestHeader& other) {
+  if (this != &other) {
+    request_line_ = other.request_line_;
+    header_map_ = other.header_map_;
+  }
+  return *this;
+}
+
 const RequestLine& RequestHeader::requestLine() const { return request_line_; }
 
 const HeaderFieldMap& RequestHeader::headerMap() const { return header_map_; }

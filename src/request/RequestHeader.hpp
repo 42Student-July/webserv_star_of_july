@@ -22,8 +22,8 @@ class RequestHeader {
   RequestHeader();
   RequestHeader(const RequestLine& request_line, const HeaderFieldMap& headers);
   ~RequestHeader();
-  // RequestHeader(const RequestHeader& other);
-  // RequestHeader& operator=(const RequestHeader& other);
+  RequestHeader(const RequestHeader& other);
+  RequestHeader& operator=(const RequestHeader& other);
   const RequestLine& requestLine() const;
   const HeaderFieldMap& headerMap() const;
   size_t contentLength() const;
