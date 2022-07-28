@@ -17,10 +17,7 @@ class HttpRequestParser : public HttpParser {
   HttpRequestParser();
   ~HttpRequestParser();
   // 2つの引数はコンストラクタで渡した方が読みやすいかも。
-  HttpRequest *parse(const std::string unparsed_str,
-                     const ServerConfig &server_config);
-  void parse2(const std::string unparsed_str,
-              const ServerConfig &server_config);
+  void parse(const std::string unparsed_str, const ServerConfig &server_config);
   HttpRequest *buildRequest(const ServerConfig &server_config);
   bool errorOccured() const;
   bool finished() const;

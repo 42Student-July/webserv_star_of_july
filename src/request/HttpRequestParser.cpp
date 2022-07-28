@@ -5,48 +5,8 @@ HttpRequestParser::HttpRequestParser() : parse_status_(PARSE_HEADER) {}
 
 HttpRequestParser::~HttpRequestParser() {}
 
-// 2つの引数はコンストラクタで渡した方が読みやすいかも。
-// HttpRequest *HttpRequestParser::parse(const std::string unparsed_str,
-//                                       const ServerConfig &server_config) {
-//   HttpRequest *req = new HttpRequest(server_config);
-//   RequestHeader header;
-
-//   try {
-//     if (parse_status_ == PARSE_DONE || parse_status_ == PARSE_ERROR) {
-//       clear();
-//     }
-//     if (parse_status_ == PARSE_HEADER) {
-//       req->header = parseRequestHeader(unparsed_str);
-//     }
-//     if (parse_status_ == PARSE_BODY) {
-//       req->body = parseBody(req->header.contentLength());
-//     }
-//     if (parse_status_ == PARSE_CHUNKED_BODY) {
-//       chunked_request_ += unparsed_str;
-//       if (chunked_request_.size() > kMaxBodyLength) {
-//         throw ParseErrorExeption(HttpStatus::PAYLOAD_TOO_LARGE,
-//                                  "body is too long");
-//       }
-//       if (chunked_request_.find("0\r\n\r\n") == std::string::npos) {
-//         req->body = parseChunkedBody(chunked_request_);
-//       }
-//     }
-//   } catch (const ParseErrorExeption &e) {
-//     changeStatus(PARSE_ERROR);
-//     req->response_status_code = e.getErrorStatus();
-//     std::cerr << "Catch exeption in HttpRequestParser: " << std::endl
-//               << e.what() << std::endl;
-//   } catch (const std::exception &e) {
-//     changeStatus(PARSE_ERROR);
-//     req->response_status_code = HttpStatus::INTERNAL_SERVER_ERROR;
-//     std::cerr << "Catch exeption in HttpRequestParser: " << std::endl
-//               << e.what() << std::endl;
-//   }
-//   return req;
-// }
-
-void HttpRequestParser::parse2(const std::string unparsed_str,
-                               const ServerConfig &server_config) {
+void HttpRequestParser::parse(const std::string unparsed_str,
+                              const ServerConfig &server_config) {
   // bodysizelimitまだ
   (void)server_config;
   try {

@@ -2,7 +2,10 @@
 
 ConnectionSocket::ConnectionSocket(int accepted_fd,
                                    const ServerConfig &serverconfig)
-    : ASocket(accepted_fd, serverconfig), state_(READ) {}
+    : ASocket(accepted_fd, serverconfig),
+      state_(READ),
+      current_request_(NULL),
+      current_response_(NULL) {}
 
 ConnectionSocket::~ConnectionSocket() {
   if (close(fd_) < 0) {
@@ -49,20 +52,20 @@ ssize_t ConnectionSocket::recvFromClient() {
     std::cerr << "recv: EOF" << std::endl << std::endl;
     return 0;
   }
-
-  // std::cout << "recv_buffer_: " << recv_buffer_ << std::endl;
+  // std::cerr << "recv_buffer_: " << std::endl << recv_buffer_ << std::endl;
   return recv_size;
 }
 
 void ConnectionSocket::generateRequest(ssize_t recv_size) {
   MessageBodyParser body_parser;
   recv_buffer_[recv_size] = '\0';
-  request_parser_.parse2(recv_buffer_, serverconfig_);
+  request_parser_.parse(recv_buffer_, serverconfig_);
   if (request_parser_.finished() || request_parser_.errorOccured()) {
     current_request_ = request_parser_.buildRequest(serverconfig_);
+    std::cerr << current_request_->header.requestLine();
+    std::cerr << "#status code:" << std::endl
+              << current_request_->response_status_code << std::endl;
   }
-  // current_request_ = request_parser_.parse(recv_buffer_, serverconfig_);
-  std::cerr << current_request_->header.requestLine();
 }
 
 // // GETメソッドのファイル決め打ち
@@ -81,7 +84,7 @@ void ConnectionSocket::sendResponse() const {
   const char *response = plain_txt->Text().c_str();
   size_t response_len = plain_txt->Size();
 
-  // std::cerr << response;
+  // std::cerr << response << std::endl;
 
   if (send(fd_, response, response_len, 0) !=
       static_cast<ssize_t>(response_len)) {
