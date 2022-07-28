@@ -46,14 +46,3 @@ std::string MessageBodyParser::parseChunkedBody(const std::string& buffer) {
   }
   return body;
 }
-
-std::string MessageBodyParser::getLine(const std::string& buffer,
-                                       StringPos* offset) {
-  StringPos crlf_pos = buffer.find(CRLF, *offset);
-  if (crlf_pos == std::string::npos) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "getLine() error");
-  }
-  std::string line = buffer.substr(*offset, crlf_pos - *offset);
-  *offset = crlf_pos + 2;
-  return line;
-}

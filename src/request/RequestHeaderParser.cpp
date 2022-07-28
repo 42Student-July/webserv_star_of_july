@@ -64,16 +64,3 @@ HeaderFieldMap RequestHeaderParser::parseHeaderField(
   headerfield_map = hf_parser.parse(headerfield_vec);
   return headerfield_map;
 }
-
-// 変数宣言と初期化を同時にするとなんか読みにくい。
-// 現在のオフセットから一行読み取る関数。読み取ったら次の行頭にoffsetを進める
-std::string RequestHeaderParser::getLine(const std::string &unparsed_str,
-                                         StringPos *offset) {
-  StringPos crlf_pos = unparsed_str.find(CRLF, *offset);
-  if (crlf_pos == std::string::npos) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "getLine() error");
-  }
-  std::string line = unparsed_str.substr(*offset, crlf_pos - *offset);
-  *offset = crlf_pos + 2;
-  return line;
-}

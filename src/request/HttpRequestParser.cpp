@@ -63,15 +63,6 @@ std::string HttpRequestParser::parseMessageBody(const std::string &unparsed_str,
   return mb_parser.parse(unparsed_body, false, header.contentLength());
 }
 
-// 変数宣言と初期化を同時にするとなんか読みにくい。
-// 現在のオフセットから一行読み取る関数。読み取ったら次の行頭にoffsetを進める
-std::string HttpRequestParser::getLine(const std::string &unparsed_str,
-                                       StringPos *offset) {
-  StringPos crlf_pos = unparsed_str.find(CRLF, *offset);
-  if (crlf_pos == std::string::npos) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "getLine() error");
-  }
-  std::string line = unparsed_str.substr(*offset, crlf_pos - *offset);
-  *offset = crlf_pos + 2;
-  return line;
-}
+// void HttpRequestParser::changeStatus(Status next_status) {
+//   parse_status_ = next_status;
+// }

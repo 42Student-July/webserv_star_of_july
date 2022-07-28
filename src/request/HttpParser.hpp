@@ -33,6 +33,8 @@ class HttpParser {
   static bool isHeaderDelimiter(int c);
   static bool isHeaderTokenChar(int c);
   static bool isHeaderToken(const std::string& str);
+  static std::string getLine(const std::string& unparsed_str,
+                             StringPos* offset);
 
  private:
   HttpParser(const HttpParser& other);
