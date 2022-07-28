@@ -51,7 +51,7 @@ RequestLine RequestHeaderParser::parseRequestLine(
   return request_line;
 }
 
-HttpRequest::HeaderFieldMap RequestHeaderParser::parseHeaderField(
+HeaderFieldMap RequestHeaderParser::parseHeaderField(
     const std::string &unparsed_str, StringPos *offset) {
   StringVector headerfield_vec;
   HeaderFieldParser hf_parser;

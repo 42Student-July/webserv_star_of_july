@@ -6,29 +6,27 @@
 #include <string>
 
 #include "HttpStatus.hpp"
-#include "RequestLine.hpp"
 #include "ServerConfig.hpp"
 
-struct RequestHeader {
-  typedef std::map<std::string, std::string> HeaderFieldMap;
-  typedef std::pair<std::string, std::string> HeaderFieldPair;
+typedef std::map<std::string, std::string> HeaderFieldMap;
+typedef std::pair<std::string, std::string> HeaderFieldPair;
 
+struct RequestLine {
+  std::string method;
+  std::string uri;
+  std::string version;
+};
+
+struct RequestHeader {
   RequestLine request_line;
   HeaderFieldMap name_value_map;
 };
 
 struct HttpRequest {
-  typedef std::map<std::string, std::string> HeaderFieldMap;
-  typedef std::pair<std::string, std::string> HeaderFieldPair;
-
   HttpRequest(const ServerConfig& server_conf);
   ~HttpRequest();
 
-  // std::string method;
-  // std::string uri;
-  // std::string version;
-  RequestLine request_line;
-  HeaderFieldMap name_value_map;
+  RequestHeader header;
   std::string body;
   ServerConfig server_config;
   std::string response_status_code;

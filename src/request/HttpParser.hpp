@@ -22,11 +22,8 @@ class HttpParser {
 
  protected:
   // 型
-  typedef HttpRequest::HeaderFieldPair HeaderFieldPair;
-  typedef HttpRequest::HeaderFieldMap HeaderFieldMap;
   typedef std::string::size_type StringPos;
   typedef std::vector<std::string> StringVector;
-
   // 定数
   static const std::string CRLF;
   static const std::string OWS;

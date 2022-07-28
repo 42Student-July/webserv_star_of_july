@@ -5,7 +5,7 @@ HeaderFieldParser::HeaderFieldParser() {}
 HeaderFieldParser::~HeaderFieldParser() {}
 
 // HeaderFieldPairを使ってるせいで可読性低い。けど同じヘッダーフィールドに対応すると、こうしないとfor文が長くなって微妙になった
-HttpRequest::HeaderFieldMap HeaderFieldParser::parse(
+HeaderFieldMap HeaderFieldParser::parse(
     const std::vector<std::string>& header_field_vec) {
   HeaderFieldMap header_field_map;
   HeaderFieldPair header_field_pair;
@@ -20,8 +20,7 @@ HttpRequest::HeaderFieldMap HeaderFieldParser::parse(
   return header_field_map;
 }
 
-HttpRequest::HeaderFieldPair HeaderFieldParser::parseHeaderField(
-    const std::string& line) {
+HeaderFieldPair HeaderFieldParser::parseHeaderField(const std::string& line) {
   StringPos colon_pos = line.find_first_of(":");
   if (colon_pos == std::string::npos) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "header has no colon");

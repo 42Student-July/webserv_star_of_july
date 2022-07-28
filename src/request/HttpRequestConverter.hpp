@@ -11,8 +11,6 @@ class HttpRequestConverter {
   HttpRequestDTO* toDTO(const HttpRequest& request);
 
  private:
-  typedef HttpRequest::HeaderFieldMap HeaderFieldMap;
-
   HttpRequestConverter(const HttpRequestConverter& other);
   HttpRequestConverter& operator=(const HttpRequestConverter& other);
   static std::string searchFieldValue(const HeaderFieldMap& name_value_map,

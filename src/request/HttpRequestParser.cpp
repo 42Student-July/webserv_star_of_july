@@ -15,12 +15,10 @@ HttpRequest *HttpRequestParser::parse(const std::string buffer,
 
   try {
     validateRequestLength(buffer);
-    header = parseRequestHeader(buffer);
-    req->request_line = header.request_line;
-    req->name_value_map = header.name_value_map;
+    req->header = parseRequestHeader(buffer);
     StringPos body_begin = buffer.find(CRLF + CRLF) + 4;
     body_buffer_ = buffer.substr(body_begin);
-    setContentLengthInfo(req->name_value_map, req);
+    setContentLengthInfo(req->header.name_value_map, req);
     req->body = parseBody(body_buffer_);
   } catch (const ParseErrorExeption &e) {
     req->response_status_code = e.getErrorStatus();
