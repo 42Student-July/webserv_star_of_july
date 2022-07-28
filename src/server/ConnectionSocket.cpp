@@ -40,6 +40,7 @@ void ConnectionSocket::handleWriteEvent() {
 ssize_t ConnectionSocket::recvFromClient() {
   ssize_t recv_size = recv(fd_, recv_buffer_, kRecvBufferSize, 0);
 
+
   if (recv_size < 0) {
     throw std::runtime_error("recv() failed");
   }
@@ -47,6 +48,8 @@ ssize_t ConnectionSocket::recvFromClient() {
     std::cerr << "recv: EOF" << std::endl << std::endl;
     return 0;
   }
+
+  std::cout << "recv_buffer_: " << recv_buffer_ << std::endl;
   return recv_size;
 }
 
