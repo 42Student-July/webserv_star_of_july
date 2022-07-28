@@ -27,7 +27,6 @@ void HttpRequestParser::parse(const std::string unparsed_str,
       }
       if (chunked_request_.find("0\r\n\r\n", findHeaderEnd(chunked_request_)) !=
           std::string::npos) {
-        std::cerr << chunked_request_ << std::endl;
         parsed_body_ = parseChunkedBody(fetchUnparsedBody(chunked_request_));
       }
     }

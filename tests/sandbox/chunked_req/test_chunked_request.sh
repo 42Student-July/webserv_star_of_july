@@ -13,5 +13,5 @@ send_chunk_req()
 		localhost:4242
 }
 
-send_chunk_req body.txt
 send_chunk_req body_big.txt
+send_chunk_req body.txt

@@ -62,9 +62,11 @@ void ConnectionSocket::generateRequest(ssize_t recv_size) {
   request_parser_.parse(recv_buffer_, serverconfig_);
   if (request_parser_.finished() || request_parser_.errorOccured()) {
     current_request_ = request_parser_.buildRequest(serverconfig_);
-    std::cerr << current_request_->header.requestLine();
-    std::cerr << "#status code:" << std::endl
-              << current_request_->response_status_code << std::endl;
+    std::cerr << *current_request_ << std::endl;
+    // std::cerr << current_request_->header.requestLine();
+    // std::cerr << current_request_->body;
+    // std::cerr << "#status code:" << std::endl
+    //           << current_request_->response_status_code << std::endl;
   }
 }
 

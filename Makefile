@@ -100,6 +100,12 @@ TEST_DIRS = $(CONFIG_DIR) \
 unit_test:
 	@for dir in $(TEST_DIRS); do $(MAKE) -C $$dir test; done
 
+.PHONY: chunk_test
+chunk_test:
+	# (cd tests/sandbox/chunked_req/ && ./test_chunked_request.sh)
+	cd tests/sandbox/chunked_req/ && ./test_chunked_request.sh
+
+
 GTEST_DIR = tests/googletest-release-1.12.1
 
 .PHONY:setup_gtest
