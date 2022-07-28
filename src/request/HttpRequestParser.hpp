@@ -21,7 +21,13 @@ class HttpRequestParser : public HttpParser {
                      const ServerConfig &server_config);
 
  private:
-  enum Status { PARSE_HEADER, PARSE_BODY, PARSE_DONE, PARSE_ERROR };
+  enum Status {
+    PARSE_HEADER,
+    PARSE_BODY,
+    PARSE_CHUNKED_BODY,
+    PARSE_DONE,
+    PARSE_ERROR
+  };
 
   static const size_t kMaxHeaderLength = 1 << 10;
   static const size_t kMaxBodyLength = 1 << 20;
@@ -29,12 +35,13 @@ class HttpRequestParser : public HttpParser {
   HttpRequestParser(const HttpRequestParser &other);
   HttpRequestParser &operator=(const HttpRequestParser &other);
   static void validateRequestLength(const std::string &unparsed_str);
-  static RequestHeader parseRequestHeader(const std::string &unparsed_str);
-  std::string parseBody(const std::string &unparsed_str);
-  std::string parseMessageBody(const std::string &unparsed_str,
-                               const RequestHeader &header);
-  // void changeStatus(Status next_status);
-  // Status parse_status_;
+  RequestHeader parseRequestHeader(const std::string &unparsed_str);
+  std::string parseBody(size_t content_length);
+  std::string parseChunkedBody(const std::string &unparsed_str);
+  void changeStatus(Status next_status);
+
+  Status parse_status_;
+  std::string unparsed_body_;
 };
 
 #endif  // SRC_HTTPREQUESTPARSER_HPP_

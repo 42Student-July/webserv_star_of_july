@@ -22,6 +22,16 @@ size_t RequestHeader::contentLength() const {
   }
 }
 
+bool RequestHeader::transferEncodingIsChunked() const {
+  HeaderFieldMap::const_iterator it = header_map_.find("transfer-encoding");
+  if (it != header_map_.end() && it->second == "chunked") {
+    // validateしてない
+    return true;
+  } else {
+    return false;
+  }
+}
+
 static std::ostream& operator<<(std::ostream& stream,
                                 const HeaderFieldMap& rhs) {
   HeaderFieldMap::const_iterator it = rhs.begin();

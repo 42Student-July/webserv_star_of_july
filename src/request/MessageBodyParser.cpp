@@ -20,7 +20,7 @@ std::string MessageBodyParser::parse(const std::string& buffer, bool is_chunked,
 
 std::string MessageBodyParser::parseBody(const std::string& buffer,
                                          size_t content_length) {
-  std::cerr << buffer.size() << ", conte: " << content_length << std::endl;
+  // std::cerr << buffer.size() << ", conte: " << content_length << std::endl;
   if (buffer.size() < content_length) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
                              "body length is less than content_length");

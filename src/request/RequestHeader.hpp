@@ -27,6 +27,7 @@ class RequestHeader {
   const RequestLine& requestLine() const;
   const HeaderFieldMap& headerMap() const;
   size_t contentLength() const;
+  bool transferEncodingIsChunked() const;
 
  private:
   RequestLine request_line_;

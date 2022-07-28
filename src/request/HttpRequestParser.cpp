@@ -1,7 +1,7 @@
 #include "HttpRequestParser.hpp"
 #include "utility.hpp"
 
-HttpRequestParser::HttpRequestParser() {}
+HttpRequestParser::HttpRequestParser() : parse_status_(PARSE_HEADER) {}
 
 HttpRequestParser::~HttpRequestParser() {}
 
@@ -15,12 +15,24 @@ HttpRequest *HttpRequestParser::parse(const std::string unparsed_str,
 
   try {
     validateRequestLength(unparsed_str);
-    req->header = parseRequestHeader(unparsed_str);
-    req->body = parseMessageBody(unparsed_str, req->header);
+    if (parse_status_ == PARSE_HEADER) {
+      req->header = parseRequestHeader(unparsed_str);
+    }
+    if (parse_status_ == PARSE_BODY) {
+      req->body = parseBody(req->header.contentLength());
+    }
+    if (parse_status_ == PARSE_CHUNKED_BODY) {
+      unparsed_body_ += unparsed_str;
+      if (unparsed_body_.find("0\r\n\r\n") == std::string::npos) {
+        req->body = parseChunkedBody(unparsed_body_);
+      }
+    }
   } catch (const ParseErrorExeption &e) {
+    changeStatus(PARSE_ERROR);
     req->response_status_code = e.getErrorStatus();
     std::cerr << e.what() << std::endl;
   } catch (const std::exception &e) {
+    changeStatus(PARSE_ERROR);
     req->response_status_code = HttpStatus::INTERNAL_SERVER_ERROR;
     std::cerr << e.what() << std::endl;
   }
@@ -48,21 +60,27 @@ RequestHeader HttpRequestParser::parseRequestHeader(
   RequestHeaderParser rh_parser;
   size_t header_len = unparsed_str.find(CRLF + CRLF) + 4;
   std::string unparsed_header = unparsed_str.substr(0, header_len);
-
-  return rh_parser.parse(unparsed_header);
-}
-
-std::string HttpRequestParser::parseMessageBody(const std::string &unparsed_str,
-                                                const RequestHeader &header) {
-  StringPos body_begin = unparsed_str.find(CRLF + CRLF) + 4;
-  std::string unparsed_body = unparsed_str.substr(body_begin);
-  if (unparsed_body.empty()) {
-    return "";
+  RequestHeader header = rh_parser.parse(unparsed_header);
+  if (header.transferEncodingIsChunked()) {
+    changeStatus(PARSE_CHUNKED_BODY);
+  } else {
+    changeStatus(PARSE_BODY);
   }
-  MessageBodyParser mb_parser;
-  return mb_parser.parse(unparsed_body, false, header.contentLength());
+  unparsed_body_ = unparsed_str.substr(header_len);
+  return header;
 }
 
-// void HttpRequestParser::changeStatus(Status next_status) {
-//   parse_status_ = next_status;
-// }
+std::string HttpRequestParser::parseBody(size_t content_length) {
+  MessageBodyParser mb_parser;
+  return mb_parser.parseBody(unparsed_body_, content_length);
+}
+
+std::string HttpRequestParser::parseChunkedBody(
+    const std::string &unparsed_str) {
+  MessageBodyParser mb_parser;
+  return mb_parser.parseChunkedBody(unparsed_str);
+}
+
+void HttpRequestParser::changeStatus(Status next_status) {
+  parse_status_ = next_status;
+}
