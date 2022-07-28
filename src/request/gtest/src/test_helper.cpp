@@ -25,6 +25,16 @@ HttpRequest *buildRequest(const std::string &filepath,
   return parser.parse(content.c_str(), config);
 }
 
+RequestHeader buildRequestHeader(const std::string &filepath) {
+  std::string content;
+  std::string unparsed_header;
+  RequestHeaderParser parser;
+
+  content = readFile(filepath.c_str());
+  unparsed_header = content.substr(0, content.find("\r\n\r\n") + 4);
+  return parser.parse(unparsed_header);
+}
+
 HttpRequestDTO *buildDTO(const std::string &filepath,
                          const ServerConfig config) {
   HttpRequestConverter converter;
@@ -63,6 +73,13 @@ void checkRequestline(const std::string &method, const std::string &uri,
   ASSERT_EQ(method, request->request_line.method);
   ASSERT_EQ(uri, request->request_line.uri);
   ASSERT_EQ(version, request->request_line.version);
+}
+
+void checkRequestline(const std::string &method, const std::string &uri,
+                      const std::string &version, RequestLine request_line) {
+  ASSERT_EQ(method, request_line.method);
+  ASSERT_EQ(uri, request_line.uri);
+  ASSERT_EQ(version, request_line.version);
 }
 
 void checkRequestline(const std::string &method, const std::string &uri,

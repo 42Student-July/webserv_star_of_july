@@ -9,6 +9,14 @@
 #include "RequestLine.hpp"
 #include "ServerConfig.hpp"
 
+struct RequestHeader {
+  typedef std::map<std::string, std::string> HeaderFieldMap;
+  typedef std::pair<std::string, std::string> HeaderFieldPair;
+
+  RequestLine request_line;
+  HeaderFieldMap name_value_map;
+};
+
 struct HttpRequest {
   typedef std::map<std::string, std::string> HeaderFieldMap;
   typedef std::pair<std::string, std::string> HeaderFieldPair;
