@@ -27,7 +27,8 @@ HttpRequestDTO* HttpRequestConverter::toDTO(const HttpRequest& req) {
 
   dto->connection = searchFieldValue(headers, "connection");
   dto->authorization = searchFieldValue(headers, "authorization");
-  dto->content_length = searchFieldValue(headers, "content-length");
+  size_t body_size = req.body.size();
+  dto->content_length = utility::toString(body_size);
   dto->content_type = searchFieldValue(headers, "content-type");
   dto->accept = searchFieldValue(headers, "accept");
   dto->forwarded = searchFieldValue(headers, "forwarded");
