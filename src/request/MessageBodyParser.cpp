@@ -4,26 +4,14 @@ MessageBodyParser::MessageBodyParser() {}
 
 MessageBodyParser::~MessageBodyParser() {}
 
-std::string MessageBodyParser::parse(const std::string& buffer, bool is_chunked,
-                                     bool exists_content_length,
-                                     size_t content_length) {
-  // std::cerr << "buffer:" << buffer << std::endl
-  //           << "is_chunked:" << is_chunked << std::endl
-  //           << "exists_content_length:" << exists_content_length << std::endl
-  //           << "content_length:" << content_length << std::endl
-  //           << std::endl;
-  if (is_chunked) {
-    return parseChunkedBody(buffer);
-  } else {
-    return parseBody(buffer, exists_content_length, content_length);
-  }
-}
+// std::cerr << "buffer:" << buffer << std::endl
+//           << "content_length:" << content_length << std::endl
+//           << std::endl;
 
 std::string MessageBodyParser::parseBody(const std::string& buffer,
-                                         bool exists_content_length,
                                          size_t content_length) {
-  if (!exists_content_length) {
-    content_length = 0;
+  if (content_length > kMaxBodyLength) {
+    throw ParseErrorExeption(HttpStatus::PAYLOAD_TOO_LARGE, "body is too long");
   }
   if (buffer.size() < content_length) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST,
@@ -32,9 +20,14 @@ std::string MessageBodyParser::parseBody(const std::string& buffer,
   return buffer.substr(0, content_length);
 }
 
+// #include <cstdio>
 std::string MessageBodyParser::parseChunkedBody(const std::string& buffer) {
   std::string body;
   StringPos offset = 0;
+
+  if (buffer.size() > kMaxBodyLength) {
+    throw ParseErrorExeption(HttpStatus::PAYLOAD_TOO_LARGE, "body is too long");
+  }
 
   while (42) {
     std::string chunk_size_str = getLine(buffer, &offset);
@@ -49,15 +42,4 @@ std::string MessageBodyParser::parseChunkedBody(const std::string& buffer) {
     body += ex_chunk_data;
   }
   return body;
-}
-
-std::string MessageBodyParser::getLine(const std::string& buffer,
-                                       StringPos* offset) {
-  StringPos crlf_pos = buffer.find(CRLF, *offset);
-  if (crlf_pos == std::string::npos) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "getLine() error");
-  }
-  std::string line = buffer.substr(*offset, crlf_pos - *offset);
-  *offset = crlf_pos + 2;
-  return line;
 }

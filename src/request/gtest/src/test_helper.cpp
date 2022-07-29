@@ -22,7 +22,8 @@ HttpRequest *buildRequest(const std::string &filepath,
   HttpRequestParser parser;
 
   content = readFile(filepath.c_str());
-  return parser.parse(content.c_str(), config);
+  parser.parse(content.c_str(), config);
+  return parser.buildRequest(config);
 }
 
 RequestHeader buildRequestHeader(const std::string &filepath) {
@@ -49,9 +50,10 @@ HttpRequestDTO *buildDTO(const std::string &filepath,
 
 void checkRequestline(const std::string &method, const std::string &uri,
                       const std::string &version, HttpRequest *request) {
-  ASSERT_EQ(method, request->request_line.method);
-  ASSERT_EQ(uri, request->request_line.uri);
-  ASSERT_EQ(version, request->request_line.version);
+  const RequestLine &request_line = request->header.requestLine();
+  ASSERT_EQ(method, request_line.method);
+  ASSERT_EQ(uri, request_line.uri);
+  ASSERT_EQ(version, request_line.version);
 }
 
 void checkRequestline(const std::string &method, const std::string &uri,
@@ -70,8 +72,8 @@ void checkRequestline(const std::string &method, const std::string &uri,
 
 // Request用
 void checkHeaderField(const std::string &name, const std::string &value,
-                      const HttpRequest::HeaderFieldMap &name_value_map) {
-  HttpRequest::HeaderFieldMap::const_iterator it = name_value_map.find(name);
+                      const HeaderFieldMap &name_value_map) {
+  HeaderFieldMap::const_iterator it = name_value_map.find(name);
 
   ASSERT_TRUE(it != name_value_map.end());
   ASSERT_EQ(value, it->second);

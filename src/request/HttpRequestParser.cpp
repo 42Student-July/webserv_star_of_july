@@ -1,114 +1,126 @@
 #include "HttpRequestParser.hpp"
 #include "utility.hpp"
 
-HttpRequestParser::HttpRequestParser() {}
+HttpRequestParser::HttpRequestParser() : parse_status_(PARSE_HEADER) {}
 
 HttpRequestParser::~HttpRequestParser() {}
 
-// 2つの引数はコンストラクタで渡した方が読みやすいかも。
-HttpRequest *HttpRequestParser::parse(const std::string buffer,
-                                      const ServerConfig &server_config) {
-  HttpRequest *req = new HttpRequest(server_config);
-  StringPos offset = 0;
-
+void HttpRequestParser::parse(const std::string unparsed_str,
+                              const ServerConfig &server_config) {
+  // bodysizelimitまだ
+  (void)server_config;
   try {
-    validateRequestLength(buffer);
-    req->request_line = parseRequestLine(buffer, &offset);
-    req->name_value_map = parseHeaderField(buffer, &offset);
-    body_buffer_ = buffer.substr(offset);
-    setContentLengthInfo(req->name_value_map, req);
-    req->body = parseBody(buffer, offset);
+    if (parse_status_ == PARSE_DONE || parse_status_ == PARSE_ERROR) {
+      clear();
+    }
+    if (parse_status_ == PARSE_HEADER) {
+      parsed_header_ = parseRequestHeader(unparsed_str);
+    }
+    if (parse_status_ == PARSE_BODY) {
+      parsed_body_ = parseBody(unparsed_str, parsed_header_.contentLength());
+    }
+    if (parse_status_ == PARSE_CHUNKED_BODY) {
+      chunked_request_ += unparsed_str;
+      if (chunked_request_.size() > kMaxHeaderLength + kMaxBodyLength) {
+        throw ParseErrorExeption(HttpStatus::PAYLOAD_TOO_LARGE,
+                                 "body is too long");
+      }
+      if (chunked_request_.find("0\r\n\r\n", findHeaderEnd(chunked_request_)) !=
+          std::string::npos) {
+        parsed_body_ = parseChunkedBody(fetchUnparsedBody(chunked_request_));
+      }
+    }
   } catch (const ParseErrorExeption &e) {
-    req->response_status_code = e.getErrorStatus();
-    std::cerr << e.what() << std::endl;
-  } catch (
-      const std::exception &
-          e) {  // (...)ですべての例外をキャッチした方がいいかも。でもe.what()でエラーメッセージを見たいのでこちらで対応
-    req->response_status_code = HttpStatus::INTERNAL_SERVER_ERROR;
-    std::cerr << e.what() << std::endl;
+    changeStatus(PARSE_ERROR);
+    error_code_ = e.getErrorStatus();
+    std::cerr << "Catch exeption in HttpRequestParser: " << std::endl
+              << e.what() << std::endl;
+  } catch (const std::exception &e) {
+    changeStatus(PARSE_ERROR);
+    error_code_ = HttpStatus::INTERNAL_SERVER_ERROR;
+    std::cerr << "Catch exeption in HttpRequestParser: " << std::endl
+              << e.what() << std::endl;
   }
+}
+
+// コンストラクタの引数増やしたい
+// server_configの選択のロジックはまだ
+HttpRequest *HttpRequestParser::buildRequest(
+    const ServerConfig &server_config) {
+  HttpRequest *req = new HttpRequest(server_config);
+
+  req->header = parsed_header_;
+  req->body = parsed_body_;
+  req->response_status_code = (errorOccured()) ? error_code_ : HttpStatus::OK;
   return req;
 }
 
-const std::string &HttpRequestParser::getBodyBuffer() const {
-  return body_buffer_;
+bool HttpRequestParser::errorOccured() const {
+  return parse_status_ == PARSE_ERROR;
 }
 
-// http://nginx.org/en/docs/http/ngx_http_core_module.html#client_header_buffer_size
-void HttpRequestParser::validateRequestLength(const std::string &buffer) {
-  StringPos header_end = buffer.find(CRLF + CRLF);
-  if (header_end == std::string::npos) {
+bool HttpRequestParser::finished() const { return parse_status_ == PARSE_DONE; }
+
+RequestHeader HttpRequestParser::parseRequestHeader(
+    const std::string &unparsed_str) {
+  RequestHeaderParser rh_parser;
+  std::string unparsed_header = fetchUnparsedHeader(unparsed_str);
+  RequestHeader header = rh_parser.parse(unparsed_header);
+  if (header.transferEncodingIsChunked()) {
+    changeStatus(PARSE_CHUNKED_BODY);
+  } else {
+    changeStatus(PARSE_BODY);
+  }
+  return header;
+}
+
+std::string HttpRequestParser::parseBody(const std::string &unparsed_str,
+                                         size_t content_length) {
+  MessageBodyParser mb_parser;
+  std::string unparsed_body = fetchUnparsedBody(unparsed_str);
+  std::string body = mb_parser.parseBody(unparsed_body, content_length);
+  changeStatus(PARSE_DONE);
+  return body;
+}
+
+std::string HttpRequestParser::parseChunkedBody(
+    const std::string &unparsed_str) {
+  MessageBodyParser mb_parser;
+  std::string body = mb_parser.parseChunkedBody(unparsed_str);
+  changeStatus(PARSE_DONE);
+  return body;
+}
+
+void HttpRequestParser::changeStatus(Status next_status) {
+  parse_status_ = next_status;
+}
+
+void HttpRequestParser::clear() {
+  RequestHeader header;
+
+  parsed_header_ = header;
+  parsed_body_ = "";
+  chunked_request_ = "";
+  error_code_ = "";
+  changeStatus(PARSE_HEADER);
+}
+
+// 命名適当
+HttpParser::StringPos HttpRequestParser::findHeaderEnd(
+    const std::string &unparsed_req) {
+  size_t pos = unparsed_req.find(CRLF + CRLF);
+  if (pos == std::string::npos) {
     throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No header_end");
   }
-  if (header_end > kMaxHeaderLength) {
-    throw ParseErrorExeption(HttpStatus::REQUEST_HEADER_FIELD_TOO_LARGE,
-                             "request is too long");
-  }
-  size_t body_len = buffer.size() - header_end;
-  if (body_len > kMaxBodyLength) {
-    throw ParseErrorExeption(HttpStatus::PAYLOAD_TOO_LARGE, "body is too long");
-  }
+  return pos + 4;
 }
 
-RequestLine HttpRequestParser::parseRequestLine(const std::string &buffer,
-                                                StringPos *offset) {
-  RequestLineParser rl_parser;
-  RequestLine request_line = rl_parser.parse(getLine(buffer, offset));
-
-  return request_line;
+std::string HttpRequestParser::fetchUnparsedHeader(
+    const std::string &unparsed_req) {
+  return unparsed_req.substr(0, findHeaderEnd(unparsed_req));
 }
 
-HttpRequest::HeaderFieldMap HttpRequestParser::parseHeaderField(
-    const std::string &buffer, StringPos *offset) {
-  StringVector headerfield_vec;
-  HeaderFieldParser hf_parser;
-  HeaderFieldMap headerfield_map;
-
-  for (std::string line = getLine(buffer, offset); line.size() != 0;
-       line = getLine(buffer, offset)) {
-    headerfield_vec.push_back(line);
-  }
-  headerfield_map = hf_parser.parse(headerfield_vec);
-  return headerfield_map;
-}
-
-std::string HttpRequestParser::parseBody(const std::string &buffer,
-                                         StringPos offset) {
-  // bodyがないケース
-  if (offset == buffer.size()) {
-    return "";
-  }
-
-  StringPos body_end = buffer.find(CRLF, offset);
-  if (body_end == std::string::npos) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "No body_end");
-  }
-  return buffer.substr(offset, body_end - offset);
-}
-
-// 変数宣言と初期化を同時にするとなんか読みにくい。
-// 現在のオフセットから一行読み取る関数。読み取ったら次の行頭にoffsetを進める
-std::string HttpRequestParser::getLine(const std::string &buffer,
-                                       StringPos *offset) {
-  StringPos crlf_pos = buffer.find(CRLF, *offset);
-  if (crlf_pos == std::string::npos) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "getLine() error");
-  }
-  std::string line = buffer.substr(*offset, crlf_pos - *offset);
-  *offset = crlf_pos + 2;
-  return line;
-}
-
-#include <cstdio>
-// 動かすために.あとでどこのメソッドにするかふくめ、リファクタする
-void HttpRequestParser::setContentLengthInfo(HeaderFieldMap &headerfield_map,
-                                             HttpRequest *req) {
-  if (headerfield_map.find("content-length") != headerfield_map.end()) {
-    // validateしてない
-    req->content_length = utility::stoi(headerfield_map["content-length"]);
-    req->has_content_length = true;
-  } else {
-    req->content_length = body_buffer_.size();
-    req->has_content_length = false;
-  }
+std::string HttpRequestParser::fetchUnparsedBody(
+    const std::string &unparsed_req) {
+  return unparsed_req.substr(findHeaderEnd(unparsed_req));
 }

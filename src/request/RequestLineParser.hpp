@@ -2,7 +2,7 @@
 #define REQUESTLINEPARSER_HPP
 
 #include "HttpParser.hpp"
-#include "RequestLine.hpp"
+#include "HttpRequest.hpp"
 
 class RequestLineParser : public HttpParser {
  public:

@@ -13,11 +13,16 @@ std::string HttpRequestConverter::searchFieldValue(
 
 HttpRequestDTO* HttpRequestConverter::toDTO(const HttpRequest& req) {
   HttpRequestDTO* dto = new HttpRequestDTO;
-  const HeaderFieldMap& headers = req.name_value_map;
+  const RequestLine& request_line = req.header.requestLine();
+  const HeaderFieldMap& headers = req.header.headerMap();
 
-  dto->method = req.request_line.method;
-  dto->path = req.request_line.uri;
-  dto->version = req.request_line.version.substr(sizeof("HTTP/") - 1);
+  dto->method = request_line.method;
+  dto->path = request_line.uri;
+  if (request_line.version.find("HTTP/") != std::string::npos) {
+    dto->version = request_line.version.substr(sizeof("HTTP/") - 1);
+  } else {
+    dto->version = "";
+  }
   dto->body = req.body;
 
   dto->connection = searchFieldValue(headers, "connection");

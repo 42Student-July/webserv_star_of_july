@@ -11,26 +11,26 @@ class BodyParserTest : public ::testing::Test {
 
 TEST_F(BodyParserTest, ContentLengthIsJustBufferSize) {
   std::string buffer = "12345";
-  std::string body = parser.parse(buffer, false, true, 5);
+  std::string body = parser.parseBody(buffer, 5);
 
   EXPECT_EQ("12345", body);
 }
 
 TEST_F(BodyParserTest, ContentLengthIsLessThanBufferSize) {
   std::string buffer = "12345";
-  std::string body = parser.parse(buffer, false, true, 4);
+  std::string body = parser.parseBody(buffer, 4);
 
   EXPECT_EQ("1234", body);
 }
 
 TEST_F(BodyParserTest, ContentLengthIsGreaterThanBufferSize) {
   std::string buffer = "12345";
-  EXPECT_THROW(parser.parse(buffer, false, true, 6), std::runtime_error);
+  EXPECT_THROW(parser.parseBody(buffer, 6), std::runtime_error);
 }
 
 TEST_F(BodyParserTest, ContentLength_0) {
   std::string buffer = "12345";
-  std::string body = parser.parse(buffer, false, true, 0);
+  std::string body = parser.parseBody(buffer, 0);
 
   EXPECT_EQ("", body);
 }
@@ -38,7 +38,7 @@ TEST_F(BodyParserTest, ContentLength_0) {
 // 0だとバグるので暫定的に
 TEST_F(BodyParserTest, NoContentLengthAndNoTransferEncoding) {
   std::string buffer = "12345";
-  std::string body = parser.parse(buffer, false, false, 0);
+  std::string body = parser.parseBody(buffer, 0);
 
   EXPECT_EQ("", body);
   // EXPECT_THROW(parser.parse(buffer, false, false, 0), std::runtime_error);
@@ -46,7 +46,7 @@ TEST_F(BodyParserTest, NoContentLengthAndNoTransferEncoding) {
 
 TEST_F(BodyParserTest, Chunk_NoChunk) {
   std::string buffer = "0\r\n\r\n";
-  std::string body = parser.parse(buffer, true, false, 0);
+  std::string body = parser.parseChunkedBody(buffer);
 
   EXPECT_EQ("", body);
 }
@@ -55,7 +55,7 @@ TEST_F(BodyParserTest, Chunk_1Chunk) {
   std::string buffer =
       "a\r\n123456789a\r\n"
       "0\r\n\r\n";
-  std::string body = parser.parse(buffer, true, false, 0);
+  std::string body = parser.parseChunkedBody(buffer);
 
   EXPECT_EQ("123456789a", body);
 }
@@ -64,14 +64,14 @@ TEST_F(BodyParserTest, ChunkSize_DataIsLess) {
   std::string buffer =
       "a\r\n123456789\r\n"
       "0\r\n\r\n";
-  EXPECT_THROW(parser.parse(buffer, true, false, 0), std::runtime_error);
+  EXPECT_THROW(parser.parseChunkedBody(buffer), std::runtime_error);
 }
 
 TEST_F(BodyParserTest, ChunkSize_DataIsGreater) {
   std::string buffer =
       "a\r\n123456789ab\r\n"
       "0\r\n\r\n";
-  EXPECT_THROW(parser.parse(buffer, true, false, 0), std::runtime_error);
+  EXPECT_THROW(parser.parseChunkedBody(buffer), std::runtime_error);
 }
 
 TEST_F(BodyParserTest, Chunk_2ChunkNonl) {
@@ -79,7 +79,7 @@ TEST_F(BodyParserTest, Chunk_2ChunkNonl) {
       "2\r\n42\r\n"
       "5\r\ntokyo\r\n"
       "0\r\n\r\n";
-  std::string body = parser.parse(buffer, true, false, 0);
+  std::string body = parser.parseChunkedBody(buffer);
 
   EXPECT_EQ("42tokyo", body);
 }
@@ -89,7 +89,7 @@ TEST_F(BodyParserTest, Chunk_2ChunkNl) {
       "3\r\n42\n\r\n"
       "6\r\ntokyo\n\r\n"
       "0\r\n\r\n";
-  std::string body = parser.parse(buffer, true, false, 0);
+  std::string body = parser.parseChunkedBody(buffer);
 
   EXPECT_EQ("42\ntokyo\n", body);
 }
@@ -108,7 +108,7 @@ TEST_F(BodyParserTest, Chunk_10ChunkNl) {
       "14\r\nhogehoge9\nfugafuga9\n\r\n"
       "16\r\nhogehoge10\nfugafuga10\n\r\n"
       "0\r\n\r\n";
-  std::string body = parser.parse(buffer, true, false, 0);
+  std::string body = parser.parseChunkedBody(buffer);
 
   std::string expetcted =
       "hogehoge1\nfugafuga1\n"
@@ -130,7 +130,7 @@ TEST_F(BodyParserTest, ChunkSize_InvalidChar) {
       "5g\r\n12345\r\n"
       "0\r\n\r\n";
 
-  EXPECT_THROW(parser.parse(buffer, true, false, 0), std::invalid_argument);
+  EXPECT_THROW(parser.parseChunkedBody(buffer), std::invalid_argument);
 }
 
 TEST_F(BodyParserTest, ChunkSize_HasSpase) {
@@ -138,7 +138,7 @@ TEST_F(BodyParserTest, ChunkSize_HasSpase) {
       " 5\r\n12345\r\n"
       "0\r\n\r\n";
 
-  EXPECT_THROW(parser.parse(buffer, true, false, 0), std::invalid_argument);
+  EXPECT_THROW(parser.parseChunkedBody(buffer), std::invalid_argument);
 }
 
 TEST_F(BodyParserTest, ChunkSize_OverFlow) {
@@ -146,7 +146,7 @@ TEST_F(BodyParserTest, ChunkSize_OverFlow) {
       "2147483648\r\n12345\r\n"
       "0\r\n\r\n";
 
-  EXPECT_THROW(parser.parse(buffer, true, false, 0), std::out_of_range);
+  EXPECT_THROW(parser.parseChunkedBody(buffer), std::out_of_range);
 }
 
 TEST_F(BodyParserTest, ChunkSize_Minus) {
@@ -154,14 +154,14 @@ TEST_F(BodyParserTest, ChunkSize_Minus) {
       "-5\r\n12345\r\n"
       "0\r\n\r\n";
 
-  EXPECT_THROW(parser.parse(buffer, true, false, 0), std::invalid_argument);
+  EXPECT_THROW(parser.parseChunkedBody(buffer), std::invalid_argument);
 }
 
 TEST_F(BodyParserTest, ChunkSize_UpperCase) {
   std::string buffer =
       "A\r\n123456789a\r\n"
       "0\r\n\r\n";
-  std::string body = parser.parse(buffer, true, false, 0);
+  std::string body = parser.parseChunkedBody(buffer);
 
   EXPECT_EQ("123456789a", body);
 }

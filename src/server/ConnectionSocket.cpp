@@ -2,7 +2,10 @@
 
 ConnectionSocket::ConnectionSocket(int accepted_fd,
                                    const ServerConfig &serverconfig)
-    : ASocket(accepted_fd, serverconfig), state_(READ) {}
+    : ASocket(accepted_fd, serverconfig),
+      state_(READ),
+      current_request_(NULL),
+      current_response_(NULL) {}
 
 ConnectionSocket::~ConnectionSocket() {
   if (close(fd_) < 0) {
@@ -28,8 +31,10 @@ void ConnectionSocket::handleReadEvent() {
     return;
   }
   generateRequest(recv_size);
-  generateResponse();
-  state_ = WRITE;
+  if (request_parser_.finished() || request_parser_.errorOccured()) {
+    generateResponse();
+    state_ = WRITE;
+  }
 }
 
 void ConnectionSocket::handleWriteEvent() {
@@ -40,7 +45,6 @@ void ConnectionSocket::handleWriteEvent() {
 ssize_t ConnectionSocket::recvFromClient() {
   ssize_t recv_size = recv(fd_, recv_buffer_, kRecvBufferSize, 0);
 
-
   if (recv_size < 0) {
     throw std::runtime_error("recv() failed");
   }
@@ -48,24 +52,22 @@ ssize_t ConnectionSocket::recvFromClient() {
     std::cerr << "recv: EOF" << std::endl << std::endl;
     return 0;
   }
-
-  std::cout << "recv_buffer_: " << recv_buffer_ << std::endl;
+  // std::cerr << "recv_buffer_: " << std::endl << recv_buffer_ << std::endl;
   return recv_size;
 }
 
 void ConnectionSocket::generateRequest(ssize_t recv_size) {
   MessageBodyParser body_parser;
   recv_buffer_[recv_size] = '\0';
-  current_request_ = request_parser_.parse(recv_buffer_, serverconfig_);
-  // std::cerr << "Body buffer: " << std::endl
-  //           << request_parser_.getBodyBuffer() << std::endl;
-  // std::cerr << "ContentLength: " << std::endl
-  //           << current_request_->content_length << std::endl;
-  current_request_->body = body_parser.parse(
-      request_parser_.getBodyBuffer(), false,
-      current_request_->has_content_length, current_request_->content_length);
-
-  std::cerr << *current_request_;
+  request_parser_.parse(recv_buffer_, serverconfig_);
+  if (request_parser_.finished() || request_parser_.errorOccured()) {
+    current_request_ = request_parser_.buildRequest(serverconfig_);
+    std::cerr << *current_request_ << std::endl;
+    // std::cerr << current_request_->header.requestLine();
+    // std::cerr << current_request_->body;
+    // std::cerr << "#status code:" << std::endl
+    //           << current_request_->response_status_code << std::endl;
+  }
 }
 
 // // GETメソッドのファイル決め打ち
@@ -84,7 +86,7 @@ void ConnectionSocket::sendResponse() const {
   const char *response = plain_txt->Text().c_str();
   size_t response_len = plain_txt->Size();
 
-  // std::cerr << response;
+  // std::cerr << response << std::endl;
 
   if (send(fd_, response, response_len, 0) !=
       static_cast<ssize_t>(response_len)) {

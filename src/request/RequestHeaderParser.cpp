@@ -6,17 +6,17 @@ RequestHeaderParser::RequestHeaderParser() {}
 RequestHeaderParser::~RequestHeaderParser() {}
 
 RequestHeader RequestHeaderParser::parse(const std::string &unparsed_str) {
-  RequestHeader header;
+  // RequestHeader header;
   StringPos offset = 0;
 
-  validateRequestLength(unparsed_str);
-  header.request_line = parseRequestLine(unparsed_str, &offset);
-  header.name_value_map = parseHeaderField(unparsed_str, &offset);
-  return header;
+  validateHeaderLength(unparsed_str);
+  RequestLine request_line = parseRequestLine(unparsed_str, &offset);
+  HeaderFieldMap header_map = parseHeaderField(unparsed_str, &offset);
+  return RequestHeader(request_line, header_map);
   //　try-catchは呼び出し元でやる(暫定)
   //
   // try {
-  //   validateRequestLength(unparsed_str);
+  //   validateHeaderLength(unparsed_str);
   //   header.request_line = parseRequestLine(unparsed_str, &offset);
   //   header.name_value_map = parseHeaderField(unparsed_str, &offset);
   // } catch (const ParseErrorExeption &e) {
@@ -31,7 +31,7 @@ RequestHeader RequestHeaderParser::parse(const std::string &unparsed_str) {
 }
 
 // http://nginx.org/en/docs/http/ngx_http_core_module.html#client_header_buffer_size
-void RequestHeaderParser::validateRequestLength(
+void RequestHeaderParser::validateHeaderLength(
     const std::string &unparsed_str) {
   size_t header_len = unparsed_str.size();
   if (header_len == std::string::npos) {
@@ -51,7 +51,7 @@ RequestLine RequestHeaderParser::parseRequestLine(
   return request_line;
 }
 
-HttpRequest::HeaderFieldMap RequestHeaderParser::parseHeaderField(
+HeaderFieldMap RequestHeaderParser::parseHeaderField(
     const std::string &unparsed_str, StringPos *offset) {
   StringVector headerfield_vec;
   HeaderFieldParser hf_parser;
@@ -63,17 +63,4 @@ HttpRequest::HeaderFieldMap RequestHeaderParser::parseHeaderField(
   }
   headerfield_map = hf_parser.parse(headerfield_vec);
   return headerfield_map;
-}
-
-// 変数宣言と初期化を同時にするとなんか読みにくい。
-// 現在のオフセットから一行読み取る関数。読み取ったら次の行頭にoffsetを進める
-std::string RequestHeaderParser::getLine(const std::string &unparsed_str,
-                                         StringPos *offset) {
-  StringPos crlf_pos = unparsed_str.find(CRLF, *offset);
-  if (crlf_pos == std::string::npos) {
-    throw ParseErrorExeption(HttpStatus::BAD_REQUEST, "getLine() error");
-  }
-  std::string line = unparsed_str.substr(*offset, crlf_pos - *offset);
-  *offset = crlf_pos + 2;
-  return line;
 }

@@ -50,7 +50,7 @@ static bool consistsOfHexadecimal(const std::string& str) {
 // 0123456789abcdefABCDEF以外の文字を許容しない
 int utility::hexStringToInt(const std::string& hex_str) {
   if (!consistsOfHexadecimal(hex_str)) {
-    throw std::invalid_argument("stoi");
+    throw std::invalid_argument("hexStringToInt");
   }
   return utility::stoi(hex_str, NULL, 16);
 }
@@ -66,10 +66,10 @@ void utility::freeArrays(char** arrays) {
   free(arrays);
 }
 
-char **utility::map2Array(std::map<std::string, std::string> map_env,
-                 std::string connector) {
-  char **array_env = NULL;
-  array_env = new char *[map_env.size() + 1];
+char** utility::map2Array(std::map<std::string, std::string> map_env,
+                          std::string connector) {
+  char** array_env = NULL;
+  array_env = new char*[map_env.size() + 1];
   size_t i = 0;
   std::map<std::string, std::string>::const_iterator it = map_env.begin();
   for (; it != map_env.end(); it++, i++) {

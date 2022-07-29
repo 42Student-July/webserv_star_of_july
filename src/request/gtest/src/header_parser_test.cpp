@@ -28,54 +28,53 @@ TEST_F(RequestHeaderParserTest, StoreRequestline) {
   std::string file_name = "simple_get.crlf";
   RequestHeader header = buildRequestHeader(file_dir + file_name);
 
-  checkRequestline("GET", "/", "HTTP/1.1", header.request_line);
+  checkRequestline("GET", "/", "HTTP/1.1", header.requestLine());
 }
 
 TEST_F(RequestHeaderParserTest, StoreHeaderFieldWithCurl) {
   std::string file_name = "curl.crlf";
   RequestHeader header = buildRequestHeader(file_dir + file_name);
 
-  checkRequestline("GET", "/", "HTTP/1.1", header.request_line);
-  checkHeaderField("host", "localhost:4242", header.name_value_map);
-  checkHeaderField("user-agent", "curl/7.68.0", header.name_value_map);
-  checkHeaderField("accept", "*/*", header.name_value_map);
-  ASSERT_EQ(3, header.name_value_map.size());
+  checkRequestline("GET", "/", "HTTP/1.1", header.requestLine());
+  checkHeaderField("host", "localhost:4242", header.headerMap());
+  checkHeaderField("user-agent", "curl/7.68.0", header.headerMap());
+  checkHeaderField("accept", "*/*", header.headerMap());
+  ASSERT_EQ(3, header.headerMap().size());
 }
 
 TEST_F(RequestHeaderParserTest, StoreHeaderFieldWithChrome) {
   std::string file_name = "chrome.crlf";
   RequestHeader header = buildRequestHeader(file_dir + file_name);
 
-  checkRequestline("GET", "/", "HTTP/1.1", header.request_line);
-  checkHeaderField("host", "localhost:4242", header.name_value_map);
-  checkHeaderField("connection", "keep-alive", header.name_value_map);
-  checkHeaderField("cache-control", "max-age=0", header.name_value_map);
+  checkRequestline("GET", "/", "HTTP/1.1", header.requestLine());
+  checkHeaderField("host", "localhost:4242", header.headerMap());
+  checkHeaderField("connection", "keep-alive", header.headerMap());
+  checkHeaderField("cache-control", "max-age=0", header.headerMap());
   checkHeaderField("sec-ch-ua",
                    "\".Not/A)Brand\";v=\"99\", \"Google "
                    "Chrome\";v=\"103\", \"Chromium\";v=\"103\"",
-                   header.name_value_map);
-  checkHeaderField("sec-ch-ua-mobile", "?0", header.name_value_map);
-  checkHeaderField("sec-ch-ua-platform", "\"Linux\"", header.name_value_map);
-  checkHeaderField("upgrade-insecure-requests", "1", header.name_value_map);
+                   header.headerMap());
+  checkHeaderField("sec-ch-ua-mobile", "?0", header.headerMap());
+  checkHeaderField("sec-ch-ua-platform", "\"Linux\"", header.headerMap());
+  checkHeaderField("upgrade-insecure-requests", "1", header.headerMap());
   checkHeaderField("user-agent",
                    "Mozilla/5.0 (X11; Linux x86_64) "
                    "AppleWebKit/537.36 (KHTML, "
                    "like Gecko) Chrome/103.0.0.0 Safari/537.36",
-                   header.name_value_map);
+                   header.headerMap());
   checkHeaderField(
       "accept",
       "text/html,application/xhtml+xml,application/xml;q=0.9,image/"
       "avif,image/"
       "webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-      header.name_value_map);
-  checkHeaderField("sec-fetch-site", "none", header.name_value_map);
-  checkHeaderField("sec-fetch-mode", "navigate", header.name_value_map);
-  checkHeaderField("sec-fetch-dest", "document", header.name_value_map);
-  checkHeaderField("accept-encoding", "gzip, deflate, br",
-                   header.name_value_map);
+      header.headerMap());
+  checkHeaderField("sec-fetch-site", "none", header.headerMap());
+  checkHeaderField("sec-fetch-mode", "navigate", header.headerMap());
+  checkHeaderField("sec-fetch-dest", "document", header.headerMap());
+  checkHeaderField("accept-encoding", "gzip, deflate, br", header.headerMap());
   checkHeaderField("accept-language", "ja,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
-                   header.name_value_map);
-  ASSERT_EQ(15, header.name_value_map.size());
+                   header.headerMap());
+  ASSERT_EQ(15, header.headerMap().size());
 }
 
 // テスト名（テストファイル名とエラーメッセージが対応してないことがある
@@ -162,17 +161,17 @@ TEST_F(RequestHeaderParserTest, CheckFieldValueIsTrimmedByWS) {
   std::string file_name = "field_value_is_trimmed.crlf";
   RequestHeader header = buildRequestHeader(file_dir + file_name);
 
-  checkRequestline("GET", "/", "HTTP/1.1", header.request_line);
-  checkHeaderField("host", "admin", header.name_value_map);
-  ASSERT_EQ(2, header.name_value_map.size());
+  checkRequestline("GET", "/", "HTTP/1.1", header.requestLine());
+  checkHeaderField("host", "admin", header.headerMap());
+  ASSERT_EQ(2, header.headerMap().size());
 }
 
 TEST_F(RequestHeaderParserTest, FieldValueHasOnlyWS) {
   std::string file_name = "field_value_has_only_WS.crlf";
   RequestHeader header = buildRequestHeader(file_dir + file_name);
 
-  checkRequestline("GET", "/", "HTTP/1.1", header.request_line);
-  ASSERT_EQ(2, header.name_value_map.size());
+  checkRequestline("GET", "/", "HTTP/1.1", header.requestLine());
+  ASSERT_EQ(2, header.headerMap().size());
 }
 
 TEST_F(RequestHeaderParserTest, FieldNameHasOnlyWS) {
@@ -212,21 +211,21 @@ TEST_F(RequestHeaderParserTest, SameHeaderFieldName) {
   std::string file_name = "same_header_field_name.crlf";
   RequestHeader header = buildRequestHeader(file_dir + file_name);
 
-  checkRequestline("GET", "/", "HTTP/1.1", header.request_line);
-  checkHeaderField("host", "admin", header.name_value_map);
-  checkHeaderField("user-agent", "agent1,agent2", header.name_value_map);
-  ASSERT_EQ(2, header.name_value_map.size());
+  checkRequestline("GET", "/", "HTTP/1.1", header.requestLine());
+  checkHeaderField("host", "admin", header.headerMap());
+  checkHeaderField("user-agent", "agent1,agent2", header.headerMap());
+  ASSERT_EQ(2, header.headerMap().size());
 }
 
 TEST_F(RequestHeaderParserTest, FieldNameCaseInsesitive) {
   std::string file_name = "field_name_case_insensitive.crlf";
   RequestHeader header = buildRequestHeader(file_dir + file_name);
 
-  checkRequestline("GET", "/", "HTTP/1.1", header.request_line);
-  checkHeaderField("host", "admin", header.name_value_map);
-  checkHeaderField("user-agent", "agent1", header.name_value_map);
-  checkHeaderField("accept", "text/html", header.name_value_map);
-  ASSERT_EQ(3, header.name_value_map.size());
+  checkRequestline("GET", "/", "HTTP/1.1", header.requestLine());
+  checkHeaderField("host", "admin", header.headerMap());
+  checkHeaderField("user-agent", "agent1", header.headerMap());
+  checkHeaderField("accept", "text/html", header.headerMap());
+  ASSERT_EQ(3, header.headerMap().size());
 }
 
 TEST_F(RequestHeaderParserTest, NoCrRequestLine) {

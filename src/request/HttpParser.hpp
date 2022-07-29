@@ -22,20 +22,21 @@ class HttpParser {
 
  protected:
   // 型
-  typedef HttpRequest::HeaderFieldPair HeaderFieldPair;
-  typedef HttpRequest::HeaderFieldMap HeaderFieldMap;
   typedef std::string::size_type StringPos;
   typedef std::vector<std::string> StringVector;
-
   // 定数
   static const std::string CRLF;
   static const std::string OWS;
   static const std::string Delimiters;
+  static const size_t kMaxHeaderLength = 1 << 10;
+  static const size_t kMaxBodyLength = 1 << 20;
   // メソッド
   static bool isOWS(int c);
   static bool isHeaderDelimiter(int c);
   static bool isHeaderTokenChar(int c);
   static bool isHeaderToken(const std::string& str);
+  static std::string getLine(const std::string& unparsed_str,
+                             StringPos* offset);
 
  private:
   HttpParser(const HttpParser& other);

@@ -5,11 +5,11 @@
 #include <map>
 #include <string>
 
-#include "HeaderFieldParser.hpp"
 #include "HttpParser.hpp"
 #include "HttpRequest.hpp"
 #include "HttpStatus.hpp"
-#include "RequestLineParser.hpp"
+#include "MessageBodyParser.hpp"
+#include "RequestHeaderParser.hpp"
 #include "ServerConfig.hpp"
 
 class HttpRequestParser : public HttpParser {
@@ -17,27 +17,36 @@ class HttpRequestParser : public HttpParser {
   HttpRequestParser();
   ~HttpRequestParser();
   // 2つの引数はコンストラクタで渡した方が読みやすいかも。
-  HttpRequest *parse(const std::string buffer,
-                     const ServerConfig &server_config);
-  // ここで持つべきじゃないので後で移動
-  const std::string &getBodyBuffer() const;
+  void parse(const std::string unparsed_str, const ServerConfig &server_config);
+  HttpRequest *buildRequest(const ServerConfig &server_config);
+  bool errorOccured() const;
+  bool finished() const;
 
  private:
-  static const size_t kMaxHeaderLength = 1 << 10;
-  static const size_t kMaxBodyLength = 1 << 20;
+  enum Status {
+    PARSE_HEADER,
+    PARSE_BODY,
+    PARSE_CHUNKED_BODY,
+    PARSE_DONE,
+    PARSE_ERROR
+  };
 
   HttpRequestParser(const HttpRequestParser &other);
   HttpRequestParser &operator=(const HttpRequestParser &other);
-  static void validateRequestLength(const std::string &buffer);
-  static RequestLine parseRequestLine(const std::string &buffer,
-                                      StringPos *offset);
-  HeaderFieldMap parseHeaderField(const std::string &buffer, StringPos *offset);
-  static std::string parseBody(const std::string &buffer, StringPos offset);
-  static std::string getLine(const std::string &buffer, StringPos *offset);
-  void setContentLengthInfo(HeaderFieldMap &headerfield_map, HttpRequest *req);
+  RequestHeader parseRequestHeader(const std::string &unparsed_str);
+  std::string parseBody(const std::string &unparsed_str, size_t content_length);
+  std::string parseChunkedBody(const std::string &unparsed_str);
+  void changeStatus(Status next_status);
+  void clear();
+  static StringPos findHeaderEnd(const std::string &unparsed_req);
+  static std::string fetchUnparsedHeader(const std::string &unparsed_req);
+  static std::string fetchUnparsedBody(const std::string &unparsed_req);
 
-  // ここで持つべきじゃないので後で移動
-  std::string body_buffer_;
+  Status parse_status_;
+  RequestHeader parsed_header_;
+  std::string parsed_body_;
+  std::string chunked_request_;
+  std::string error_code_;
 };
 
 #endif  // SRC_HTTPREQUESTPARSER_HPP_

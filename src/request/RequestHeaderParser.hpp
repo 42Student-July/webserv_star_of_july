@@ -25,13 +25,11 @@ class RequestHeaderParser : public HttpParser {
 
   RequestHeaderParser(const RequestHeaderParser &other);
   RequestHeaderParser &operator=(const RequestHeaderParser &other);
-  static void validateRequestLength(const std::string &unparsed_str);
+  static void validateHeaderLength(const std::string &unparsed_str);
   static RequestLine parseRequestLine(const std::string &unparsed_str,
                                       StringPos *offset);
   HeaderFieldMap parseHeaderField(const std::string &unparsed_str,
                                   StringPos *offset);
-  static std::string getLine(const std::string &unparsed_str,
-                             StringPos *offset);
 };
 
 #endif  // SRC_REQUESTHEADERPARSER_HPP_
