@@ -3,6 +3,7 @@
 
 #include "HttpRequest.hpp"
 #include "HttpRequestDTO.hpp"
+#include "../utility/utility.hpp"
 
 class HttpRequestConverter {
  public:

@@ -37,7 +37,7 @@ TEST_F(HttpConverterTest, StoreNoHeaderField) {
 
   checkRequestline("POST", "/", "1.1", dto);
   checkHeaderField("", dto->authorization);
-  checkHeaderField("", dto->content_length);
+  checkHeaderField("0", dto->content_length);
   checkHeaderField("", dto->content_type);
   checkHeaderField("", dto->accept);
   checkHeaderField("", dto->forwarded);
