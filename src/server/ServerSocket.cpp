@@ -7,6 +7,9 @@ ServerSocket::ServerSocket(const ServerConfig &serverconfig)
   if (fd_ < 0) {
     throw std::runtime_error("socket() failed");
   }
+  if (fcntl(fd_, F_SETFL, O_NONBLOCK) < 0) {
+    throw std::runtime_error("fcntl() failed");
+  }
 
   memset(&server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
@@ -35,6 +38,9 @@ ConnectionSocket *ServerSocket::createConnectionSocket() const {
 
   if (new_socket < 0) {
     throw std::runtime_error("accept failed()");
+  }
+  if (fcntl(new_socket, F_SETFL, O_NONBLOCK) < 0) {
+    throw std::runtime_error("fcntl() failed");
   }
   ConnectionSocket *new_ConnectionSocket =
       new ConnectionSocket(new_socket, serverconfig_);

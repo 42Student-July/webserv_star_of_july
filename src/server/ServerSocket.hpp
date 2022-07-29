@@ -2,6 +2,7 @@
 #define SRC_SERVERSOCKET_HPP_
 
 #include <arpa/inet.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 
 #include <cstring>
