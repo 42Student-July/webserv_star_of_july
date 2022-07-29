@@ -32,7 +32,7 @@ void Server::handleSockets(const Selector::SocketMap &sockets) {
 }
 
 void Server::handleServerSocket(const ServerSocket *socket) {
-  ConnectionSocket *new_ConnectionSocket = socket->createConnectionSocket();
+  ConnectionSocket *new_ConnectionSocket = socket->acceptConnection();
 
   fd2socket_[new_ConnectionSocket->getFd()] = new_ConnectionSocket;
 }
@@ -43,8 +43,8 @@ void Server::handleConnectionSocket(ConnectionSocket *socket) {
 
 // 通信を終えたConnectionSocketSocketを破棄する
 void Server::destroyConnectionSockets() {
-  for (SocketMap::iterator it = fd2socket_.begin();
-       it != fd2socket_.end(); it++) {
+  for (SocketMap::iterator it = fd2socket_.begin(); it != fd2socket_.end();
+       it++) {
     if (!utils::isServerSocket(it->second)) {
       ConnectionSocket::State state =
           dynamic_cast<ConnectionSocket *>(it->second)->getState();
@@ -53,7 +53,7 @@ void Server::destroyConnectionSockets() {
         it++;
         delete tmp_it->second;
         fd2socket_.erase(tmp_it);
-		it--;
+        it--;
       }
     }
   }
