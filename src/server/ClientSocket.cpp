@@ -12,14 +12,6 @@ ClientSocket::~ClientSocket() {
   }
 }
 
-void ClientSocket::handleCommunication() {
-  if (state_ == READ) {
-    handleReadEvent();
-  } else {
-    handleWriteEvent();
-  }
-}
-
 ClientSocket::State ClientSocket::getState() const { return state_; }
 
 void ClientSocket::handleReadEvent() {

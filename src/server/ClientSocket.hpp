@@ -24,7 +24,8 @@ class ClientSocket : public ASocket {
   ClientSocket(int accepted_fd, const ServerConfig &serverconfig);
   ~ClientSocket();
 
-  void handleCommunication();
+  void handleReadEvent();
+  void handleWriteEvent();
   State getState() const;
 
  private:
@@ -35,8 +36,6 @@ class ClientSocket : public ASocket {
   ClientSocket(const ClientSocket &other);
   ClientSocket &operator=(const ClientSocket &other);
 
-  void handleReadEvent();
-  void handleWriteEvent();
   ssize_t recvFromClient();
   void generateRequest(ssize_t recv_size);
   void generateResponse();

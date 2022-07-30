@@ -30,9 +30,10 @@ void Server::handleReadEvent(const FdVector &readyfd) {
   for (FdVector::const_iterator it = readyfd.begin(); it != readyfd.end();
        it++) {
     if (isServerSocketFd(*it)) {
-      handleServerSocket(server_sock_map_[*it]);
+      ClientSocket *new_clnt = server_sock_map_[*it]->acceptConnection();
+      client_sock_map_[new_clnt->getFd()] = new_clnt;
     } else {
-      handleConnectionSocket(client_sock_map_[*it]);
+      client_sock_map_[*it]->handleReadEvent();
     }
   }
 }
@@ -40,7 +41,7 @@ void Server::handleReadEvent(const FdVector &readyfd) {
 void Server::handleWriteEvent(const FdVector &readyfd) {
   for (FdVector::const_iterator it = readyfd.begin(); it != readyfd.end();
        it++) {
-    handleConnectionSocket(client_sock_map_[*it]);
+    client_sock_map_[*it]->handleWriteEvent();
   }
 }
 
@@ -58,14 +59,4 @@ void Server::destroyClient() {
       it++;
     }
   }
-}
-
-void Server::handleServerSocket(const ServerSocket *socket) {
-  ClientSocket *new_ConnectionSocket = socket->acceptConnection();
-
-  client_sock_map_[new_ConnectionSocket->getFd()] = new_ConnectionSocket;
-}
-
-void Server::handleConnectionSocket(ClientSocket *socket) {
-  socket->handleCommunication();
 }

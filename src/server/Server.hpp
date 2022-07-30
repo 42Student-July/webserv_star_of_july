@@ -25,10 +25,8 @@ class Server {
 
   void handleReadEvent(const FdVector &readyfd);
   void handleWriteEvent(const FdVector &writefd);
-  void handleServerSocket(const ServerSocket *socket);
-  static void handleConnectionSocket(ClientSocket *socket);
-  bool isServerSocketFd(int fd);
   void destroyClient();
+  bool isServerSocketFd(int fd);
 
   Selector selector_;
   ServerSocketMap server_sock_map_;

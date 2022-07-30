@@ -9,7 +9,6 @@
 #include "ClientSocket.hpp"
 #include "ServerSocket.hpp"
 #include "type.hpp"
-#include "utils.hpp"
 
 // 責務：ソケットの集合を監視し、IOの準備ができたソケットの集合を返す
 // selectをラップしているクラス
