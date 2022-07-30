@@ -3,6 +3,7 @@
 
 #include <sys/select.h>
 
+#include <algorithm>
 #include <iostream>
 #include <map>
 #include <set>
@@ -17,15 +18,13 @@
 // selectをラップしているクラス
 class Selector {
  public:
-  typedef std::map<int, ASocket *> SocketMap;
-
   Selector();
   ~Selector();
 
-  int select(const SocketMap &fd2socket);
-  SocketMap &getReadySockets();
-  SocketMap &getReadyReadSockets();   // 現状使ってない
-  SocketMap &getReadyWriteSockets();  // 現状使ってない
+  void select(const ServerSocketMap &server_sock_map_,
+              const ClientSocketMap &client_sock_map_);
+  const std::vector<int> readFds() const;
+  const std::vector<int> writeFds() const;
 
  private:
   static const int kTimeoutSec = 10;
@@ -34,20 +33,18 @@ class Selector {
   Selector &operator=(const Selector &other);
 
   void clear();
-  void init(const SocketMap &fd2socket);
-  void showTarget();
-  int getMaxFd();
-  void addTarget(ClientSocket *sockets);
+  void storeTargetfds(const ServerSocketMap &server_sock_map_,
+                      const ClientSocketMap &client_sock_map_);
+  fd_set prepareReadfds();
+  fd_set prepareWritefds();
+  int calcMaxFd();
+  std::vector<int> toVector(const fd_set &fdset, int maxfd);
+  void showInfo(int maxfd);
 
-  static fd_set toFdset(const SocketMap &sockets);
-  static SocketMap toSocketMap(const fd_set &fdset,
-                               const SocketMap &target_fds);
-
-  SocketMap ready_all_;
-  SocketMap ready_read_;
-  SocketMap ready_write_;
-  SocketMap target_read_;
-  SocketMap target_write_;
+  std::vector<int> target_readfds_;
+  std::vector<int> target_writefds_;
+  std::vector<int> readfds_;
+  std::vector<int> writefds_;
 };
 
 #endif  // SRC_SELECTOR_HPP_

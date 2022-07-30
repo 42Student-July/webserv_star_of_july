@@ -52,4 +52,6 @@ class ClientSocket : public ASocket {
   HttpResponse *current_response_;
 };
 
+typedef std::map<int, ClientSocket *> ClientSocketMap;
+
 #endif  // SRC_CLIENTSOCKET_HPP_

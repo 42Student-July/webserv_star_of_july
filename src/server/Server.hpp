@@ -13,8 +13,6 @@
 
 class Server {
  public:
-  typedef std::map<int, ASocket *> SocketMap;
-
   explicit Server(const std::vector<ServerConfig> &serverconfigs);
   ~Server();
 
@@ -25,13 +23,16 @@ class Server {
   Server(const Server &other);
   Server &operator=(const Server &other);
 
-  void handleSockets(const SocketMap &sockets);
+  void handleReadEvent(const std::vector<int> &readyfd);
+  void handleWriteEvent(const std::vector<int> &writefd);
   void handleServerSocket(const ServerSocket *socket);
   static void handleConnectionSocket(ClientSocket *socket);
-  void destroyConnectionSockets();
+  bool isServerSocketFd(int fd);
+  void destroyClient();
 
   Selector selector_;
-  SocketMap fd2socket_;
+  ServerSocketMap server_sock_map_;
+  ClientSocketMap client_sock_map_;
 };
 
 #endif  // SRC_SERVER_HPP_
