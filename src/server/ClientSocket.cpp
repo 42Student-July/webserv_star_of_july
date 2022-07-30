@@ -12,7 +12,11 @@ ClientSocket::~ClientSocket() {
   }
 }
 
-ClientSocket::State ClientSocket::getState() const { return state_; }
+bool ClientSocket::isWaitingForRequest() const { return state_ == READ; }
+
+bool ClientSocket::canResponse() const { return state_ == WRITE; }
+
+bool ClientSocket::shouldClose() const { return state_ == CLOSE; }
 
 void ClientSocket::handleReadEvent() {
   ssize_t recv_size = recvFromClient();

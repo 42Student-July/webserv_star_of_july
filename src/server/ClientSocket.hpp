@@ -26,7 +26,9 @@ class ClientSocket : public ASocket {
 
   void handleReadEvent();
   void handleWriteEvent();
-  State getState() const;
+  bool isWaitingForRequest() const;  //命名微妙
+  bool canResponse() const;
+  bool shouldClose() const;
 
  private:
   static const int kRecvBufferSize = (1 << 16);

@@ -48,8 +48,7 @@ void Server::handleWriteEvent(const FdVector &writable_fds) {
 void Server::destroyClient() {
   ClientSocketMap::iterator it = clnt_socks_.begin();
   while (it != clnt_socks_.end()) {
-    ClientSocket::State state = it->second->getState();
-    if (state == ClientSocket::CLOSE) {
+    if (it->second->shouldClose()) {
       ClientSocketMap::iterator tmp_it = it;
       it++;
       delete tmp_it->second;

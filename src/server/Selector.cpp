@@ -43,11 +43,12 @@ void Selector::setFdset(fd_set *readfds, fd_set *writefds,
   }
   for (ClientSocketMap::const_iterator it = clnt_socks.begin();
        it != clnt_socks.end(); it++) {
-    // メソッドつくる、ここで == を使わない
-    if (it->second->getState() == ClientSocket::READ) {
+    if (it->second->isWaitingForRequest()) {
       FD_SET(it->first, readfds);
-    } else {
+    } else if (it->second->canResponse()) {
       FD_SET(it->first, writefds);
+    } else {
+      throw std::runtime_error("seFdset: unexpected clnt socket state");
     }
   }
 }
@@ -79,8 +80,7 @@ void Selector::showInfo(int maxfd, const ServerSocketMap &serv_socks,
   }
   for (ClientSocketMap::const_iterator it = clnt_socks.begin();
        it != clnt_socks.end(); it++) {
-    // メソッドつくる、ここで == を使わない
-    if (it->second->getState() == ClientSocket::READ) {
+    if (it->second->isWaitingForRequest()) {
       std::cerr << it->first << ", ";
     }
   }
@@ -88,8 +88,7 @@ void Selector::showInfo(int maxfd, const ServerSocketMap &serv_socks,
   std::cerr << "writefd : ";
   for (ClientSocketMap::const_iterator it = clnt_socks.begin();
        it != clnt_socks.end(); it++) {
-    // メソッドつくる、ここで == を使わない
-    if (it->second->getState() == ClientSocket::WRITE) {
+    if (it->second->canResponse()) {
       std::cerr << it->first << ", ";
     }
   }
