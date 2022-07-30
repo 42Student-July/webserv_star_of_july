@@ -5,11 +5,7 @@
 
 #include <algorithm>
 #include <iostream>
-#include <map>
-#include <set>
-#include <vector>
 
-#include "ASocket.hpp"
 #include "ClientSocket.hpp"
 #include "ServerSocket.hpp"
 #include "type.hpp"
@@ -22,30 +18,27 @@ class Selector {
   Selector();
   ~Selector();
 
-  void select(const ServerSocketMap &server_sock_map_,
-              const ClientSocketMap &client_sock_map_);
-  const FdVector readFds() const;
-  const FdVector writeFds() const;
+  void select(const ServerSocketMap &serv_socks,
+              const ClientSocketMap &clnt_socks);
+  const FdVector readableFds() const;
+  const FdVector writableFds() const;
 
  private:
-  static const int kTimeoutSec = 10;
+  static const int kTimeoutSec = 5;
 
   Selector(const Selector &other);
   Selector &operator=(const Selector &other);
-
-  void clear();
-  void storeTargetfds(const ServerSocketMap &server_sock_map_,
-                      const ClientSocketMap &client_sock_map_);
-  fd_set prepareReadfds();
-  fd_set prepareWritefds();
-  int calcMaxFd();
+  void setFdset(fd_set *readfds, fd_set *writefds,
+                const ServerSocketMap &serv_socks,
+                const ClientSocketMap &clnt_socks);
+  int calcMaxFd(const ServerSocketMap &serv_socks,
+                const ClientSocketMap &clnt_socks);
   FdVector toFdVector(const fd_set &fdset, int maxfd);
-  void showInfo(int maxfd);
+  void showInfo(int maxfd, const ServerSocketMap &serv_socks,
+                const ClientSocketMap &clnt_socks);
 
-  FdVector target_readfds_;
-  FdVector target_writefds_;
-  FdVector readfds_;
-  FdVector writefds_;
+  FdVector readable_fds_;
+  FdVector writable_fds_;
 };
 
 #endif  // SRC_SELECTOR_HPP_

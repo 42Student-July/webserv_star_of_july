@@ -4,29 +4,20 @@ Selector::Selector() {}
 
 Selector::~Selector() {}
 
-void Selector::clear() {
-  readfds_.clear();
-  writefds_.clear();
-  target_readfds_.clear();
-  target_writefds_.clear();
-}
+const FdVector Selector::readableFds() const { return readable_fds_; }
+const FdVector Selector::writableFds() const { return writable_fds_; }
 
-const FdVector Selector::readFds() const { return readfds_; }
-const FdVector Selector::writeFds() const { return writefds_; }
-
-void Selector::select(const ServerSocketMap &server_sock_map_,
-                      const ClientSocketMap &client_sock_map_) {
+void Selector::select(const ServerSocketMap &serv_socks,
+                      const ClientSocketMap &clnt_socks) {
   // selectの準備
-  clear();
-  storeTargetfds(server_sock_map_, client_sock_map_);
-
-  fd_set readfds = prepareReadfds();
-  fd_set writefds = prepareWritefds();
-  int maxfd = calcMaxFd();
+  fd_set readfds;
+  fd_set writefds;
+  setFdset(&readfds, &writefds, serv_socks, clnt_socks);
+  int maxfd = calcMaxFd(serv_socks, clnt_socks);
   struct timeval timeout = {kTimeoutSec, 0};
 
   // デバッグ用
-  showInfo(maxfd);
+  showInfo(maxfd, serv_socks, clnt_socks);
 
   // selectの実行
   int count = ::select(maxfd + 1, &readfds, &writefds, NULL, &timeout);
@@ -34,66 +25,38 @@ void Selector::select(const ServerSocketMap &server_sock_map_,
     throw std::runtime_error("select() failed");
   }
   if (count == 0) {
-    std::cerr << "Time out, you had tea break?" << std::endl;
+    std::cerr << kTimeoutSec << "seconds passed without event" << std::endl;
   } else {
-    readfds_ = toFdVector(readfds, maxfd);
-    writefds_ = toFdVector(writefds, maxfd);
+    readable_fds_ = toFdVector(readfds, maxfd);
+    writable_fds_ = toFdVector(writefds, maxfd);
   }
 }
 
-void Selector::storeTargetfds(const ServerSocketMap &server_sock_map_,
-                              const ClientSocketMap &client_sock_map_) {
-  for (ServerSocketMap::const_iterator it = server_sock_map_.begin();
-       it != server_sock_map_.end(); it++) {
-    target_readfds_.push_back(it->first);
+void Selector::setFdset(fd_set *readfds, fd_set *writefds,
+                        const ServerSocketMap &serv_socks,
+                        const ClientSocketMap &clnt_socks) {
+  FD_ZERO(readfds);
+  FD_ZERO(writefds);
+  for (ServerSocketMap::const_iterator it = serv_socks.begin();
+       it != serv_socks.end(); it++) {
+    FD_SET(it->first, readfds);
   }
-  for (ClientSocketMap::const_iterator it = client_sock_map_.begin();
-       it != client_sock_map_.end(); it++) {
+  for (ClientSocketMap::const_iterator it = clnt_socks.begin();
+       it != clnt_socks.end(); it++) {
     // メソッドつくる、ここで == を使わない
     if (it->second->getState() == ClientSocket::READ) {
-      target_readfds_.push_back(it->first);
+      FD_SET(it->first, readfds);
     } else {
-      target_writefds_.push_back(it->first);
+      FD_SET(it->first, writefds);
     }
   }
 }
 
-fd_set Selector::prepareReadfds() {
-  fd_set readfds;
-  FD_ZERO(&readfds);
-  for (FdVector::const_iterator it = target_readfds_.begin();
-       it != target_readfds_.end(); it++) {
-    FD_SET(*it, &readfds);
-  }
-  return readfds;
-}
-
-fd_set Selector::prepareWritefds() {
-  fd_set writefds;
-  FD_ZERO(&writefds);
-  for (FdVector::const_iterator it = target_writefds_.begin();
-       it != target_writefds_.end(); it++) {
-    FD_SET(*it, &writefds);
-  }
-  return writefds;
-}
-
-int Selector::calcMaxFd() {
-  int max_readfd;
-  if (target_readfds_.empty()) {
-    max_readfd = -1;
-  } else {
-    max_readfd =
-        *std::max_element(target_readfds_.begin(), target_readfds_.end());
-  }
-  int max_writefd;
-  if (target_writefds_.empty()) {
-    max_writefd = -1;
-  } else {
-    max_writefd =
-        *std::max_element(target_writefds_.begin(), target_writefds_.end());
-  }
-  return std::max(max_readfd, max_writefd);
+int Selector::calcMaxFd(const ServerSocketMap &serv_socks,
+                        const ClientSocketMap &clnt_socks) {
+  int serv_maxfd = (serv_socks.empty()) ? -1 : serv_socks.rbegin()->first;
+  int clnt_maxfd = (clnt_socks.empty()) ? -1 : clnt_socks.rbegin()->first;
+  return std::max(serv_maxfd, clnt_maxfd);
 }
 
 FdVector Selector::toFdVector(const fd_set &fdset, int maxfd) {
@@ -106,18 +69,29 @@ FdVector Selector::toFdVector(const fd_set &fdset, int maxfd) {
   return ret;
 }
 
-void Selector::showInfo(int maxfd) {
+void Selector::showInfo(int maxfd, const ServerSocketMap &serv_socks,
+                        const ClientSocketMap &clnt_socks) {
   std::cerr << "*** Selecter Target Info ***" << std::endl;
   std::cerr << "readfd  : ";
-  for (FdVector::const_iterator it = target_readfds_.begin();
-       it != target_readfds_.end(); it++) {
-    std::cerr << *it << ", ";
+  for (ServerSocketMap::const_iterator it = serv_socks.begin();
+       it != serv_socks.end(); it++) {
+    std::cerr << it->first << ", ";
+  }
+  for (ClientSocketMap::const_iterator it = clnt_socks.begin();
+       it != clnt_socks.end(); it++) {
+    // メソッドつくる、ここで == を使わない
+    if (it->second->getState() == ClientSocket::READ) {
+      std::cerr << it->first << ", ";
+    }
   }
   std::cerr << std::endl;
   std::cerr << "writefd : ";
-  for (FdVector::const_iterator it = target_writefds_.begin();
-       it != target_writefds_.end(); it++) {
-    std::cerr << *it << ", ";
+  for (ClientSocketMap::const_iterator it = clnt_socks.begin();
+       it != clnt_socks.end(); it++) {
+    // メソッドつくる、ここで == を使わない
+    if (it->second->getState() == ClientSocket::WRITE) {
+      std::cerr << it->first << ", ";
+    }
   }
   std::cerr << std::endl;
   std::cerr << "maxfd   : " << maxfd << std::endl;

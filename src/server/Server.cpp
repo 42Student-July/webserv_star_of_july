@@ -13,9 +13,11 @@ Server::~Server() {}
 void Server::run() {
   std::cerr << YELLOW "run server" RESET << std::endl;
   for (;;) {
-    selector_.select(server_sock_map_, client_sock_map_);
-    handleReadEvent(selector_.readFds());
-    handleWriteEvent(selector_.writeFds());
+    Selector sel;
+    // selector_.select(server_sock_map_, client_sock_map_);
+    sel.select(server_sock_map_, client_sock_map_);
+    handleReadEvent(sel.readableFds());
+    handleWriteEvent(sel.writableFds());
     destroyClient();
   }
 }
