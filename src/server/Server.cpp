@@ -24,9 +24,9 @@ bool Server::isServerSocketFd(int fd) {
   return server_sock_map_.find(fd) != server_sock_map_.end();
 }
 
-void Server::handleReadEvent(const std::vector<int> &readyfd) {
-  for (std::vector<int>::const_iterator it = readyfd.begin();
-       it != readyfd.end(); it++) {
+void Server::handleReadEvent(const FdVector &readyfd) {
+  for (FdVector::const_iterator it = readyfd.begin(); it != readyfd.end();
+       it++) {
     if (isServerSocketFd(*it)) {
       handleServerSocket(server_sock_map_[*it]);
     } else {
@@ -35,9 +35,9 @@ void Server::handleReadEvent(const std::vector<int> &readyfd) {
   }
 }
 
-void Server::handleWriteEvent(const std::vector<int> &readyfd) {
-  for (std::vector<int>::const_iterator it = readyfd.begin();
-       it != readyfd.end(); it++) {
+void Server::handleWriteEvent(const FdVector &readyfd) {
+  for (FdVector::const_iterator it = readyfd.begin(); it != readyfd.end();
+       it++) {
     handleConnectionSocket(client_sock_map_[*it]);
   }
 }

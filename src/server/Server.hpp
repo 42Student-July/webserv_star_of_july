@@ -9,7 +9,7 @@
 #include "ServerConfig.hpp"
 #include "ServerSocket.hpp"
 #include "color.hpp"
-#include "utils.hpp"
+#include "type.hpp"
 
 class Server {
  public:
@@ -23,8 +23,8 @@ class Server {
   Server(const Server &other);
   Server &operator=(const Server &other);
 
-  void handleReadEvent(const std::vector<int> &readyfd);
-  void handleWriteEvent(const std::vector<int> &writefd);
+  void handleReadEvent(const FdVector &readyfd);
+  void handleWriteEvent(const FdVector &writefd);
   void handleServerSocket(const ServerSocket *socket);
   static void handleConnectionSocket(ClientSocket *socket);
   bool isServerSocketFd(int fd);

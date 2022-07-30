@@ -11,8 +11,8 @@ void Selector::clear() {
   target_writefds_.clear();
 }
 
-const std::vector<int> Selector::readFds() const { return readfds_; }
-const std::vector<int> Selector::writeFds() const { return writefds_; }
+const FdVector Selector::readFds() const { return readfds_; }
+const FdVector Selector::writeFds() const { return writefds_; }
 
 void Selector::select(const ServerSocketMap &server_sock_map_,
                       const ClientSocketMap &client_sock_map_) {
@@ -36,8 +36,8 @@ void Selector::select(const ServerSocketMap &server_sock_map_,
   if (count == 0) {
     std::cerr << "Time out, you had tea break?" << std::endl;
   } else {
-    readfds_ = toVector(readfds, maxfd);
-    writefds_ = toVector(writefds, maxfd);
+    readfds_ = toFdVector(readfds, maxfd);
+    writefds_ = toFdVector(writefds, maxfd);
   }
 }
 
@@ -61,7 +61,7 @@ void Selector::storeTargetfds(const ServerSocketMap &server_sock_map_,
 fd_set Selector::prepareReadfds() {
   fd_set readfds;
   FD_ZERO(&readfds);
-  for (std::vector<int>::const_iterator it = target_readfds_.begin();
+  for (FdVector::const_iterator it = target_readfds_.begin();
        it != target_readfds_.end(); it++) {
     FD_SET(*it, &readfds);
   }
@@ -71,7 +71,7 @@ fd_set Selector::prepareReadfds() {
 fd_set Selector::prepareWritefds() {
   fd_set writefds;
   FD_ZERO(&writefds);
-  for (std::vector<int>::const_iterator it = target_writefds_.begin();
+  for (FdVector::const_iterator it = target_writefds_.begin();
        it != target_writefds_.end(); it++) {
     FD_SET(*it, &writefds);
   }
@@ -96,8 +96,8 @@ int Selector::calcMaxFd() {
   return std::max(max_readfd, max_writefd);
 }
 
-std::vector<int> Selector::toVector(const fd_set &fdset, int maxfd) {
-  std::vector<int> ret;
+FdVector Selector::toFdVector(const fd_set &fdset, int maxfd) {
+  FdVector ret;
   for (int i = 0; i <= maxfd; i++) {
     if (FD_ISSET(i, &fdset)) {
       ret.push_back(i);
@@ -109,13 +109,13 @@ std::vector<int> Selector::toVector(const fd_set &fdset, int maxfd) {
 void Selector::showInfo(int maxfd) {
   std::cerr << "*** Selecter Target Info ***" << std::endl;
   std::cerr << "readfd  : ";
-  for (std::vector<int>::const_iterator it = target_readfds_.begin();
+  for (FdVector::const_iterator it = target_readfds_.begin();
        it != target_readfds_.end(); it++) {
     std::cerr << *it << ", ";
   }
   std::cerr << std::endl;
   std::cerr << "writefd : ";
-  for (std::vector<int>::const_iterator it = target_writefds_.begin();
+  for (FdVector::const_iterator it = target_writefds_.begin();
        it != target_writefds_.end(); it++) {
     std::cerr << *it << ", ";
   }

@@ -30,6 +30,4 @@ class ServerSocket : public ASocket {
   static void setNonBlocking(int fd);
 };
 
-typedef std::map<int, ServerSocket *> ServerSocketMap;
-
 #endif  // SRC_SERVERSOCKET_HPP_

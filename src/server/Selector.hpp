@@ -12,6 +12,7 @@
 #include "ASocket.hpp"
 #include "ClientSocket.hpp"
 #include "ServerSocket.hpp"
+#include "type.hpp"
 #include "utils.hpp"
 
 // 責務：ソケットの集合を監視し、IOの準備ができたソケットの集合を返す
@@ -23,8 +24,8 @@ class Selector {
 
   void select(const ServerSocketMap &server_sock_map_,
               const ClientSocketMap &client_sock_map_);
-  const std::vector<int> readFds() const;
-  const std::vector<int> writeFds() const;
+  const FdVector readFds() const;
+  const FdVector writeFds() const;
 
  private:
   static const int kTimeoutSec = 10;
@@ -38,13 +39,13 @@ class Selector {
   fd_set prepareReadfds();
   fd_set prepareWritefds();
   int calcMaxFd();
-  std::vector<int> toVector(const fd_set &fdset, int maxfd);
+  FdVector toFdVector(const fd_set &fdset, int maxfd);
   void showInfo(int maxfd);
 
-  std::vector<int> target_readfds_;
-  std::vector<int> target_writefds_;
-  std::vector<int> readfds_;
-  std::vector<int> writefds_;
+  FdVector target_readfds_;
+  FdVector target_writefds_;
+  FdVector readfds_;
+  FdVector writefds_;
 };
 
 #endif  // SRC_SELECTOR_HPP_
