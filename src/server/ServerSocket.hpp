@@ -2,6 +2,7 @@
 #define SRC_SERVERSOCKET_HPP_
 
 #include <arpa/inet.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 
 #include <cstring>
@@ -17,15 +18,16 @@ class ServerSocket : public ASocket {
   explicit ServerSocket(const ServerConfig &serverconfig);
   ~ServerSocket();
 
-  ConnectionSocket *createConnectionSocket() const;
+  ConnectionSocket *acceptConnection() const;
 
  private:
-  static const int kServerPort = 8000;
-  static const int kMaxPendig = 5;
-
   ServerSocket();
   ServerSocket(const ServerSocket &other);
   ServerSocket &operator=(const ServerSocket &other);
+  void createEndpoint();
+  void setLocalAddress();
+  void listen();
+  static void setNonBlocking(int fd);
 };
 
 #endif  // SRC_SERVERSOCKET_HPP_

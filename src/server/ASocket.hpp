@@ -7,6 +7,7 @@
 
 class ASocket {
  public:
+  ASocket(const ServerConfig &serverconfig);
   ASocket(int fd, const ServerConfig &serverconfig);
   virtual ~ASocket();
 
