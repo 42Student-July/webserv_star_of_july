@@ -26,18 +26,18 @@ void Server::handleSockets(const Selector::SocketMap &sockets) {
     if (utils::isServerSocket(it->second)) {
       handleServerSocket(dynamic_cast<ServerSocket *>(it->second));
     } else {
-      handleConnectionSocket(dynamic_cast<ConnectionSocket *>(it->second));
+      handleConnectionSocket(dynamic_cast<ClientSocket *>(it->second));
     }
   }
 }
 
 void Server::handleServerSocket(const ServerSocket *socket) {
-  ConnectionSocket *new_ConnectionSocket = socket->acceptConnection();
+  ClientSocket *new_ConnectionSocket = socket->acceptConnection();
 
   fd2socket_[new_ConnectionSocket->getFd()] = new_ConnectionSocket;
 }
 
-void Server::handleConnectionSocket(ConnectionSocket *socket) {
+void Server::handleConnectionSocket(ClientSocket *socket) {
   socket->handleCommunication();
 }
 
@@ -46,9 +46,9 @@ void Server::destroyConnectionSockets() {
   for (SocketMap::iterator it = fd2socket_.begin(); it != fd2socket_.end();
        it++) {
     if (!utils::isServerSocket(it->second)) {
-      ConnectionSocket::State state =
-          dynamic_cast<ConnectionSocket *>(it->second)->getState();
-      if (state == ConnectionSocket::CLOSE) {
+      ClientSocket::State state =
+          dynamic_cast<ClientSocket *>(it->second)->getState();
+      if (state == ClientSocket::CLOSE) {
         SocketMap::iterator tmp_it = it;
         it++;
         delete tmp_it->second;

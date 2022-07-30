@@ -1,5 +1,5 @@
-#ifndef SRC_CONNECTIONSOCKET_HPP_
-#define SRC_CONNECTIONSOCKET_HPP_
+#ifndef SRC_CLIENTSOCKET_HPP_
+#define SRC_CLIENTSOCKET_HPP_
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -17,12 +17,12 @@
 #include "MessageBodyParser.hpp"
 #include "response.h"
 
-class ConnectionSocket : public ASocket {
+class ClientSocket : public ASocket {
  public:
   enum State { READ, WRITE, CLOSE };
 
-  ConnectionSocket(int accepted_fd, const ServerConfig &serverconfig);
-  ~ConnectionSocket();
+  ClientSocket(int accepted_fd, const ServerConfig &serverconfig);
+  ~ClientSocket();
 
   void handleCommunication();
   State getState() const;
@@ -31,9 +31,9 @@ class ConnectionSocket : public ASocket {
   static const int kRecvBufferSize = (1 << 16);
   // 65536, httpServerだとリクエストの文字数の上限かな
 
-  ConnectionSocket();
-  ConnectionSocket(const ConnectionSocket &other);
-  ConnectionSocket &operator=(const ConnectionSocket &other);
+  ClientSocket();
+  ClientSocket(const ClientSocket &other);
+  ClientSocket &operator=(const ClientSocket &other);
 
   void handleReadEvent();
   void handleWriteEvent();
@@ -52,4 +52,4 @@ class ConnectionSocket : public ASocket {
   HttpResponse *current_response_;
 };
 
-#endif  // SRC_CONNECTIONSOCKET_HPP_
+#endif  // SRC_CLIENTSOCKET_HPP_

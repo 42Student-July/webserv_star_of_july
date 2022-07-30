@@ -1,19 +1,18 @@
-#include "ConnectionSocket.hpp"
+#include "ClientSocket.hpp"
 
-ConnectionSocket::ConnectionSocket(int accepted_fd,
-                                   const ServerConfig &serverconfig)
+ClientSocket::ClientSocket(int accepted_fd, const ServerConfig &serverconfig)
     : ASocket(accepted_fd, serverconfig),
       state_(READ),
       current_request_(NULL),
       current_response_(NULL) {}
 
-ConnectionSocket::~ConnectionSocket() {
+ClientSocket::~ClientSocket() {
   if (close(fd_) < 0) {
     std::runtime_error("close() failed");
   }
 }
 
-void ConnectionSocket::handleCommunication() {
+void ClientSocket::handleCommunication() {
   if (state_ == READ) {
     handleReadEvent();
   } else {
@@ -21,9 +20,9 @@ void ConnectionSocket::handleCommunication() {
   }
 }
 
-ConnectionSocket::State ConnectionSocket::getState() const { return state_; }
+ClientSocket::State ClientSocket::getState() const { return state_; }
 
-void ConnectionSocket::handleReadEvent() {
+void ClientSocket::handleReadEvent() {
   ssize_t recv_size = recvFromClient();
 
   if (recv_size == 0) {
@@ -37,12 +36,12 @@ void ConnectionSocket::handleReadEvent() {
   }
 }
 
-void ConnectionSocket::handleWriteEvent() {
+void ClientSocket::handleWriteEvent() {
   sendResponse();
   state_ = READ;
 }
 
-ssize_t ConnectionSocket::recvFromClient() {
+ssize_t ClientSocket::recvFromClient() {
   ssize_t recv_size = recv(fd_, recv_buffer_, kRecvBufferSize, 0);
 
   if (recv_size < 0) {
@@ -56,7 +55,7 @@ ssize_t ConnectionSocket::recvFromClient() {
   return recv_size;
 }
 
-void ConnectionSocket::generateRequest(ssize_t recv_size) {
+void ClientSocket::generateRequest(ssize_t recv_size) {
   MessageBodyParser body_parser;
   recv_buffer_[recv_size] = '\0';
   request_parser_.parse(recv_buffer_, serverconfig_);
@@ -71,7 +70,7 @@ void ConnectionSocket::generateRequest(ssize_t recv_size) {
 }
 
 // // GETメソッドのファイル決め打ち
-void ConnectionSocket::generateResponse() {
+void ClientSocket::generateResponse() {
   ConfigConverter conf_converter;
   ConfigDTO *conf_dto = conf_converter.toDTO(serverconfig_);
   HttpRequestConverter req_converter;
@@ -80,7 +79,7 @@ void ConnectionSocket::generateResponse() {
   current_response_ = builder.build(*req_dto);
 }
 
-void ConnectionSocket::sendResponse() const {
+void ClientSocket::sendResponse() const {
   HttpResponseSerializer serializer = HttpResponseSerializer();
   HttpResponsePlainText *plain_txt = serializer.serialize(*current_response_);
   const char *response = plain_txt->Text().c_str();

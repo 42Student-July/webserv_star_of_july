@@ -9,13 +9,13 @@ ServerSocket::ServerSocket(const ServerConfig &serverconfig)
 
 ServerSocket::~ServerSocket() {}
 
-ConnectionSocket *ServerSocket::acceptConnection() const {
+ClientSocket *ServerSocket::acceptConnection() const {
   int new_socket = accept(fd_, NULL, NULL);
   if (new_socket < 0) {
     throw std::runtime_error("accept failed()");
   }
   setNonBlocking(new_socket);
-  return new ConnectionSocket(new_socket, serverconfig_);
+  return new ClientSocket(new_socket, serverconfig_);
 }
 
 void ServerSocket::createEndpoint() {

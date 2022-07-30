@@ -2,7 +2,7 @@
 #define SRC_UTILS_HPP_
 
 #include "ASocket.hpp"
-#include "ConnectionSocket.hpp"
+#include "ClientSocket.hpp"
 #include "ServerSocket.hpp"
 
 namespace utils {
