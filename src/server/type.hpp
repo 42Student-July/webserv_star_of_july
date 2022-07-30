@@ -1,6 +1,7 @@
 #ifndef TYPE_HPP
 #define TYPE_HPP
 
+#include <map>
 #include <vector>
 
 class ClientSocket;

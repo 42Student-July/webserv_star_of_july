@@ -1,9 +1,6 @@
 #ifndef SRC_SERVER_HPP_
 #define SRC_SERVER_HPP_
 
-#include <map>
-#include <vector>
-
 #include "ClientSocket.hpp"
 #include "Selector.hpp"
 #include "ServerConfig.hpp"
@@ -15,22 +12,19 @@ class Server {
  public:
   explicit Server(const std::vector<ServerConfig> &serverconfigs);
   ~Server();
-
   void run();
 
  private:
   Server();
   Server(const Server &other);
   Server &operator=(const Server &other);
-
-  void handleReadEvent(const FdVector &readyfd);
-  void handleWriteEvent(const FdVector &writefd);
+  void handleReadEvent(const FdVector &readable_fds);
+  void handleWriteEvent(const FdVector &writable_fds);
   void destroyClient();
   bool isServerSocketFd(int fd);
 
-  Selector selector_;
-  ServerSocketMap server_sock_map_;
-  ClientSocketMap client_sock_map_;
+  ServerSocketMap serv_socks_;
+  ClientSocketMap clnt_socks_;
 };
 
 #endif  // SRC_SERVER_HPP_
