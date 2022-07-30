@@ -4,7 +4,7 @@ Server::Server(const std::vector<ServerConfig> &serverconfigs) {
   for (std::vector<ServerConfig>::const_iterator it = serverconfigs.begin();
        it != serverconfigs.end(); it++) {
     ServerSocket *serv_sock = new ServerSocket(*it);
-    fd2socket_[serv_sock->getFd()] = serv_sock;
+    serv_socks_[serv_sock->getFd()] = serv_sock;
   }
 }
 
@@ -13,48 +13,48 @@ Server::~Server() {}
 void Server::run() {
   std::cerr << YELLOW "run server" RESET << std::endl;
   for (;;) {
-    selector_.select(fd2socket_);
-    SocketMap ready = selector_.getReadySockets();
-    handleSockets(ready);
-    destroyConnectionSockets();
+    Selector sel;
+    sel.select(serv_socks_, clnt_socks_);
+    handleReadEvent(sel.readableFds());
+    handleWriteEvent(sel.writableFds());
+    destroyClient();
   }
 }
 
-void Server::handleSockets(const Selector::SocketMap &sockets) {
-  for (Selector::SocketMap::const_iterator it = sockets.begin();
-       it != sockets.end(); it++) {
-    if (utils::isServerSocket(it->second)) {
-      handleServerSocket(dynamic_cast<ServerSocket *>(it->second));
+bool Server::isServerSocketFd(int fd) {
+  return serv_socks_.find(fd) != serv_socks_.end();
+}
+
+void Server::handleReadEvent(const FdVector &readable_fds) {
+  for (FdVector::const_iterator it = readable_fds.begin();
+       it != readable_fds.end(); it++) {
+    if (isServerSocketFd(*it)) {
+      ClientSocket *new_clnt = serv_socks_[*it]->acceptConnection();
+      clnt_socks_[new_clnt->getFd()] = new_clnt;
     } else {
-      handleConnectionSocket(dynamic_cast<ConnectionSocket *>(it->second));
+      clnt_socks_[*it]->handleReadEvent();
     }
   }
 }
 
-void Server::handleServerSocket(const ServerSocket *socket) {
-  ConnectionSocket *new_ConnectionSocket = socket->acceptConnection();
-
-  fd2socket_[new_ConnectionSocket->getFd()] = new_ConnectionSocket;
+void Server::handleWriteEvent(const FdVector &writable_fds) {
+  for (FdVector::const_iterator it = writable_fds.begin();
+       it != writable_fds.end(); it++) {
+    clnt_socks_[*it]->handleWriteEvent();
+  }
 }
 
-void Server::handleConnectionSocket(ConnectionSocket *socket) {
-  socket->handleCommunication();
-}
-
-// 通信を終えたConnectionSocketSocketを破棄する
-void Server::destroyConnectionSockets() {
-  for (SocketMap::iterator it = fd2socket_.begin(); it != fd2socket_.end();
-       it++) {
-    if (!utils::isServerSocket(it->second)) {
-      ConnectionSocket::State state =
-          dynamic_cast<ConnectionSocket *>(it->second)->getState();
-      if (state == ConnectionSocket::CLOSE) {
-        SocketMap::iterator tmp_it = it;
-        it++;
-        delete tmp_it->second;
-        fd2socket_.erase(tmp_it);
-        it--;
-      }
+// 通信を終えたConnectionSocketを破棄する
+void Server::destroyClient() {
+  ClientSocketMap::iterator it = clnt_socks_.begin();
+  while (it != clnt_socks_.end()) {
+    if (it->second->shouldClose()) {
+      ClientSocketMap::iterator tmp_it = it;
+      it++;
+      delete tmp_it->second;
+      clnt_socks_.erase(tmp_it);
+    } else {
+      it++;
     }
   }
 }

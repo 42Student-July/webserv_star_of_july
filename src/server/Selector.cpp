@@ -4,124 +4,96 @@ Selector::Selector() {}
 
 Selector::~Selector() {}
 
-Selector::SocketMap &Selector::getReadySockets() { return ready_all_; }
+const FdVector Selector::readableFds() const { return readable_fds_; }
+const FdVector Selector::writableFds() const { return writable_fds_; }
 
-Selector::SocketMap &Selector::getReadyReadSockets() { return ready_read_; }
+void Selector::select(const ServerSocketMap &serv_socks,
+                      const ClientSocketMap &clnt_socks) {
+  // selectの準備
+  fd_set readfds;
+  fd_set writefds;
+  setFdset(&readfds, &writefds, serv_socks, clnt_socks);
+  int maxfd = calcMaxFd(serv_socks, clnt_socks);
+  struct timeval timeout = {kTimeoutSec, 0};
 
-Selector::SocketMap &Selector::getReadyWriteSockets() { return ready_write_; }
+  // デバッグ用
+  showInfo(maxfd, serv_socks, clnt_socks);
 
-void Selector::clear() {
-  ready_all_.clear();
-  ready_read_.clear();
-  ready_write_.clear();
-  target_read_.clear();
-  target_write_.clear();
+  // selectの実行
+  int count = ::select(maxfd + 1, &readfds, &writefds, NULL, &timeout);
+  if (count < 0) {
+    throw std::runtime_error("select() failed");
+  }
+  if (count == 0) {
+    std::cerr << kTimeoutSec << "seconds passed without event" << std::endl;
+  } else {
+    readable_fds_ = toFdVector(readfds, maxfd);
+    writable_fds_ = toFdVector(writefds, maxfd);
+  }
 }
 
-void Selector::init(const SocketMap &target) {
-  for (SocketMap::const_iterator it = target.begin(); it != target.end();
-       it++) {
-    if (utils::isServerSocket(it->second)) {
-      target_read_[it->first] = it->second;
+void Selector::setFdset(fd_set *readfds, fd_set *writefds,
+                        const ServerSocketMap &serv_socks,
+                        const ClientSocketMap &clnt_socks) {
+  FD_ZERO(readfds);
+  FD_ZERO(writefds);
+  for (ServerSocketMap::const_iterator it = serv_socks.begin();
+       it != serv_socks.end(); it++) {
+    FD_SET(it->first, readfds);
+  }
+  for (ClientSocketMap::const_iterator it = clnt_socks.begin();
+       it != clnt_socks.end(); it++) {
+    if (it->second->isWaitingForRequest()) {
+      FD_SET(it->first, readfds);
+    } else if (it->second->canResponse()) {
+      FD_SET(it->first, writefds);
     } else {
-      addTarget(dynamic_cast<ConnectionSocket *>(it->second));
+      throw std::runtime_error("seFdset: unexpected clnt socket state");
     }
   }
 }
 
-int Selector::select(const SocketMap &fd2socket) {
-  clear();
-  init(fd2socket);
-
-  int maxfd = getMaxFd();
-  fd_set readfds = toFdset(target_read_);
-  fd_set writefds = toFdset(target_write_);
-  struct timeval timeout = {kTimeoutSec, 0};
-
-  int event_count = ::select(maxfd + 1, &readfds, &writefds, NULL, &timeout);
-  if (event_count < 0) {
-    throw std::runtime_error("select() failed");
-  }
-  if (event_count == 0) {
-    std::cerr << "Time out, you had tea break?" << std::endl;
-  } else {
-    ready_read_ = toSocketMap(readfds, target_read_);
-    ready_write_ = toSocketMap(writefds, target_write_);
-    ready_all_ = ready_read_;
-    ready_all_.insert(ready_write_.begin(), ready_write_.end());
-  }
-
-  // デバッグ用
-  showTarget();
-
-  return event_count;
+int Selector::calcMaxFd(const ServerSocketMap &serv_socks,
+                        const ClientSocketMap &clnt_socks) {
+  int serv_maxfd = (serv_socks.empty()) ? -1 : serv_socks.rbegin()->first;
+  int clnt_maxfd = (clnt_socks.empty()) ? -1 : clnt_socks.rbegin()->first;
+  return std::max(serv_maxfd, clnt_maxfd);
 }
 
-void Selector::showTarget() {
-  std::cerr << "###Read Target  : ";
-  for (SocketMap::const_iterator it = target_read_.begin();
-       it != target_read_.end(); it++) {
-    std::cerr << it->first << ", ";
-  }
-  std::cerr << std::endl;
-  std::cerr << "###Write Target : ";
-  for (SocketMap::const_iterator it = target_write_.begin();
-       it != target_write_.end(); it++) {
-    std::cerr << it->first << ", ";
-  }
-  std::cerr << std::endl << std::endl;
-}
-
-int Selector::getMaxFd() {
-  int maxfd = -1;
-  int maxfd_read = -1;
-  int maxfd_write = -1;
-
-  if (!target_read_.empty()) {
-    maxfd_read = target_read_.rbegin()->first;
-  }
-  if (!target_write_.empty()) {
-    maxfd_write = target_write_.rbegin()->first;
-  }
-  maxfd = (maxfd_read > maxfd_write) ? maxfd_read : maxfd_write;
-
-  return maxfd;
-}
-
-fd_set Selector::toFdset(const SocketMap &sockets) {
-  fd_set ret;
-
-  FD_ZERO(&ret);
-  for (SocketMap::const_iterator it = sockets.begin(); it != sockets.end();
-       it++) {
-    FD_SET(it->first, &ret);
+FdVector Selector::toFdVector(const fd_set &fdset, int maxfd) {
+  FdVector ret;
+  for (int i = 0; i <= maxfd; i++) {
+    if (FD_ISSET(i, &fdset)) {
+      ret.push_back(i);
+    }
   }
   return ret;
 }
 
-Selector::SocketMap Selector::toSocketMap(const fd_set &fdset,
-                                          const SocketMap &target_fds) {
-  SocketMap fd2set;
-
-  for (SocketMap::const_iterator it = target_fds.begin();
-       it != target_fds.end(); it++) {
-    if (FD_ISSET(it->first, &fdset)) {
-      fd2set[it->first] = it->second;
+void Selector::showInfo(int maxfd, const ServerSocketMap &serv_socks,
+                        const ClientSocketMap &clnt_socks) {
+  std::cerr << "*** Selecter Target Info ***" << std::endl;
+  std::cerr << "readfd  : ";
+  for (ServerSocketMap::const_iterator it = serv_socks.begin();
+       it != serv_socks.end(); it++) {
+    std::cerr << it->first << ", ";
+  }
+  for (ClientSocketMap::const_iterator it = clnt_socks.begin();
+       it != clnt_socks.end(); it++) {
+    if (it->second->isWaitingForRequest()) {
+      std::cerr << it->first << ", ";
     }
   }
-  return fd2set;
-}
-
-void Selector::addTarget(ConnectionSocket *ConnectionSocket) {
-  switch (ConnectionSocket->getState()) {
-    case ConnectionSocket::READ:
-      target_read_[ConnectionSocket->getFd()] = ConnectionSocket;
-      break;
-    case ConnectionSocket::WRITE:
-      target_write_[ConnectionSocket->getFd()] = ConnectionSocket;
-      break;
-    case ConnectionSocket::CLOSE:
-      throw std::runtime_error("unexpected state");
-      break;
+  std::cerr << std::endl;
+  std::cerr << "writefd : ";
+  for (ClientSocketMap::const_iterator it = clnt_socks.begin();
+       it != clnt_socks.end(); it++) {
+    if (it->second->canResponse()) {
+      std::cerr << it->first << ", ";
+    }
   }
+  std::cerr << std::endl;
+  std::cerr << "maxfd   : " << maxfd << std::endl;
+  std::cerr << "****************************" << std::endl;
+  std::cerr << std::endl;
 }

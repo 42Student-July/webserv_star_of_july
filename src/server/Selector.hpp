@@ -3,51 +3,41 @@
 
 #include <sys/select.h>
 
+#include <algorithm>
 #include <iostream>
-#include <map>
-#include <set>
-#include <vector>
 
-#include "ASocket.hpp"
-#include "ConnectionSocket.hpp"
+#include "ClientSocket.hpp"
 #include "ServerSocket.hpp"
-#include "utils.hpp"
+#include "type.hpp"
 
 // 責務：ソケットの集合を監視し、IOの準備ができたソケットの集合を返す
 // selectをラップしているクラス
 class Selector {
  public:
-  typedef std::map<int, ASocket *> SocketMap;
-
   Selector();
   ~Selector();
 
-  int select(const SocketMap &fd2socket);
-  SocketMap &getReadySockets();
-  SocketMap &getReadyReadSockets();   // 現状使ってない
-  SocketMap &getReadyWriteSockets();  // 現状使ってない
+  void select(const ServerSocketMap &serv_socks,
+              const ClientSocketMap &clnt_socks);
+  const FdVector readableFds() const;
+  const FdVector writableFds() const;
 
  private:
-  static const int kTimeoutSec = 10;
+  static const int kTimeoutSec = 5;
 
   Selector(const Selector &other);
   Selector &operator=(const Selector &other);
+  void setFdset(fd_set *readfds, fd_set *writefds,
+                const ServerSocketMap &serv_socks,
+                const ClientSocketMap &clnt_socks);
+  int calcMaxFd(const ServerSocketMap &serv_socks,
+                const ClientSocketMap &clnt_socks);
+  FdVector toFdVector(const fd_set &fdset, int maxfd);
+  void showInfo(int maxfd, const ServerSocketMap &serv_socks,
+                const ClientSocketMap &clnt_socks);
 
-  void clear();
-  void init(const SocketMap &fd2socket);
-  void showTarget();
-  int getMaxFd();
-  void addTarget(ConnectionSocket *sockets);
-
-  static fd_set toFdset(const SocketMap &sockets);
-  static SocketMap toSocketMap(const fd_set &fdset,
-                               const SocketMap &target_fds);
-
-  SocketMap ready_all_;
-  SocketMap ready_read_;
-  SocketMap ready_write_;
-  SocketMap target_read_;
-  SocketMap target_write_;
+  FdVector readable_fds_;
+  FdVector writable_fds_;
 };
 
 #endif  // SRC_SELECTOR_HPP_

@@ -10,7 +10,7 @@
 #include <iostream>
 
 #include "ASocket.hpp"
-#include "ConnectionSocket.hpp"
+#include "ClientSocket.hpp"
 #include "ServerConfig.hpp"
 
 class ServerSocket : public ASocket {
@@ -18,7 +18,7 @@ class ServerSocket : public ASocket {
   explicit ServerSocket(const ServerConfig &serverconfig);
   ~ServerSocket();
 
-  ConnectionSocket *acceptConnection() const;
+  ClientSocket *acceptConnection() const;
 
  private:
   ServerSocket();
