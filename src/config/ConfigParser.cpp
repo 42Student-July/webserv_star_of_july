@@ -1,7 +1,6 @@
-#include "ConfigParser.hpp"
-
 #include <stdexcept>
 
+#include "ConfigParser.hpp"
 #include "ServerConfig.hpp"
 
 const unsigned int ConfigParser::BIT_FLAG_LISTEN =
@@ -36,6 +35,10 @@ std::vector<ServerConfig> ConfigParser::getServerConfigs() const {
   return (serverconfigs_);
 }
 
+const WebservConfig &ConfigParser::getWebservConfig() const {
+  return (webserv_config_);
+}
+
 // parseしたいconfigファイルの受け渡し
 ConfigParser::ConfigParser(std::string file) {
   std::string file_content = readFile(file);
@@ -44,6 +47,7 @@ ConfigParser::ConfigParser(std::string file) {
   std::vector<std::string> tokens = isspaceSplit(file_content);
 
   parseTokens(tokens);
+  webserv_config_ = WebservConfig(serverconfigs_);
 }
 
 // スペースで分割されたトークンをparse
@@ -317,12 +321,13 @@ bool ConfigParser::isDupLocation(const ServerConfig &server) {
   return false;
 }
 
-bool ConfigParser::isValidErrorPages(const std::map<int, std::string> &error_pages) {
+bool ConfigParser::isValidErrorPages(
+    const std::map<int, std::string> &error_pages) {
   std::map<int, std::string>::const_iterator it = error_pages.begin();
   for (; it != error_pages.end(); ++it) {
-	  if (it->second.at(0) != '/') {
-		  return false;
-	  }
+    if (it->second.at(0) != '/') {
+      return false;
+    }
   }
   return true;
 }
@@ -338,7 +343,7 @@ bool ConfigParser::isValidStatus(const std::map<int, std::string> &config_map) {
 }
 
 bool ConfigParser::isValidRoot(const std::string &root) {
-	return (root.find("./") == std::string::npos);
+  return (root.find("./") == std::string::npos);
 }
 
 bool ConfigParser::isValidVector(const std::vector<std::string> vec_to_check,
