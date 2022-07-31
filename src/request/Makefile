@@ -34,7 +34,9 @@ OBJS 	= $(addprefix $(OBJSDIR)/, $(SRCS:.cpp=.o))
 DEPS = $(OBJS:.o=.d)
 
 UTILITY_DIR = ../utility
+CONFIG_DIR = ../config
 LIB_UTILITY = $(UTILITY_DIR)/libutility.a
+LIB_CONFIG = $(CONFIG_DIR)/libconfig.a
 
 .PHONY: all
 all: $(NAME)
@@ -74,6 +76,9 @@ re: fclean all
 $(LIB_UTILITY): dummy
 	@$(MAKE) -C $(UTILITY_DIR)
 
+$(LIB_CONFIG): dummy
+	@$(MAKE) -C $(CONFIG_DIR)
+
 .PHONY: dummy
 dummy:
 
@@ -93,6 +98,7 @@ LDLIBS = -lgtest \
 		 -lpthread \
 		 $(NAME) \
 		 $(LIB_UTILITY) \
+		 $(LIB_CONFIG) \
 		 $(NULL)
 
 $(GTEST_DIR):
@@ -100,7 +106,7 @@ $(GTEST_DIR):
 
 .PHONY: test
 test: INCLUDES += -I$(GTEST_DIR)/googletest/include
-test: $(GTEST_DIR) $(NAME) $(LIB_UTILITY)
+test: $(GTEST_DIR) $(NAME) $(LIB_UTILITY) $(LIB_CONFIG)
 	clang++ -std=c++11 $(INCLUDES) $(TEST_SRCS) $(LDFLAGS) $(LDLIBS) -o test
 	-@./test
 	@$(RM) test

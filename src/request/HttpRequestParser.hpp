@@ -10,15 +10,18 @@
 #include "HttpStatus.hpp"
 #include "MessageBodyParser.hpp"
 #include "RequestHeaderParser.hpp"
-#include "ServerConfig.hpp"
+#include "WebservConfig.hpp"
+// あとで消す
+#include "HttpRequestConverter.hpp"
 
 class HttpRequestParser : public HttpParser {
  public:
   HttpRequestParser();
   ~HttpRequestParser();
   // 2つの引数はコンストラクタで渡した方が読みやすいかも。
-  void parse(const std::string unparsed_str, const ServerConfig &server_config);
-  HttpRequest *buildRequest(const ServerConfig &server_config);
+  void parse(const std::string unparsed_str, size_t port,
+             const WebservConfig &config);
+  HttpRequest *buildRequest();
   bool errorOccured() const;
   bool finished() const;
 
@@ -47,6 +50,7 @@ class HttpRequestParser : public HttpParser {
   std::string parsed_body_;
   std::string chunked_request_;
   std::string error_code_;
+  ServerConfig serv_config_;
 };
 
 #endif  // SRC_HTTPREQUESTPARSER_HPP_

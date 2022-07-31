@@ -7,10 +7,12 @@
 
 // requestの内容をファイルから読み込んでいるが、直接ベタ打ちした方がよかったい気がする。
 
+const size_t kPort = 4242;
+
 class HttpRequestParserTest : public ::testing::Test {
  protected:
   virtual void SetUp() {
-    config.port = 4242;
+    config.port = kPort;
     config.host = "42tokyo";
     config.server.push_back("nop");
     config.server.push_back("cluster");
@@ -18,13 +20,17 @@ class HttpRequestParserTest : public ::testing::Test {
     config.root = "www/html";
     config.client_body_size_limit = 65536;
     // locations_は省略
+    conf_vec.push_back(config);
+    wconfig = WebservConfig(conf_vec);
   }
   ServerConfig config;
+  ServConfVector conf_vec;
+  WebservConfig wconfig;
 };
 
 TEST_F(HttpRequestParserTest, StoreRequestline) {
   std::string file_name = "simple_get.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("GET", "/", "HTTP/1.1", req);
   ASSERT_EQ(HttpStatus::OK, req->response_status_code);
@@ -32,7 +38,7 @@ TEST_F(HttpRequestParserTest, StoreRequestline) {
 
 TEST_F(HttpRequestParserTest, StoreHeaderFieldWithCurl) {
   std::string file_name = "curl.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("GET", "/", "HTTP/1.1", req);
   checkHeaderField("host", "localhost:4242", req->header.headerMap());
@@ -44,7 +50,7 @@ TEST_F(HttpRequestParserTest, StoreHeaderFieldWithCurl) {
 
 TEST_F(HttpRequestParserTest, StoreHeaderFieldWithChrome) {
   std::string file_name = "chrome.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("GET", "/", "HTTP/1.1", req);
   checkHeaderField("host", "localhost:4242", req->header.headerMap());
@@ -81,7 +87,7 @@ TEST_F(HttpRequestParserTest, StoreHeaderFieldWithChrome) {
 
 TEST_F(HttpRequestParserTest, StoreOneLineToBody) {
   std::string file_name = "body_one_line.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("POST", "/", "HTTP/1.1", req);
   checkHeaderField("host", "localhost:80", req->header.headerMap());
@@ -93,7 +99,7 @@ TEST_F(HttpRequestParserTest, StoreOneLineToBody) {
 
 TEST_F(HttpRequestParserTest, StoreMultiLinesToBody) {
   std::string file_name = "body_multi_lines.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("POST", "/", "HTTP/1.1", req);
   checkHeaderField("host", "localhost:80", req->header.headerMap());
@@ -105,7 +111,7 @@ TEST_F(HttpRequestParserTest, StoreMultiLinesToBody) {
 
 TEST_F(HttpRequestParserTest, StoreJsonToBody) {
   std::string file_name = "body_json.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("POST", "/", "HTTP/1.1", req);
   checkHeaderField("host", "localhost:80", req->header.headerMap());
@@ -119,7 +125,7 @@ TEST_F(HttpRequestParserTest, StoreJsonToBody) {
 
 TEST_F(HttpRequestParserTest, StoreServerConfig) {
   std::string file_name = "simple_get.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
@@ -135,7 +141,7 @@ TEST_F(HttpRequestParserTest, StoreServerConfig) {
 
 TEST_F(HttpRequestParserTest, InvalidHttpVersion) {
   std::string file_name = "invalid_http_version.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -144,7 +150,7 @@ TEST_F(HttpRequestParserTest, InvalidHttpVersion) {
 
 TEST_F(HttpRequestParserTest, NoRequestLine) {
   std::string file_name = "no_request_line.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -153,7 +159,7 @@ TEST_F(HttpRequestParserTest, NoRequestLine) {
 
 TEST_F(HttpRequestParserTest, NoMethod) {
   std::string file_name = "no_method.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -162,7 +168,7 @@ TEST_F(HttpRequestParserTest, NoMethod) {
 
 TEST_F(HttpRequestParserTest, NoUri) {
   std::string file_name = "no_uri.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -171,7 +177,7 @@ TEST_F(HttpRequestParserTest, NoUri) {
 
 TEST_F(HttpRequestParserTest, NoHttpVersion) {
   std::string file_name = "no_http_version.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -180,7 +186,7 @@ TEST_F(HttpRequestParserTest, NoHttpVersion) {
 
 TEST_F(HttpRequestParserTest, InvalidMethod) {
   std::string file_name = "invalid_method.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -189,7 +195,7 @@ TEST_F(HttpRequestParserTest, InvalidMethod) {
 
 TEST_F(HttpRequestParserTest, InvalidProtocol) {
   std::string file_name = "invalid_protocol.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -198,7 +204,7 @@ TEST_F(HttpRequestParserTest, InvalidProtocol) {
 
 TEST_F(HttpRequestParserTest, VersionHasNoSlash) {
   std::string file_name = "version_has_no_slash.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -207,7 +213,7 @@ TEST_F(HttpRequestParserTest, VersionHasNoSlash) {
 
 TEST_F(HttpRequestParserTest, VersionHasNoPeriod) {
   std::string file_name = "version_has_no_period.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -216,7 +222,7 @@ TEST_F(HttpRequestParserTest, VersionHasNoPeriod) {
 
 TEST_F(HttpRequestParserTest, VersionHasOtherThanDigit) {
   std::string file_name = "version_has_other_than_digit.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -225,7 +231,7 @@ TEST_F(HttpRequestParserTest, VersionHasOtherThanDigit) {
 
 TEST_F(HttpRequestParserTest, VersionIsNotSupported) {
   std::string file_name = "version_is_not_supported.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -234,7 +240,7 @@ TEST_F(HttpRequestParserTest, VersionIsNotSupported) {
 
 TEST_F(HttpRequestParserTest, HeaderHasNoColon) {
   std::string file_name = "header_has_no_colon.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -243,7 +249,7 @@ TEST_F(HttpRequestParserTest, HeaderHasNoColon) {
 
 TEST_F(HttpRequestParserTest, HeaderHasSpaceBeforeColon) {
   std::string file_name = "header_has_space_before_colon.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -252,7 +258,7 @@ TEST_F(HttpRequestParserTest, HeaderHasSpaceBeforeColon) {
 
 TEST_F(HttpRequestParserTest, HeaderHasNoFieldName) {
   std::string file_name = "header_has_no_field_name.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -261,7 +267,7 @@ TEST_F(HttpRequestParserTest, HeaderHasNoFieldName) {
 
 TEST_F(HttpRequestParserTest, CheckFieldValueIsTrimmedByWS) {
   std::string file_name = "field_value_is_trimmed.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
@@ -272,7 +278,7 @@ TEST_F(HttpRequestParserTest, CheckFieldValueIsTrimmedByWS) {
 
 TEST_F(HttpRequestParserTest, FieldValueHasOnlyWS) {
   std::string file_name = "field_value_has_only_WS.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
@@ -283,7 +289,7 @@ TEST_F(HttpRequestParserTest, FieldValueHasOnlyWS) {
 
 TEST_F(HttpRequestParserTest, FieldNameHasOnlyWS) {
   std::string file_name = "field_name_has_only_WS.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -292,7 +298,7 @@ TEST_F(HttpRequestParserTest, FieldNameHasOnlyWS) {
 
 TEST_F(HttpRequestParserTest, FieldNameHasInvalidChar) {
   std::string file_name = "field_name_has_invalid_char.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -301,7 +307,7 @@ TEST_F(HttpRequestParserTest, FieldNameHasInvalidChar) {
 
 TEST_F(HttpRequestParserTest, FieldNameLastIsInvalidChar) {
   std::string file_name = "field_name_last_is_invalid_char.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -310,7 +316,7 @@ TEST_F(HttpRequestParserTest, FieldNameLastIsInvalidChar) {
 
 TEST_F(HttpRequestParserTest, NoHost) {
   std::string file_name = "no_host.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -319,7 +325,7 @@ TEST_F(HttpRequestParserTest, NoHost) {
 
 TEST_F(HttpRequestParserTest, NoHostEmpty) {
   std::string file_name = "no_host_empty.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -328,7 +334,7 @@ TEST_F(HttpRequestParserTest, NoHostEmpty) {
 
 TEST_F(HttpRequestParserTest, TwoHost) {
   std::string file_name = "two_host.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -337,7 +343,7 @@ TEST_F(HttpRequestParserTest, TwoHost) {
 
 TEST_F(HttpRequestParserTest, SameHeaderFieldName) {
   std::string file_name = "same_header_field_name.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
@@ -349,7 +355,7 @@ TEST_F(HttpRequestParserTest, SameHeaderFieldName) {
 
 TEST_F(HttpRequestParserTest, FieldNameCaseInsesitive) {
   std::string file_name = "field_name_case_insensitive.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("GET", "/", "HTTP/1.1", req);
   checkBody("", req->body);
@@ -362,7 +368,7 @@ TEST_F(HttpRequestParserTest, FieldNameCaseInsesitive) {
 
 TEST_F(HttpRequestParserTest, NoCrRequestLine) {
   std::string file_name = "no_cr_request_line.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -371,7 +377,7 @@ TEST_F(HttpRequestParserTest, NoCrRequestLine) {
 
 TEST_F(HttpRequestParserTest, NoCrHeaderField) {
   std::string file_name = "no_cr_header_field.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -380,7 +386,7 @@ TEST_F(HttpRequestParserTest, NoCrHeaderField) {
 
 TEST_F(HttpRequestParserTest, NoCrHeaderEnd) {
   std::string file_name = "no_cr_header_end.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(0, req->header.headerMap().size());
@@ -389,7 +395,7 @@ TEST_F(HttpRequestParserTest, NoCrHeaderEnd) {
 
 TEST_F(HttpRequestParserTest, NoCrBodyEnd) {
   std::string file_name = "no_cr_body_end.crlf";
-  HttpRequest *req = buildRequest(file_dir + file_name, config);
+  HttpRequest *req = buildRequest(file_dir + file_name, kPort, wconfig);
 
   checkBody("", req->body);
   ASSERT_EQ(2, req->header.headerMap().size());
