@@ -1,6 +1,7 @@
 #ifndef WEBSERVCONFING_HPP
 #define WEBSERVCONFING_HPP
 
+#include <algorithm>
 #include <set>
 #include <stdexcept>
 
@@ -22,6 +23,7 @@ class WebservConfig {
 
  private:
   const ServerConfig& findDefaultServerConfig(size_t port) const;
+
   ServConfVector serv_confs_;
   PortSet ports_;
 };

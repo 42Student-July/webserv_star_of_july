@@ -34,7 +34,7 @@ bool dataNearlyEqual(const ServerConfig& config1, const ServerConfig& config2) {
   return true;
 }
 
-TEST(WebservConfigPortsTest, Handles1Server) {
+TEST(WebservConfigPortsTest, SingleServer) {
   ConfigParser parser("./TestConfigs/listen.conf");
   WebservConfig config = parser.getWebservConfig();
   PortSet expected_set;
@@ -42,7 +42,7 @@ TEST(WebservConfigPortsTest, Handles1Server) {
   ASSERT_EQ(expected_set, config.ports());
 }
 
-TEST(WebservConfigPortsTest, Handles2Server) {
+TEST(WebservConfigPortsTest, DualServer) {
   ConfigParser parser("./TestConfigs/dual_servers.conf");
   WebservConfig config = parser.getWebservConfig();
   PortSet expected_set;
@@ -51,7 +51,7 @@ TEST(WebservConfigPortsTest, Handles2Server) {
   ASSERT_EQ(expected_set, config.ports());
 }
 
-TEST(WebservConfigPortsTest, Handles2ServerUsingSamePort) {
+TEST(WebservConfigPortsTest, DualServerUsingSamePort) {
   ConfigParser parser("./TestConfigs/dual_servers_have_different_name.conf");
   WebservConfig config = parser.getWebservConfig();
   PortSet expected_set;
@@ -59,10 +59,81 @@ TEST(WebservConfigPortsTest, Handles2ServerUsingSamePort) {
   ASSERT_EQ(expected_set, config.ports());
 }
 
-TEST(WebservConfigFindServerConfigTest, FindsConfig) {
+TEST(WebservConfigFindServerConfigTest, NoServerNameInFile_SingleServer) {
   ConfigParser parser("./TestConfigs/listen.conf");
   WebservConfig config = parser.getWebservConfig();
   ServerConfig expected = parser.getServerConfigs()[0];
   ServerConfig actual = config.findServerConfig(4242, "hello");
+  ASSERT_TRUE(dataNearlyEqual(expected, actual));
+}
+
+TEST(WebservConfigFindServerConfigTest, NoServerNameInFile_DualServer) {
+  ConfigParser parser("./TestConfigs/dual_servers.conf");
+  WebservConfig config = parser.getWebservConfig();
+  ServerConfig expected = parser.getServerConfigs()[1];
+  ServerConfig actual = config.findServerConfig(4343, "www.cate.com");
+  ASSERT_TRUE(dataNearlyEqual(expected, actual));
+}
+
+TEST(WebservConfigFindServerConfigTest,
+     NoportInFile_SingleServer_ExceptionThrown) {
+  ConfigParser parser("./TestConfigs/listen.conf");
+  WebservConfig config = parser.getWebservConfig();
+  ASSERT_THROW(config.findServerConfig(8888, "hello"), std::runtime_error);
+}
+
+TEST(WebservConfigFindServerConfigTest,
+     NoportInFile_DualServer_ExceptionThrown) {
+  ConfigParser parser("./TestConfigs/dual_servers.conf");
+  WebservConfig config = parser.getWebservConfig();
+  ASSERT_THROW(config.findServerConfig(8888, "hello"), std::runtime_error);
+}
+
+TEST(WebservConfigFindServerConfigTest, ServerNameInFile_SingleServer) {
+  ConfigParser parser("./TestConfigs/server_name.conf");
+  WebservConfig config = parser.getWebservConfig();
+  ServerConfig expected = parser.getServerConfigs()[0];
+  ServerConfig actual = config.findServerConfig(4242, "hello");
+  ASSERT_TRUE(dataNearlyEqual(expected, actual));
+}
+
+TEST(WebservConfigFindServerConfigTest, ServerNameAtSecond_SingleServer) {
+  ConfigParser parser("./TestConfigs/server_name.conf");
+  WebservConfig config = parser.getWebservConfig();
+  ServerConfig expected = parser.getServerConfigs()[0];
+  ServerConfig actual = config.findServerConfig(4242, "hello2");
+  ASSERT_TRUE(dataNearlyEqual(expected, actual));
+}
+
+TEST(WebservConfigFindServerConfigTest, ServerNameInFile_DualServer) {
+  ConfigParser parser("./TestConfigs/dual_servers_have_different_name.conf");
+  WebservConfig config = parser.getWebservConfig();
+  ServerConfig expected = parser.getServerConfigs()[0];
+  ServerConfig actual = config.findServerConfig(4242, "www.mike.com");
+  ASSERT_TRUE(dataNearlyEqual(expected, actual));
+}
+
+TEST(WebservConfigFindServerConfigTest, ServerNameAtSecondServer_DualServer) {
+  ConfigParser parser("./TestConfigs/dual_servers_have_different_name.conf");
+  WebservConfig config = parser.getWebservConfig();
+  ServerConfig expected = parser.getServerConfigs()[1];
+  ServerConfig actual = config.findServerConfig(4242, "www.cate.com");
+  ASSERT_TRUE(dataNearlyEqual(expected, actual));
+}
+
+TEST(WebservConfigFindServerConfigTest,
+     ServerWithDifferentPortHasMathcedServerName_QuadServer) {
+  ConfigParser parser("./TestConfigs/quad_servers.conf");
+  WebservConfig config = parser.getWebservConfig();
+  ServerConfig expected = parser.getServerConfigs()[1];
+  ServerConfig actual = config.findServerConfig(5252, "www.hogehoge.com");
+  ASSERT_TRUE(dataNearlyEqual(expected, actual));
+}
+
+TEST(WebservConfigFindServerConfigTest, SimilarServerName_QuadServer) {
+  ConfigParser parser("./TestConfigs/quad_servers.conf");
+  WebservConfig config = parser.getWebservConfig();
+  ServerConfig expected = parser.getServerConfigs()[3];
+  ServerConfig actual = config.findServerConfig(4242, "www.mike2.com");
   ASSERT_TRUE(dataNearlyEqual(expected, actual));
 }

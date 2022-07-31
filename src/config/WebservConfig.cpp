@@ -40,7 +40,8 @@ const ServerConfig& WebservConfig::findServerConfig(
   const ServerConfig& default_server = findDefaultServerConfig(port);
   for (ServConfVector::const_iterator it = serv_confs_.begin();
        it != serv_confs_.end(); ++it) {
-    if (it->port == port && it->host == host) {
+    if (it->port == port && std::find(it->server.begin(), it->server.end(),
+                                      host) != it->server.end()) {
       return *it;
     }
   }
