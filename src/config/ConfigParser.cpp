@@ -114,6 +114,9 @@ void ConfigParser::parseLocation(LocationConfig &location,
   location.location = *it;
   if (*(++it) == "{") {
     it++;
+    if (it == ite) {
+      throw std::runtime_error("Error: Config: Need to be closed by brackets");
+    }
     for (; it != ite; ++it) {
       if (*it == "root") {
         parseLocationRoot(location, ++it, l_exist_flag);
