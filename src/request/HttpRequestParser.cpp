@@ -14,9 +14,7 @@ void HttpRequestParser::parse(const std::string unparsed_str, size_t port,
     }
     if (parse_status_ == PARSE_HEADER) {
       parsed_header_ = parseRequestHeader(unparsed_str);
-      std::string host = HttpRequestConverter::searchFieldValue(
-          parsed_header_.headerMap(), "host");
-      serv_config_ = config.findServerConfig(port, host);
+      serv_config_ = config.findServerConfig(port, parsed_header_.host());
     }
     if (parse_status_ == PARSE_BODY) {
       parsed_body_ = parseBody(unparsed_str, parsed_header_.contentLength());

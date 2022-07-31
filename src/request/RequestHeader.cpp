@@ -3,8 +3,9 @@
 RequestHeader::RequestHeader() {}
 
 RequestHeader::RequestHeader(const RequestLine& request_line,
-                             const HeaderFieldMap& headers)
-    : request_line_(request_line), header_map_(headers) {}
+                             const HeaderFieldMap& headers,
+                             const std::string& host)
+    : request_line_(request_line), header_map_(headers), host_(host) {}
 
 RequestHeader::~RequestHeader() {}
 
@@ -14,6 +15,7 @@ RequestHeader& RequestHeader::operator=(const RequestHeader& other) {
   if (this != &other) {
     request_line_ = other.request_line_;
     header_map_ = other.header_map_;
+    host_ = other.host_;
   }
   return *this;
 }
@@ -21,6 +23,8 @@ RequestHeader& RequestHeader::operator=(const RequestHeader& other) {
 const RequestLine& RequestHeader::requestLine() const { return request_line_; }
 
 const HeaderFieldMap& RequestHeader::headerMap() const { return header_map_; }
+
+const std::string& RequestHeader::host() const { return host_; }
 
 size_t RequestHeader::contentLength() const {
   HeaderFieldMap::const_iterator it = header_map_.find("content-length");
@@ -62,6 +66,9 @@ std::ostream& operator<<(std::ostream& stream, const RequestLine& rhs) {
 }
 
 std::ostream& operator<<(std::ostream& stream, const RequestHeader& rhs) {
-  stream << rhs.requestLine() << std::endl << rhs.headerMap() << std::endl;
+  stream << rhs.requestLine() << std::endl
+         << rhs.headerMap() << std::endl
+         << "#Host (trimmed port)" << std::endl
+         << rhs.host() << std::endl;
   return stream;
 }

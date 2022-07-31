@@ -64,9 +64,8 @@ void ClientSocket::generateRequest(ssize_t recv_size,
 
 // やばいので後で直す
 void ClientSocket::generateResponse(const WebservConfig &config) {
-  std::string host = HttpRequestConverter::searchFieldValue(
-      current_request_->header.headerMap(), "host");
-  ServerConfig serv_config = config.findServerConfig(port_, host);
+  ServerConfig serv_config =
+      config.findServerConfig(port_, current_request_->header.host());
   ConfigConverter conf_converter;
   ConfigDTO *conf_dto = conf_converter.toDTO(serv_config);
   HttpRequestConverter req_converter;

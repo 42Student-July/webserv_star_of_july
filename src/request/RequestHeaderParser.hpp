@@ -30,6 +30,7 @@ class RequestHeaderParser : public HttpParser {
                                       StringPos *offset);
   HeaderFieldMap parseHeaderField(const std::string &unparsed_str,
                                   StringPos *offset);
+  std::string parseHost(const HeaderFieldMap &headers);
 };
 
 #endif  // SRC_REQUESTHEADERPARSER_HPP_
