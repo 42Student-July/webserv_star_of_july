@@ -42,3 +42,22 @@ TEST(ConfigConverterTest, StoreEverything) {
   EXPECT_EQ(false, dto->locations[0].autoindex);
   EXPECT_EQ(".py", dto->locations[0].cgi_extensions[0]);
 }
+
+TEST(ConfigConverterTest, StoreNoServerNameConfig) {
+  ServerConfig config = initServerConfigWithLocation();
+  config.server.clear();
+  ConfigConverter converter;
+  ConfigDTO *dto = converter.toDTO(config);
+
+  EXPECT_EQ("4242", dto->port);
+  EXPECT_EQ("42tokyo", dto->host);
+  EXPECT_TRUE(dto->server.empty());
+  EXPECT_EQ("error0", dto->error_pages[0]);
+  EXPECT_EQ("www/html", dto->root);
+  EXPECT_EQ("location", dto->locations[0].location);
+  EXPECT_EQ("www/cgi-bin", dto->locations[0].root);
+  EXPECT_EQ("GET", dto->locations[0].allowed_methods[0]);
+  EXPECT_EQ("index.cgi", dto->locations[0].indexes[0]);
+  EXPECT_EQ(false, dto->locations[0].autoindex);
+  EXPECT_EQ(".py", dto->locations[0].cgi_extensions[0]);
+}
