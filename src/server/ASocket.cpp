@@ -1,10 +1,6 @@
 #include "ASocket.hpp"
 
-ASocket::ASocket(const ServerConfig &serverconfig)
-    : serverconfig_(serverconfig) {}
-
-ASocket::ASocket(int fd, const ServerConfig &serverconfig)
-    : fd_(fd), serverconfig_(serverconfig) {}
+ASocket::ASocket(size_t port, int fd) : port_(port), fd_(fd) {}
 
 ASocket::~ASocket() {}
 

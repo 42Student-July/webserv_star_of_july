@@ -1,7 +1,6 @@
 #include "ServerSocket.hpp"
 
-ServerSocket::ServerSocket(const ServerConfig &serverconfig)
-    : ASocket(serverconfig) {
+ServerSocket::ServerSocket(size_t port) : ASocket(port) {
   createEndpoint();
   setLocalAddress();
   listen();
@@ -15,7 +14,7 @@ ClientSocket *ServerSocket::acceptConnection() const {
     throw std::runtime_error("accept failed()");
   }
   setNonBlocking(new_socket);
-  return new ClientSocket(new_socket, serverconfig_);
+  return new ClientSocket(port_, new_socket);
 }
 
 void ServerSocket::createEndpoint() {
@@ -42,7 +41,7 @@ void ServerSocket::setLocalAddress() {
   memset(&server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  server_addr.sin_port = htons(serverconfig_.port);
+  server_addr.sin_port = htons(port_);
   if (bind(fd_, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
     throw std::runtime_error("bind() failed");
   }
