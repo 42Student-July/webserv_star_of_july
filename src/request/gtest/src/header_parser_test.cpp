@@ -242,3 +242,19 @@ TEST_F(RequestHeaderParserTest, NoCrHeaderEnd) {
   std::string file_name = "no_cr_header_end.crlf";
   testException(file_name, HttpStatus::BAD_REQUEST, "getLine() error");
 }
+
+TEST_F(RequestHeaderParserTest, StoreHostWithoutPort) {
+  std::string file_name = "field_name_case_insensitive.crlf";
+  RequestHeader header = buildRequestHeader(file_dir + file_name);
+
+  checkHeaderField("host", "admin", header.headerMap());
+  ASSERT_EQ("admin", header.host());
+}
+
+TEST_F(RequestHeaderParserTest, StoreHostWithTrimmingPort) {
+  std::string file_name = "curl.crlf";
+  RequestHeader header = buildRequestHeader(file_dir + file_name);
+
+  checkHeaderField("host", "localhost:4242", header.headerMap());
+  ASSERT_EQ("localhost", header.host());
+}

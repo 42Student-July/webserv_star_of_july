@@ -19,6 +19,7 @@
 
 #include "../utility/utility.hpp"
 #include "ServerConfig.hpp"
+#include "WebservConfig.hpp"
 
 #define BUFFER_SIZE 128
 
@@ -31,9 +32,11 @@ class ConfigParser {
   virtual ~ConfigParser();
 
   std::vector<ServerConfig> getServerConfigs() const;
+  const WebservConfig &getWebservConfig() const;
 
  private:
   std::vector<ServerConfig> serverconfigs_;
+  WebservConfig webserv_config_;
 
   static const unsigned int BIT_FLAG_LISTEN;      // 0000 0000 0000 0001
   static const unsigned int BIT_FLAG_ROOT;        // 0000 0000 0000 0010

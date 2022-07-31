@@ -12,8 +12,8 @@ int main(int argc, const char **argv) {
   }
 
   try {
-    ConfigParser config_parser(argv[1]);
-    Server server(config_parser.getServerConfigs());
+    ConfigParser parser(argv[1]);
+    Server server(parser.getWebservConfig());
 
     server.run();
   } catch (const std::exception &e) {

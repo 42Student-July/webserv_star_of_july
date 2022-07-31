@@ -7,6 +7,8 @@
 #include "ServerConfig.hpp"
 #include "test_helper.hpp"
 
+const size_t kPort = 4242;
+
 class HttpConverterTest : public ::testing::Test {
  protected:
   virtual void SetUp() {
@@ -18,13 +20,17 @@ class HttpConverterTest : public ::testing::Test {
     config.root = "www/html";
     config.client_body_size_limit = 65536;
     // locations_は省略
+    conf_vec.push_back(config);
+    wconfig = WebservConfig(conf_vec);
   }
   ServerConfig config;
+  ServConfVector conf_vec;
+  WebservConfig wconfig;
 };
 
 TEST_F(HttpConverterTest, StoreOneHeaderField) {
   std::string file_name = "dto_one_header_field.crlf";
-  HttpRequestDTO *dto = buildDTO(file_dir + file_name, config);
+  HttpRequestDTO *dto = buildDTO(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("POST", "/", "1.1", dto);
   checkHeaderField("Basic fugafuga==", dto->authorization);
@@ -33,7 +39,7 @@ TEST_F(HttpConverterTest, StoreOneHeaderField) {
 
 TEST_F(HttpConverterTest, StoreNoHeaderField) {
   std::string file_name = "dto_no_header_field.crlf";
-  HttpRequestDTO *dto = buildDTO(file_dir + file_name, config);
+  HttpRequestDTO *dto = buildDTO(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("POST", "/", "1.1", dto);
   checkHeaderField("", dto->authorization);
@@ -49,7 +55,7 @@ TEST_F(HttpConverterTest, StoreNoHeaderField) {
 
 TEST_F(HttpConverterTest, StoreAllHeaderField) {
   std::string file_name = "dto_all_header_field.crlf";
-  HttpRequestDTO *dto = buildDTO(file_dir + file_name, config);
+  HttpRequestDTO *dto = buildDTO(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("POST", "/", "1.1", dto);
   checkHeaderField("keep-alive", dto->connection);
@@ -66,7 +72,7 @@ TEST_F(HttpConverterTest, StoreAllHeaderField) {
 
 TEST_F(HttpConverterTest, StoreAllHeaderFieldShuffled) {
   std::string file_name = "dto_all_header_field_shuffled.crlf";
-  HttpRequestDTO *dto = buildDTO(file_dir + file_name, config);
+  HttpRequestDTO *dto = buildDTO(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("POST", "/", "1.1", dto);
   checkHeaderField("keep-alive", dto->connection);
@@ -83,7 +89,7 @@ TEST_F(HttpConverterTest, StoreAllHeaderFieldShuffled) {
 
 TEST_F(HttpConverterTest, StoreMultiLinesToBody) {
   std::string file_name = "body_multi_lines.crlf";
-  HttpRequestDTO *dto = buildDTO(file_dir + file_name, config);
+  HttpRequestDTO *dto = buildDTO(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("POST", "/", "1.1", dto);
   checkBody("1stline\n2ndline\n3rdline\n", dto->body);
@@ -92,7 +98,7 @@ TEST_F(HttpConverterTest, StoreMultiLinesToBody) {
 
 TEST_F(HttpConverterTest, StoreServerConfig) {
   std::string file_name = "simple_get.crlf";
-  HttpRequestDTO *dto = buildDTO(file_dir + file_name, config);
+  HttpRequestDTO *dto = buildDTO(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("GET", "/", "1.1", dto);
   checkBody("", dto->body);
@@ -105,13 +111,9 @@ TEST_F(HttpConverterTest, StoreServerConfig) {
 
 TEST_F(HttpConverterTest, NoHttpVersion) {
   std::string file_name = "no_http_version.crlf";
-  HttpRequestDTO *dto = buildDTO(file_dir + file_name, config);
+  HttpRequestDTO *dto = buildDTO(file_dir + file_name, kPort, wconfig);
 
   checkRequestline("", "", "", dto);
   checkBody("", dto->body);
   ASSERT_EQ(HttpStatus::BAD_REQUEST, dto->response_status_code);
-  ASSERT_EQ(4242, dto->port);
-  ASSERT_EQ("42tokyo", dto->host);
-  ASSERT_EQ("nop", dto->servernames[0]);
-  ASSERT_EQ("cluster", dto->servernames[1]);
 }

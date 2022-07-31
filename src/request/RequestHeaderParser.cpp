@@ -12,7 +12,8 @@ RequestHeader RequestHeaderParser::parse(const std::string &unparsed_str) {
   validateHeaderLength(unparsed_str);
   RequestLine request_line = parseRequestLine(unparsed_str, &offset);
   HeaderFieldMap header_map = parseHeaderField(unparsed_str, &offset);
-  return RequestHeader(request_line, header_map);
+  std::string host = parseHost(header_map);
+  return RequestHeader(request_line, header_map, host);
   //　try-catchは呼び出し元でやる(暫定)
   //
   // try {
@@ -63,4 +64,11 @@ HeaderFieldMap RequestHeaderParser::parseHeaderField(
   }
   headerfield_map = hf_parser.parse(headerfield_vec);
   return headerfield_map;
+}
+
+std::string RequestHeaderParser::parseHost(const HeaderFieldMap &headers) {
+  std::string raw_host = headers.find("host")->second;
+  StringPos colon_pos = raw_host.find_first_of(":");
+  return (colon_pos == std::string::npos) ? raw_host
+                                          : raw_host.substr(0, colon_pos);
 }

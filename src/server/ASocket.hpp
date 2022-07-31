@@ -7,15 +7,14 @@
 
 class ASocket {
  public:
-  ASocket(const ServerConfig &serverconfig);
-  ASocket(int fd, const ServerConfig &serverconfig);
+  ASocket(size_t port, int fd = -1);
   virtual ~ASocket();
 
   int getFd() const;
 
  protected:
+  size_t port_;
   int fd_;
-  ServerConfig serverconfig_;
 
  private:
   ASocket(const ASocket &other);

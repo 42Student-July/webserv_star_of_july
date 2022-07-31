@@ -1,11 +1,16 @@
 #include "Server.hpp"
 
-Server::Server(const std::vector<ServerConfig> &serverconfigs) {
-  for (std::vector<ServerConfig>::const_iterator it = serverconfigs.begin();
-       it != serverconfigs.end(); it++) {
+Server::Server(const WebservConfig &config) : config_(config) {
+  PortSet ports = config.ports();
+  for (PortSet::const_iterator it = ports.begin(); it != ports.end(); it++) {
     ServerSocket *serv_sock = new ServerSocket(*it);
     serv_socks_[serv_sock->getFd()] = serv_sock;
   }
+  // for (std::vector<ServerConfig>::const_iterator it = serverconfigs.begin();
+  //      it != serverconfigs.end(); it++) {
+  //   ServerSocket *serv_sock = new ServerSocket(*it);
+  //   serv_socks_[serv_sock->getFd()] = serv_sock;
+  // }
 }
 
 Server::~Server() {}
@@ -32,7 +37,7 @@ void Server::handleReadEvent(const FdVector &readable_fds) {
       ClientSocket *new_clnt = serv_socks_[*it]->acceptConnection();
       clnt_socks_[new_clnt->getFd()] = new_clnt;
     } else {
-      clnt_socks_[*it]->handleReadEvent();
+      clnt_socks_[*it]->handleReadEvent(config_);
     }
   }
 }

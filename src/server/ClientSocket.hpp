@@ -21,10 +21,10 @@ class ClientSocket : public ASocket {
  public:
   enum State { READ, WRITE, CLOSE };
 
-  ClientSocket(int accepted_fd, const ServerConfig &serverconfig);
+  ClientSocket(int accepted_fd, size_t port);
   ~ClientSocket();
 
-  void handleReadEvent();
+  void handleReadEvent(const WebservConfig &config);
   void handleWriteEvent();
   bool isWaitingForRequest() const;  //命名微妙
   bool canResponse() const;
@@ -39,11 +39,10 @@ class ClientSocket : public ASocket {
   ClientSocket &operator=(const ClientSocket &other);
 
   ssize_t recvFromClient();
-  void generateRequest(ssize_t recv_size);
-  void generateResponse();
+  void generateRequest(ssize_t recv_size, const WebservConfig &config);
+  void generateResponse(const WebservConfig &config);
   void sendResponse() const;
 
-  // int socket_fd_;
   State state_;
   char recv_buffer_[kRecvBufferSize + 1];
   std::string response_;

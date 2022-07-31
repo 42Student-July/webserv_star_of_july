@@ -16,14 +16,14 @@ std::string readFile(const char *filepath) {
   return file_content;
 }
 
-HttpRequest *buildRequest(const std::string &filepath,
-                          const ServerConfig config) {
+HttpRequest *buildRequest(const std::string &filepath, size_t port,
+                          const WebservConfig config) {
   std::string content;
   HttpRequestParser parser;
 
   content = readFile(filepath.c_str());
-  parser.parse(content.c_str(), config);
-  return parser.buildRequest(config);
+  parser.parse(content.c_str(), port, config);
+  return parser.buildRequest();
 }
 
 RequestHeader buildRequestHeader(const std::string &filepath) {
@@ -36,13 +36,13 @@ RequestHeader buildRequestHeader(const std::string &filepath) {
   return parser.parse(unparsed_header);
 }
 
-HttpRequestDTO *buildDTO(const std::string &filepath,
-                         const ServerConfig config) {
+HttpRequestDTO *buildDTO(const std::string &filepath, size_t port,
+                         const WebservConfig config) {
   HttpRequestConverter converter;
   HttpRequest *req;
   HttpRequestDTO *dto;
 
-  req = buildRequest(filepath, config);
+  req = buildRequest(filepath, port, config);
   dto = converter.toDTO(*req);
   delete req;
   return dto;

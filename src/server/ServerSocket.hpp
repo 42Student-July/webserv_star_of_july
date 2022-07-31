@@ -15,7 +15,7 @@
 
 class ServerSocket : public ASocket {
  public:
-  explicit ServerSocket(const ServerConfig &serverconfig);
+  explicit ServerSocket(size_t port);
   ~ServerSocket();
 
   ClientSocket *acceptConnection() const;

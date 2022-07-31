@@ -1,7 +1,7 @@
 #include "ClientSocket.hpp"
 
-ClientSocket::ClientSocket(int accepted_fd, const ServerConfig &serverconfig)
-    : ASocket(accepted_fd, serverconfig),
+ClientSocket::ClientSocket(int accepted_fd, size_t port)
+    : ASocket(accepted_fd, port),
       state_(READ),
       current_request_(NULL),
       current_response_(NULL) {}
@@ -18,16 +18,16 @@ bool ClientSocket::canResponse() const { return state_ == WRITE; }
 
 bool ClientSocket::shouldClose() const { return state_ == CLOSE; }
 
-void ClientSocket::handleReadEvent() {
+void ClientSocket::handleReadEvent(const WebservConfig &config) {
   ssize_t recv_size = recvFromClient();
 
   if (recv_size == 0) {
     state_ = CLOSE;
     return;
   }
-  generateRequest(recv_size);
+  generateRequest(recv_size, config);
   if (request_parser_.finished() || request_parser_.errorOccured()) {
-    generateResponse();
+    generateResponse(config);
     state_ = WRITE;
   }
 }
@@ -51,24 +51,23 @@ ssize_t ClientSocket::recvFromClient() {
   return recv_size;
 }
 
-void ClientSocket::generateRequest(ssize_t recv_size) {
+void ClientSocket::generateRequest(ssize_t recv_size,
+                                   const WebservConfig &config) {
   MessageBodyParser body_parser;
   recv_buffer_[recv_size] = '\0';
-  request_parser_.parse(recv_buffer_, serverconfig_);
+  request_parser_.parse(recv_buffer_, port_, config);
   if (request_parser_.finished() || request_parser_.errorOccured()) {
-    current_request_ = request_parser_.buildRequest(serverconfig_);
+    current_request_ = request_parser_.buildRequest();
     std::cerr << *current_request_ << std::endl;
-    // std::cerr << current_request_->header.requestLine();
-    // std::cerr << current_request_->body;
-    // std::cerr << "#status code:" << std::endl
-    //           << current_request_->response_status_code << std::endl;
   }
 }
 
-// // GETメソッドのファイル決め打ち
-void ClientSocket::generateResponse() {
+// やばいので後で直す
+void ClientSocket::generateResponse(const WebservConfig &config) {
+  ServerConfig serv_config =
+      config.findServerConfig(port_, current_request_->header.host());
   ConfigConverter conf_converter;
-  ConfigDTO *conf_dto = conf_converter.toDTO(serverconfig_);
+  ConfigDTO *conf_dto = conf_converter.toDTO(serv_config);
   HttpRequestConverter req_converter;
   HttpRequestDTO *req_dto = req_converter.toDTO(*current_request_);
   HttpResponseBuilder builder = HttpResponseBuilder(*conf_dto);

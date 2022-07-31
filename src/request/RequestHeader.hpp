@@ -20,18 +20,21 @@ struct RequestLine {
 class RequestHeader {
  public:
   RequestHeader();
-  RequestHeader(const RequestLine& request_line, const HeaderFieldMap& headers);
+  RequestHeader(const RequestLine& request_line, const HeaderFieldMap& headers,
+                const std::string& host);
   ~RequestHeader();
   RequestHeader(const RequestHeader& other);
   RequestHeader& operator=(const RequestHeader& other);
   const RequestLine& requestLine() const;
   const HeaderFieldMap& headerMap() const;
+  const std::string& host() const;
   size_t contentLength() const;
   bool transferEncodingIsChunked() const;
 
  private:
   RequestLine request_line_;
   HeaderFieldMap header_map_;
+  std::string host_;
 };
 
 std::ostream& operator<<(std::ostream& stream, const RequestLine& rhs);

@@ -160,7 +160,7 @@ TEST(Error, NoCurlyBracketsLocationThrowsException) {
     ConfigParser configparser(
         "./TestConfigs/ErrorCases/no_curly_brackets_location.conf");
   } catch (std::exception &e) {
-    ASSERT_STREQ("Error: Config: Wrong syntax", e.what());
+    ASSERT_STREQ("Error: Config: Need to be closed by brackets", e.what());
   }
 }
 

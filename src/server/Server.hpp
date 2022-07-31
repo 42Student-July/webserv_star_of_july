@@ -5,12 +5,13 @@
 #include "Selector.hpp"
 #include "ServerConfig.hpp"
 #include "ServerSocket.hpp"
+#include "WebservConfig.hpp"
 #include "color.hpp"
 #include "type.hpp"
 
 class Server {
  public:
-  explicit Server(const std::vector<ServerConfig> &serverconfigs);
+  explicit Server(const WebservConfig &config);
   ~Server();
   void run();
 
@@ -25,6 +26,7 @@ class Server {
 
   ServerSocketMap serv_socks_;
   ClientSocketMap clnt_socks_;
+  WebservConfig config_;
 };
 
 #endif  // SRC_SERVER_HPP_

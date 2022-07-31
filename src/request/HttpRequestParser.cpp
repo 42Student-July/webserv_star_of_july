@@ -5,16 +5,16 @@ HttpRequestParser::HttpRequestParser() : parse_status_(PARSE_HEADER) {}
 
 HttpRequestParser::~HttpRequestParser() {}
 
-void HttpRequestParser::parse(const std::string unparsed_str,
-                              const ServerConfig &server_config) {
+void HttpRequestParser::parse(const std::string unparsed_str, size_t port,
+                              const WebservConfig &config) {
   // bodysizelimitまだ
-  (void)server_config;
   try {
     if (parse_status_ == PARSE_DONE || parse_status_ == PARSE_ERROR) {
       clear();
     }
     if (parse_status_ == PARSE_HEADER) {
       parsed_header_ = parseRequestHeader(unparsed_str);
+      serv_config_ = config.findServerConfig(port, parsed_header_.host());
     }
     if (parse_status_ == PARSE_BODY) {
       parsed_body_ = parseBody(unparsed_str, parsed_header_.contentLength());
@@ -45,9 +45,8 @@ void HttpRequestParser::parse(const std::string unparsed_str,
 
 // コンストラクタの引数増やしたい
 // server_configの選択のロジックはまだ
-HttpRequest *HttpRequestParser::buildRequest(
-    const ServerConfig &server_config) {
-  HttpRequest *req = new HttpRequest(server_config);
+HttpRequest *HttpRequestParser::buildRequest() {
+  HttpRequest *req = new HttpRequest(serv_config_);
 
   req->header = parsed_header_;
   req->body = parsed_body_;

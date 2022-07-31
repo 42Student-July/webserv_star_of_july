@@ -1,17 +1,3 @@
-#ifndef MAKEFILE
-#define MAKEFILE
-
-# all:
-# 	c++ -Werror -Wall -Wextra -g *.cpp -o server
-
-# run:
-# 	./server tests/listen.conf
-
-# test:
-# 	g++ gtest.cpp ConfigParser.cpp -pthread -Llib -lgtest_main -Llib -lgtest -std=gnu++11 -o tester
-# 	./tester
-# 	rm tester
-
 NAME = libconfig.a
 
 CXX = c++
@@ -26,7 +12,8 @@ INCLUDES = $(addprefix -I, $(HEADERS))
 
 SRCS = $(shell find . -maxdepth 1 -name '*.cpp' -not -name 'main.cpp')
 
-OBJS = $(SRCS:.cpp=.o)
+OBJSDIR	= ./obj
+OBJS 	= $(addprefix $(OBJSDIR)/, $(SRCS:.cpp=.o))
 
 DEPS = $(OBJS:.o=.d)
 
@@ -35,11 +22,14 @@ all: $(NAME)
 
 -include $(DEPS)
 
-$(NAME):$(OBJS)
+$(NAME): $(OBJSDIR) $(OBJS)
 	@ar rc $(NAME) $(OBJS)
 
-%.o: %.cpp
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
+$(OBJSDIR):
+	mkdir -p $(OBJSDIR)
+
+$(OBJSDIR)/%.o : %.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
 
 .PHONY: debug
 debug:			CXXFLAGS += $(DEBUG)
@@ -81,6 +71,3 @@ test: $(GTEST_DIR) $(NAME)
 	clang++ -std=c++11 $(INCLUDES) $(TEST_SRCS) $(LDFLAGS) $(LDLIBS) -o tester
 	-@./tester
 	@$(RM) tester
-
-
-#endif /* MAKEFILE */

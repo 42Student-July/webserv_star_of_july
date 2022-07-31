@@ -8,18 +8,19 @@
 #include "HttpRequestParser.hpp"
 #include "RequestHeaderParser.hpp"
 #include "ServerConfig.hpp"
+#include "WebservConfig.hpp"
 
 const std::string file_dir = "gtest/request/";
 
 ServerConfig initServerConfigWithLocation();
 std::string readFile(const char *filepath);
-HttpRequest *buildRequest(const std::string &filepath,
-                          const ServerConfig config);
+HttpRequest *buildRequest(const std::string &filepath, size_t port,
+                          const WebservConfig config);
 HttpRequest *buildRequest2(const std::string &filepath,
                            const ServerConfig config);
 RequestHeader buildRequestHeader(const std::string &filepath);
-HttpRequestDTO *buildDTO(const std::string &filepath,
-                         const ServerConfig config);
+HttpRequestDTO *buildDTO(const std::string &filepath, size_t port,
+                         const WebservConfig config);
 void checkRequestline(const std::string &method, const std::string &uri,
                       const std::string &version, HttpRequest *request);
 void checkRequestline(const std::string &method, const std::string &uri,
